@@ -93,5 +93,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </main>
-
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d22174.870620632857!2d106.70422334854723!3d10.73445604976019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f9f2353ffb9%3A0x6ab49da47594ce7b!2sLOTTE%20Mart%20Qu%E1%BA%ADn%207!5e0!3m2!1svi!2s!4v1761800881843!5m2!1svi!2s" width="1400" height="550" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 <?php include_once __DIR__ . '/includes/footer.php'; ?>
