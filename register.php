@@ -1,8 +1,6 @@
 <?php
 // ob_start() và session_start() được xử lý trong init.php và header.php
 require_once __DIR__ . '/includes/init.php'; // Bao gồm init.php trước để định nghĩa BASE_URL
-require_once __DIR__ . '/includes/header.php';
-
 $db = get_db();
 
 // Helper: generate a simple math captcha and store in session
@@ -104,6 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+?>
+<?php
+require_once __DIR__ . '/includes/header.php';
 ?>
 
 

@@ -317,7 +317,7 @@ require_once __DIR__ . '/includes/header.php';
       </div>
       <div class="form-row row-inline" style="justify-content:space-between;align-items:center;">
         <label class="helper"><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label>
-        <a href="<?php echo BASE_URL; ?>forgot.php" class="helper">Quên mật khẩu?</a>
+        <a href="forgot.php" class="helper">Quên mật khẩu?</a>
       </div>
       <div class="form-actions">
         <button class="btn" type="submit">Đăng nhập</button>
