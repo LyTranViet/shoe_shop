@@ -1,0 +1,637 @@
+/* =================================================================== */
+/* ===      GLOBAL ADMIN STYLES (Gộp từ các trang)                 === */
+/* ===      Nguồn: products.php, orders.php, users.php, etc.      === */
+/* =================================================================== */
+
+/* General Container */
+.admin-container {
+    background: #fff;
+    padding: 0px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    font-family: "Segoe UI", sans-serif;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Header */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #2c3e50;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 8px;
+}
+
+.admin-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.admin-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-btn {
+    background: #1abc9c;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.25s;
+    display: inline-block;
+}
+.add-btn:hover {
+    background: #16a085;
+}
+
+.search-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.search-form input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: 0.2s;
+    font-size: 14px;
+    color: #333;
+}
+
+.search-form input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.search-form button {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s;
+}
+
+.search-form button:hover {
+    background: #2980b9;
+}
+
+/* =================================================================== */
+/* ===      TABLE STYLES (Gộp từ các trang)                       === */
+/* ===      Nguồn: products.php, orders.php, users.php, etc.      === */
+/* =================================================================== */
+
+.table-wrapper {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.admin-table thead {
+    background: #007bff;
+    color: #000;
+}
+
+.admin-table th, 
+.admin-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.admin-table th {
+    font-weight: 600;
+    color: #000;
+}
+
+.admin-table th:last-child {
+    text-align: right;
+}
+
+.admin-table tbody tr:hover {
+    background: #f4f8ff;
+}
+
+.admin-table td:last-child {
+    text-align: center;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    font-size: 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn.edit { background: #ffc107; color: #000; }
+.btn.edit:hover { background: #e0a800; }
+.btn.delete { background: #dc3545; color: #fff; }
+.btn.delete:hover { background: #c82333; }
+.btn.view { background: #17a2b8; color: #fff; }
+.btn.view:hover { background: #138496; }
+
+.price { color: #e74c3c; font-weight: bold; }
+
+/* =================================================================== */
+/* ===      FORM STYLES (Gộp từ các trang)                         === */
+/* ===      Nguồn: users.php, categories.php, product_form.php    === */
+/* =================================================================== */
+
+.form-container {
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    max-width: 800px;
+    margin: auto;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 15px;
+}
+
+.form-actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.btn-submit {
+    background: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+/* =================================================================== */
+/* ===      PAGINATION & ALERTS (Gộp từ các trang)                 === */
+/* =================================================================== */
+
+.pagination {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.page-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 2px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    background: #f9f9f9;
+    transition: all 0.2s ease;
+}
+
+.page-btn.active,
+.page-btn:hover {
+    background: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+.alert-success { background: #d4edda; color: #155724; }
+.alert-error { background: #f8d7da; color: #721c24; }
+
+.empty {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+    font-style: italic;
+}
+
+/* =================================================================== */
+/* ===      PAGE-SPECIFIC STYLES (CSS dành riêng cho từng trang)   === */
+/* =================================================================== */
+
+/* --- Nguồn: products.php --- */
+.admin-table .thumb {
+    display: block;
+    margin: 0 auto;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+/* Cố định width cho cột của bảng products */
+.admin-table.product-list th, .admin-table.product-list td { padding: 0; }
+.admin-table.product-list th { height: 56px; padding: 0 14px; line-height: 56px; }
+.admin-table.product-list td { height: 80px; padding: 0 14px; }
+.admin-table.product-list td:nth-child(2), .admin-table.product-list td:nth-child(7) { padding: 10px; }
+.admin-table.product-list th:nth-child(1), .admin-table.product-list td:nth-child(1) { width: 60px; text-align: center; }
+.admin-table.product-list th:nth-child(2), .admin-table.product-list td:nth-child(2) { width: 100px; text-align: center; }
+.admin-table.product-list th:nth-child(3), .admin-table.product-list td:nth-child(3) { width: auto; min-width: 200px; }
+.admin-table.product-list th:nth-child(4), .admin-table.product-list td:nth-child(4) { width: 140px; }
+.admin-table.product-list th:nth-child(5), .admin-table.product-list td:nth-child(5) { width: 120px; }
+.admin-table.product-list th:nth-child(6), .admin-table.product-list td:nth-child(6) { width: 120px; }
+.admin-table.product-list th:nth-child(7), .admin-table.product-list td:nth-child(7) { width: 140px; text-align: right; }
+.admin-table.product-list tbody tr:last-child td { border-bottom: none; }
+
+/* --- Nguồn: orders.php & dashboard.php --- */
+.status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.status.chờ-xử-lý { background: #ffc107; color: #212529; }
+.status.đang-giao { background: #17a2b8; color: #fff; }
+.status.hoàn-tất { background: #28a745; color: #fff; }
+.status.hủy { background: #6c757d; color: #fff; }
+.status.failed { background: #dc3545; color: #fff; }
+
+/* --- Nguồn: order_view.php --- */
+.order-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+.panel {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+}
+.panel h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 18px;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px 20px;
+    font-size: 15px;
+}
+.order-items-panel {
+    grid-column: 1 / -1;
+}
+.order-details-grid .admin-table th {
+    background: #f4f6f7;
+    color: #333;
+}
+.order-details-grid .admin-table tfoot td {
+    font-weight: bold;
+}
+.order-details-grid .btn {
+    background: #3498db;
+    font-weight: bold;
+}
+.order-details-grid .btn:hover {
+    background: #2980b9;
+}
+
+/* --- Nguồn: product_form.php --- */
+.image-management {
+    border: 2px dashed #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    background: #fafafa;
+}
+.existing-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.img-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 6px;
+    width: 120px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+.img-card:hover {
+    transform: translateY(-3px);
+}
+.img-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+.img-actions {
+    font-size: 13px;
+    margin-top: 4px;
+}
+#add-size-btn {
+    background: #28a745;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* --- Nguồn: dashboard.php --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    border-radius: 16px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.stat-icon { font-size: 2rem; }
+.gradient-blue { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+.gradient-green { background: linear-gradient(135deg, #34d399, #059669); }
+.gradient-purple { background: linear-gradient(135deg, #c084fc, #7c3aed); }
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 1.5rem;
+}
+.chart-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.chart-card h3 { margin-bottom: 10px; }
+canvas { width: 100%; height: 280px; }
+.dashboard-header p { margin: 0; }
+.filter-form select, .filter-form .btn { padding: 8px 10px; margin-left: 5px; border-radius: 8px; border: 1px solid #d1d5db; }
+.filter-form .btn { background: #3b82f6; color: white; cursor: pointer; }
+.modern-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.modern-table th, .modern-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+.modern-table th { background: #f1f5f9; font-weight: 600; }
+.user-dropdown .logout-btn:hover { background: #c82333; }
+
+/* =================================================================== */
+/* ===      ADMIN SIDEBAR (Cập nhật từ index.php)                  === */
+/* =================================================================== */
+
+.admin-nav .nav-section {
+    margin-bottom: 1rem;
+}
+.admin-nav .nav-section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8; /* Light gray text */
+    text-transform: uppercase;
+    padding: 0 12px;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Submenu in Sidebar --- */
+.submenu-toggle {
+    justify-content: space-between;
+}
+.submenu-toggle .arrow {
+    transition: transform 0.2s ease-in-out;
+}
+.submenu-toggle.open .arrow {
+    transform: rotate(90deg);
+}
+.submenu {
+    padding-left: 20px; /* Thụt lề cho các mục con */
+    border-left: 2px solid #1f2937; /* Thêm đường kẻ dọc */
+    margin-left: 18px; /* Căn chỉnh với đường kẻ */
+    margin-top: -6px; /* Giảm khoảng cách với mục cha */
+    padding-top: 6px;
+}
+
+/* =================================================================== */
+/* ===      STOCK IN FORM TABLE (Phiếu nhập kho)                   === */
+/* =================================================================== */
+#import-details-table th:nth-child(1) { width: 50%; } /* Sản phẩm */
+#import-details-table th:nth-child(2) { width: 15%; } /* Size */
+#import-details-table th:nth-child(3) { width: 15%; } /* Số lượng */
+#import-details-table th:nth-child(4) { width: 20%; } /* Giá nhập */
+
+/* =================================================================== */
+/* ===      ADMIN TOPBAR STYLES (Chuyển từ header_admin.php)       === */
+/* =================================================================== */
+
+.admin-topbar {
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+.topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 1rem;
+}
+.admin-topbar .brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    gap: 0.5rem;
+}
+.admin-topbar .brand span { color: #ffd700; }
+
+.admin-topbar .search form {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.15);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+}
+.admin-topbar .search input {
+    border: none;
+    background: transparent;
+    color: #fff;
+    outline: none;
+    padding: 0.4rem 0.5rem;
+}
+.admin-topbar .search input::placeholder { color: #eee; }
+.admin-topbar .search button {
+    background: #ffd700;
+    border: none;
+    color: #000;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.admin-topbar .search button:hover { background: #fff04f; }
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.topbar-right .btn.home-btn { background: #28a745; color: white; }
+.topbar-right .btn.home-btn:hover { background: #218838; }
+.topbar-right .user-name-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+.topbar-right .user-name-btn:hover { background: rgba(255,255,255,0.3); }
+.user-menu { position: relative; }
+.user-menu:hover .user-dropdown { display: flex; }
+.user-dropdown { position: absolute; top: 120%; right: 0; background: #fff; color: #333; min-width: 180px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 10; }
+.user-dropdown .user-info { padding: 0.8rem; border-bottom: 1px solid #eee; }
+.user-dropdown .user-actions a { display: block; padding: 0.8rem; text-decoration: none; color: #333; transition: background 0.2s; }
+.user-dropdown .user-actions a:hover { background: #f1f1f1; }
+.user-dropdown .logout-btn { background: #dc3545; color: white; }
+.user-dropdown .logout-btn:hover { background: #c82333; }
+
+/* =================================================================== */
+/* ===   STYLES FOR STOCK IN/OUT PRODUCT DETAIL TABLES           === */
+/* =================================================================== */
+
+#product-items-container td,
+#product-items-container-stock-out td {
+    vertical-align: middle;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#product-items-container select,
+#product-items-container input,
+#product-items-container-stock-out select,
+#product-items-container-stock-out input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+#product-items-container .btn-remove-row,
+#product-items-container-stock-out .btn-remove-row {
+    background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; padding: 8px 10px; font-size: 12px;
+}
+.user-dropdown .logout-btn { background: #dc3545; color: white; }
+.user-dropdown .logout-btn:hover { background: #c82333; }
+
+/* Styles for export links in inventory */
+.export-links-container {
+    position: relative;
+    display: inline-block;
+}
+.export-btn {
+    background: #fd7e14;
+    color: white;
+}
+.export-links-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 6px;
+    padding: 5px 0;
+}
+.export-links-dropdown a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+}
+.export-links-dropdown a:hover { background-color: #f1f1f1; }
+.export-links-container:hover .export-links-dropdown { display: block; }
+.user-dropdown .logout-btn { background: #dc3545; color: white; }
+.user-dropdown .logout-btn:hover { background: #c82333; }
