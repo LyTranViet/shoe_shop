@@ -41,7 +41,8 @@ if ($isLoggedIn) {
 
 // Base path
 $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-if ($basePath === '') $basePath = '/shoe_shop-main/shoe_shop-main';
+if ($basePath === '') $basePath = '/shoe_shop';
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -247,9 +248,9 @@ if ($basePath === '') $basePath = '/shoe_shop-main/shoe_shop-main';
 
             <div class="nav-actions">
                 <a href="category.php">🏷️ Danh mục</a>
-                <a href="wishlist.php">❤️ Yêu thích</a>
+                <a href="about.php">ℹ️ Giới thiệu</a>
+                  <a href="contact.php">📞 Liên hệ</a>
                 <a href="cart.php">🛒 Giỏ hàng <span class="badge"><?php echo cart_count(); ?></span></a>
-
                 <?php if ($isLoggedIn): ?>
                 <div class="user-menu">
                     <button class="user-btn"><?php echo htmlspecialchars($displayName); ?> ⬇️</button>
@@ -258,9 +259,9 @@ if ($basePath === '') $basePath = '/shoe_shop-main/shoe_shop-main';
                         <a href="order_history.php">📦 Đơn hàng</a>
                         <a href="wishlist.php">❤️ Yêu thích</a>
                         <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'supperadmin' || $_SESSION['user_role'] === 'staff'): ?>
-                            <a href="/shoe_shop-main/shoe_shop-main/admin/index.php" style="color:#0d6efd;font-weight:600;">
-                                ⚙️ Quản trị
-                            </a>
+<a href="/shoe_shop/admin/index.php" style="color:#0d6efd;font-weight:600;">
+    ⚙️ Quản trị
+</a>                            </a>
                         <?php endif; ?>
                         <a href="logout.php" style="color:#dc3545;font-weight:600;">🚪 Đăng xuất</a>
                     </div>

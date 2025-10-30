@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $roles = array_map('strtolower', $role_stmt->fetchAll(PDO::FETCH_COLUMN));
             $is_admin = in_array('admin', $roles) || in_array('staff', $roles);
 
-header('Location: ' . ($is_admin ? '/shoe_shop-main/shoe_shop-main/' : '/shoe_shop-main/shoe_shop-main'));
+header('Location: ' . ($is_admin ? '/shoe_shop/admin/' : '/shoe_shop/index.php'));
             exit;
         } else {
             flash_set('error', 'Email hoặc mật khẩu không đúng.');
