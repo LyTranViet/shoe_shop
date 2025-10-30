@@ -9,47 +9,6 @@ $id = (int)($_GET['id'] ?? 0);
 $coupon = null;
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	$id = (int)($_POST['id'] ?? 0);
-	$code = trim($_POST['code'] ?? '');
-	$discount_percent = (int)($_POST['discount_percent'] ?? 0);
-	$valid_from = $_POST['valid_from'] ?? '';
-	$valid_to = $_POST['valid_to'] ?? '';
-	$usage_limit = (int)($_POST['usage_limit'] ?? 0);
-
-	if (empty($code) || $discount_percent <= 0 || empty($valid_from) || empty($valid_to)) {
-		$errors[] = 'Please fill all required fields.';
-	}
-
-	if (empty($errors)) {
-		try {
-			if ($id > 0) {
-				$stmt = $db->prepare("UPDATE coupons SET code=?, discount_percent=?, valid_from=?, valid_to=?, usage_limit=? WHERE id=?");
-				$stmt->execute([$code, $discount_percent, $valid_from, $valid_to, $usage_limit, $id]);
-			} else {
-				$stmt = $db->prepare("INSERT INTO coupons (code, discount_percent, valid_from, valid_to, usage_limit) VALUES (?, ?, ?, ?, ?)");
-				$stmt->execute([$code, $discount_percent, $valid_from, $valid_to, $usage_limit]);
-			}
-			header('Location: index.php?page=coupons');
-			exit;
-		} catch (PDOException $e) {
-			$errors[] = "Database error: " . $e->getMessage();
-		}
-	}
-}
-
-if ($action === 'delete' && $id > 0) {
-	try {
-		$stmt = $db->prepare("DELETE FROM coupons WHERE id = ?");
-		$stmt->execute([$id]);
-		header('Location: index.php?page=coupons');
-		exit;
-	} catch (PDOException $e) {
-		header('Location: index.php?page=coupons&error=deletefailed');
-		exit;
-	}
-}
-
 if ($action === 'edit' && $id > 0) {
 	$stmt = $db->prepare("SELECT * FROM coupons WHERE id = ?");
 	$stmt->execute([$id]);
@@ -65,6 +24,9 @@ if ($action === 'edit' && $id > 0) {
 			<a href="index.php?page=coupons" class="btn-back"><i class="fi fi-rr-arrow-left"></i> Quay lại</a>
 		</div>
 		<div>
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (!empty($errors)): ?>
 				<div class="alert alert-error">
 					<?php foreach ($errors as $error) echo "<p>$error</p>"; ?>
@@ -154,6 +116,9 @@ if ($action === 'edit' && $id > 0) {
 	</header>
 
 	<div class="table-wrapper">
+		<?php if ($msg = flash_get('error')): ?>
+			<div class="alert alert-error" style="margin: 10px;"><?= htmlspecialchars($msg) ?></div>
+		<?php endif; ?>
 		<table class="admin-table">
 			<thead>
 				<tr>

@@ -5,78 +5,11 @@ if (!isset($db)) {
     exit;
 }
 
-// --- HANDLE SAVE/UPDATE ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = (int)($_POST['id'] ?? 0);
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $role_id = (int)($_POST['role_id'] ?? 0);
-
-    if (empty($name) || empty($email) || $role_id <= 0)
-        $errors[] = 'Vui lòng nhập đầy đủ Họ tên, Email và chọn Vai trò.';
-    if ($id === 0 && empty($password))
-        $errors[] = 'Mật khẩu là bắt buộc khi thêm mới.';
-
-    if (empty($errors)) {
-        $db->beginTransaction();
-        try {
-            if ($id > 0) {
-                // UPDATE
-                $params = [$name, $email];
-                $sql = "UPDATE users SET name=?, email=?";
-                if (!empty($password)) {
-                    $sql .= ", password=?";
-                    $params[] = password_hash($password, PASSWORD_DEFAULT);
-                }
-                $sql .= " WHERE id=?";
-                $params[] = $id;
-
-                $stmt = $db->prepare($sql);
-                $stmt->execute($params);
-
-                // Cập nhật vai trò
-                $stmt_role = $db->prepare("UPDATE user_roles SET role_id = ? WHERE user_id = ?");
-                $stmt_role->execute([$role_id, $id]);
-            } else {
-                // INSERT
-                $stmt = $db->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-                $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT)]);
-                $id = $db->lastInsertId();
-
-                // Gán role
-                $stmt_role = $db->prepare("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)");
-                $stmt_role->execute([$id, $role_id]);
-            }
-
-            $db->commit();
-            header('Location: index.php?page=users');
-            exit;
-        } catch (PDOException $e) {
-            $db->rollBack();
-            $errors[] = "Lỗi cơ sở dữ liệu: " . $e->getMessage();
-        }
-    }
-}
-
 // Xác định action & id
 $action = $_GET['action'] ?? 'list';
 $id = (int)($_GET['id'] ?? 0);
 $user = null;
 $errors = $errors ?? []; // Initialize if not set from POST handling
-
-// --- DELETE ---
-if ($action === 'delete' && $id > 0) {
-    try {
-        $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        header('Location: index.php?page=users');
-        exit;
-    } catch (PDOException $e) {
-        header('Location: index.php?page=users&error=deletefailed');
-        exit;
-    }
-}
 
 // --- LOAD FORM DATA ---
 if ($action === 'edit' && $id > 0) {
@@ -103,6 +36,12 @@ if ($action === 'add' || $action === 'edit'):
 			<a href="index.php?page=users" class="btn-back"><i class="fi fi-rr-arrow-left"></i> Quay lại</a>
 		</div>
 		<div>
+			<?php 
+				// Hiển thị lỗi từ flash session nếu có
+				if ($msg = flash_get('error')) {
+					echo "<div class='alert alert-error' style='margin-bottom: 15px;'><p>$msg</p></div>";
+				}
+			?>
 			<?php if (!empty($errors)): ?>
 			<div class="alert alert-error" style="margin-bottom: 15px;">
 				<?php foreach ($errors as $error) echo "<p>$error</p>"; ?>

@@ -1,4 +1,4 @@
-</main>
+</main> 
 <footer class="footer-modern">
     <style>
         .footer-modern {

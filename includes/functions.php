@@ -111,4 +111,35 @@ function require_admin_or_staff(): void
         header('Location: /index.php'); exit;
     }
 }
+
+/**
+ * Thêm hoặc cập nhật một sản phẩm trong giỏ hàng của người dùng đã đăng nhập.
+ *
+ * @param PDO $db Đối tượng kết nối PDO.
+ * @param int $cartId ID của giỏ hàng.
+ * @param int $productId ID của sản phẩm.
+ * @param int $quantity Số lượng.
+ * @param string|null $size Kích thước sản phẩm.
+ */
+function add_or_update_cart_item(PDO $db, int $cartId, int $productId, int $quantity, ?string $size): void
+{
+    try {
+        $ci = $db->prepare('SELECT id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ? AND (size = ? OR (size IS NULL AND ? IS NULL)) LIMIT 1');
+        $ci->execute([$cartId, $productId, $size, $size]);
+        $row = $ci->fetch();
+        if ($row) {
+            $newQty = (int)$row['quantity'] + $quantity;
+            $up = $db->prepare('UPDATE cart_items SET quantity = ? WHERE id = ?');
+            $up->execute([$newQty, $row['id']]);
+        } else {
+            $pstmt = $db->prepare('SELECT price FROM products WHERE id = ?');
+            $pstmt->execute([$productId]);
+            $price = $pstmt->fetchColumn() ?: 0;
+            $ins = $db->prepare('INSERT INTO cart_items (cart_id, product_id, size, quantity, price) VALUES (?,?,?,?,?)');
+            $ins->execute([$cartId, $productId, $size, $quantity, $price]);
+        }
+    } catch (PDOException $e) {
+        // Có thể ghi log lỗi ở đây nếu cần
+    }
+}
  

@@ -10,45 +10,6 @@ $id = (int)($_GET['id'] ?? 0);
 $errors = [];
 $category = null;
 
-// --- CREATE / UPDATE ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	$id = (int)($_POST['id'] ?? 0);
-	$name = trim($_POST['name'] ?? '');
-	$description = trim($_POST['description'] ?? '');
-
-	if ($name === '') $errors[] = "Tên danh mục không được để trống.";
-
-	if (empty($errors)) {
-		try {
-			if ($id > 0) {
-				$stmt = $db->prepare("UPDATE categories SET name=?, description=? WHERE id=?");
-				$stmt->execute([$name, $description, $id]);
-				$msg = "Cập nhật danh mục thành công!";
-			} else {
-				$stmt = $db->prepare("INSERT INTO categories (name, description) VALUES (?, ?)");
-				$stmt->execute([$name, $description]);
-				$msg = "Thêm danh mục thành công!";
-			}
-			header("Location: index.php?page=categories&msg=" . urlencode($msg));
-			exit;
-		} catch (PDOException $e) {
-			$errors[] = "Lỗi cơ sở dữ liệu: " . $e->getMessage();
-		}
-	}
-}
-
-// --- DELETE ---
-if ($action === 'delete' && $id > 0) {
-	try {
-		$stmt = $db->prepare("DELETE FROM categories WHERE id = ?");
-		$stmt->execute([$id]);
-		header("Location: index.php?page=categories&msg=" . urlencode("Đã xóa danh mục thành công!"));
-		exit;
-	} catch (PDOException $e) {
-		$errors[] = "Không thể xóa danh mục (có thể đang được sử dụng).";
-	}
-}
-
 // --- FETCH FOR EDIT ---
 if ($action === 'edit' && $id > 0) {
 	$stmt = $db->prepare("SELECT * FROM categories WHERE id = ?");
@@ -64,6 +25,9 @@ if ($action === 'edit' && $id > 0) {
 			<a href="index.php?page=categories" class="btn-back"><i class="fi fi-rr-arrow-left"></i> Quay lại</a>
 		</div>
 		<div>
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (!empty($errors)): ?>
 				<div class="alert alert-error"><?php foreach ($errors as $e) echo "<div>$e</div>"; ?></div>
 			<?php endif; ?>
@@ -125,6 +89,9 @@ if ($action === 'edit' && $id > 0) {
     </header>
 
 	<div class="table-wrapper">
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error" style="margin: 10px;"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (isset($_GET['msg'])): ?>
 				<div class="alert alert-success"><?= htmlspecialchars($_GET['msg']); ?></div>
 			<?php endif; ?>

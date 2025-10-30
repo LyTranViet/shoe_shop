@@ -4,7 +4,6 @@ require_admin_or_staff();
 
 $db = get_db();
 
-// --- Router Logic ---
 $page = $_GET['page'] ?? (is_admin() ? 'dashboard' : 'orders');
 
 // --- Xử lý các file handler trước khi check quyền ---
@@ -13,11 +12,247 @@ if (in_array($page, ['handle_stock_in', 'handle_stock_out'])) {
     exit; 
 }
 
+// --- Xử lý POST/DELETE cho các trang trước khi xuất header ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // --- ORDERS ---
+    if ($page === 'orders' && isset($_POST['update_status'])) {
+        $order_id = (int)($_POST['order_id'] ?? 0);
+        $status_id = (int)($_POST['status_id'] ?? 0);
+        if ($order_id > 0 && $status_id > 0) {
+            try {
+                $stmt = $db->prepare("UPDATE orders SET status_id = ? WHERE id = ?");
+                $stmt->execute([$status_id, $order_id]);
+                flash_set('success', 'Cập nhật trạng thái đơn hàng thành công!');
+                header('Location: index.php?page=orders&action=view&id=' . $order_id);
+                exit;
+            } catch (PDOException $e) {
+                flash_set('error', 'Lỗi khi cập nhật trạng thái: ' . $e->getMessage());
+            }
+        }
+    }
+    // --- PRODUCTS ---
+    if ($page === 'products') {
+        $id = (int)($_POST['id'] ?? 0);
+        $form_action = $_POST['form_action'] ?? 'add';
+
+        // The full processing logic is complex, involving file uploads and transactions.
+        // We will let products.php handle the logic but prevent it from sending headers.
+        // This is a temporary measure. The full logic should be moved here for a cleaner architecture.
+        // For now, we just need to prevent the header() call in products.php.
+        // The actual fix will be removing the header() call from products.php.
+    }
+    // --- SUPPLIERS ---
+    if ($page === 'suppliers') {
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        if (empty($name)) {
+            flash_set('error', "Tên nhà cung cấp không được để trống.");
+        } else {
+            try {
+                $phone = trim($_POST['phone'] ?? '');
+                $email = trim($_POST['email'] ?? '');
+                $address = trim($_POST['address'] ?? '');
+                if ($id > 0) {
+                    $stmt = $db->prepare("UPDATE supplier SET supplierName = ?, Sdt = ?, Address = ?, Email = ? WHERE supplier_id = ?");
+                    $stmt->execute([$name, $phone, $address, $email, $id]);
+                    flash_set('success', "Cập nhật nhà cung cấp thành công!");
+                } else {
+                    $stmt = $db->prepare("INSERT INTO supplier (supplierName, Sdt, Address, Email) VALUES (?, ?, ?, ?)");
+                    $stmt->execute([$name, $phone, $address, $email]);
+                    flash_set('success', "Thêm nhà cung cấp thành công!");
+                }
+                header("Location: index.php?page=suppliers");
+                exit;
+            } catch (PDOException $e) {
+                flash_set('error', "Lỗi cơ sở dữ liệu: " . $e->getMessage());
+            }
+        }
+    }
+    // --- BANNERS ---
+    if ($page === 'banners') {
+        // Banner handling is complex due to file uploads.
+        // The logic will be kept in banners.php for now, but the header() call will be removed.
+        // This prevents the "headers already sent" error.
+        $title = trim($_POST['title'] ?? '');
+        if (isset($_POST['csrf_token']) && empty($title)) {
+            flash_set('error', "Tiêu đề không được để trống.");
+        }
+        if (isset($_POST['csrf_token']) && (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']))) {
+            flash_set('error', "Lỗi xác thực (CSRF token không hợp lệ). Vui lòng thử lại.");
+        }
+    }
+    // --- CATEGORIES ---
+    if ($page === 'categories') {
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        if (empty($name)) {
+            flash_set('error', 'Tên danh mục không được để trống.');
+        } else {
+            try {
+                if ($id > 0) {
+                    $stmt = $db->prepare("UPDATE categories SET name=?, description=? WHERE id=?");
+                    $stmt->execute([$name, $description, $id]);
+                    flash_set('success', "Cập nhật danh mục thành công!");
+                } else {
+                    $stmt = $db->prepare("INSERT INTO categories (name, description) VALUES (?, ?)");
+                    $stmt->execute([$name, $description]);
+                    flash_set('success', "Thêm danh mục thành công!");
+                }
+                header("Location: index.php?page=categories");
+                exit;
+            } catch (PDOException $e) {
+                flash_set('error', "Lỗi cơ sở dữ liệu: " . $e->getMessage());
+            }
+        }
+    }
+    // --- BRANDS ---
+    if ($page === 'brands') {
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        if (empty($name)) {
+            flash_set('error', "Tên thương hiệu không được để trống.");
+        } else {
+            try {
+                if ($id > 0) {
+                    $stmt = $db->prepare("UPDATE brands SET name = ?, description = ? WHERE id = ?");
+                    $stmt->execute([$name, $description, $id]);
+                    flash_set('success', "Cập nhật thương hiệu thành công!");
+                } else {
+                    $stmt = $db->prepare("INSERT INTO brands (name, description) VALUES (?, ?)");
+                    $stmt->execute([$name, $description]);
+                    flash_set('success', "Thêm thương hiệu thành công!");
+                }
+                header("Location: index.php?page=brands");
+                exit;
+            } catch (PDOException $e) {
+                flash_set('error', "Lỗi cơ sở dữ liệu: " . $e->getMessage());
+            }
+        }
+    }
+    // --- COUPONS ---
+    if ($page === 'coupons') {
+        $id = (int)($_POST['id'] ?? 0);
+        $code = trim($_POST['code'] ?? '');
+        $discount_percent = (int)($_POST['discount_percent'] ?? 0);
+        $valid_from = $_POST['valid_from'] ?? '';
+        $valid_to = $_POST['valid_to'] ?? '';
+        $usage_limit = (int)($_POST['usage_limit'] ?? 0);
+        if (empty($code) || $discount_percent <= 0 || empty($valid_from) || empty($valid_to)) {
+            flash_set('error', 'Vui lòng điền đầy đủ các trường bắt buộc.');
+        } else {
+            try {
+                if ($id > 0) {
+                    $stmt = $db->prepare("UPDATE coupons SET code=?, discount_percent=?, valid_from=?, valid_to=?, usage_limit=? WHERE id=?");
+                    $stmt->execute([$code, $discount_percent, $valid_from, $valid_to, $usage_limit, $id]);
+                } else {
+                    $stmt = $db->prepare("INSERT INTO coupons (code, discount_percent, valid_from, valid_to, usage_limit) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$code, $discount_percent, $valid_from, $valid_to, $usage_limit]);
+                }
+                header('Location: index.php?page=coupons');
+                exit;
+            } catch (PDOException $e) {
+                flash_set('error', "Lỗi cơ sở dữ liệu: " . $e->getMessage());
+            }
+        }
+    }
+}
+
+// --- Xử lý POST/DELETE cho trang users.php trước khi xuất header ---
+if ($page === 'users') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $role_id = (int)($_POST['role_id'] ?? 0);
+
+        if (empty($name) || empty($email) || $role_id <= 0) {
+            flash_set('error', 'Vui lòng nhập đầy đủ Họ tên, Email và chọn Vai trò.');
+        } elseif ($id === 0 && empty($password)) {
+            flash_set('error', 'Mật khẩu là bắt buộc khi thêm mới.');
+        } else {
+            $db->beginTransaction();
+            try {
+                if ($id > 0) {
+                    $params = [$name, $email];
+                    $sql = "UPDATE users SET name=?, email=?";
+                    if (!empty($password)) {
+                        $sql .= ", password=?";
+                        $params[] = password_hash($password, PASSWORD_DEFAULT);
+                    }
+                    $sql .= " WHERE id=?";
+                    $params[] = $id;
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute($params);
+                    $stmt_role = $db->prepare("UPDATE user_roles SET role_id = ? WHERE user_id = ?");
+                    $stmt_role->execute([$role_id, $id]);
+                } else {
+                    $stmt = $db->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+                    $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT)]);
+                    $id = $db->lastInsertId();
+                    $stmt_role = $db->prepare("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)");
+                    $stmt_role->execute([$id, $role_id]);
+                }
+                $db->commit();
+                header('Location: index.php?page=users');
+                exit;
+            } catch (PDOException $e) {
+                $db->rollBack();
+                flash_set('error', "Lỗi cơ sở dữ liệu: " . $e->getMessage());
+            }
+        }
+    }
+}
+
+// --- Xử lý DELETE cho các trang ---
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $id_to_delete = (int)$_GET['id'];
+    if ($id_to_delete > 0) {
+        try {
+            if ($page === 'categories') {
+                $stmt = $db->prepare("DELETE FROM categories WHERE id = ?");
+                $stmt->execute([$id_to_delete]);
+                header("Location: index.php?page=categories&msg=" . urlencode("Đã xóa danh mục thành công!"));
+                exit;
+            }
+            if ($page === 'brands') {
+                $stmt = $db->prepare("DELETE FROM brands WHERE id = ?");
+                $stmt->execute([$id_to_delete]);
+                header("Location: index.php?page=brands&msg=" . urlencode("Đã xóa thương hiệu thành công!"));
+                exit;
+            }
+            if ($page === 'coupons') {
+                $stmt = $db->prepare("DELETE FROM coupons WHERE id = ?");
+                $stmt->execute([$id_to_delete]);
+                header('Location: index.php?page=coupons');
+                exit;
+            }
+            if ($page === 'users') {
+                $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
+                $stmt->execute([$id_to_delete]);
+                header('Location: index.php?page=users');
+                exit;
+            }
+            if ($page === 'products') {
+                // Note: This is a simple delete. For a real-world app, you'd also delete associated images and sizes.
+                $stmt = $db->prepare("DELETE FROM products WHERE id = ?");
+                $stmt->execute([$id_to_delete]);
+                header('Location: index.php?page=products&msg=' . urlencode("Đã xóa sản phẩm thành công!"));
+                exit;
+            }
+        } catch (PDOException $e) {
+            flash_set('error', "Không thể xóa mục này vì có dữ liệu liên quan.");
+        }
+    }
+}
+
 require_once __DIR__ . '/../includes/header_admin.php';
 
 // --- Phân quyền ---
 $is_superadmin = is_superadmin();
-$is_admin = is_admin() && !$is_superadmin;
+$is_admin = is_admin();
 $is_staff = is_staff();
 
 $superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts'];
@@ -164,5 +399,84 @@ document.addEventListener('DOMContentLoaded', function () {
             submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
         });
     });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.querySelector('.admin-topbar .search form');
+    const searchInput = searchForm ? searchForm.querySelector('input[name="q"]') : null;
+
+    if (searchForm && searchInput) {
+        // Từ điển các từ khóa và trang tương ứng
+        const adminPageKeywords = {
+            'dashboard': ['dashboard', 'tổng quan', 'báo cáo'],
+            'orders': ['đơn hàng', 'đơn', 'order'],
+            'products': ['sản phẩm', 'sp', 'hàng hóa', 'product'],
+            'coupons': ['mã giảm giá', 'coupon', 'khuyến mãi', 'voucher'],
+            'categories': ['danh mục', 'loại sản phẩm', 'category'],
+            'brands': ['thương hiệu', 'nhãn hàng', 'brand'],
+            'customers': ['khách hàng', 'khách', 'customer'],
+            'users': ['nhân viên', 'người dùng', 'user', 'tài khoản'],
+            'suppliers': ['nhà cung cấp', 'ncc', 'supplier'],
+            'stock_in': ['phiếu nhập', 'nhập kho', 'nhập hàng', 'stock in'],
+            'stock_out': ['phiếu xuất', 'xuất kho', 'xuất hàng', 'stock out'],
+            'inventory': ['tồn kho', 'kho', 'inventory'],
+            'banners': ['banner', 'quảng cáo'],
+            'contacts': ['liên hệ', 'phản hồi', 'contact']
+        };
+
+        searchForm.addEventListener('submit', function(event) {
+            const query = searchInput.value.trim().toLowerCase();
+
+            for (const pageName in adminPageKeywords) {
+                if (adminPageKeywords[pageName].some(keyword => query.includes(keyword))) {
+                    event.preventDefault(); // Ngăn form submit theo cách thông thường
+                    window.location.href = `index.php?page=${pageName}`; // Chuyển hướng đến trang tương ứng
+                    return;
+                }
+            }
+            // Nếu không có từ khóa nào khớp, để form submit bình thường
+        });
+    }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.querySelector('.admin-tools .search-form'); // Assuming this is the search form
+    const searchInput = searchForm ? searchForm.querySelector('input[name="q"]') : null;
+
+    if (searchForm && searchInput) {
+        const adminPageKeywords = {
+            'dashboard': ['dashboard', 'tổng quan'],
+            'orders': ['đơn hàng', 'đơn', 'order'],
+            'products': ['sản phẩm', 'sp', 'hàng hóa', 'product'],
+            'coupons': ['mã giảm giá', 'coupon', 'khuyến mãi', 'voucher'],
+            'categories': ['danh mục', 'loại sản phẩm', 'category'],
+            'brands': ['thương hiệu', 'nhãn hàng', 'brand'],
+            'customers': ['khách hàng', 'khách', 'customer'],
+            'users': ['nhân viên', 'người dùng', 'user'],
+            'suppliers': ['nhà cung cấp', 'ncc', 'supplier'],
+            'stock_in': ['phiếu nhập', 'nhập kho', 'nhập hàng', 'stock in'],
+            'stock_out': ['phiếu xuất', 'xuất kho', 'xuất hàng', 'stock out'],
+            'inventory': ['tồn kho', 'kho', 'inventory'],
+            'banners': ['banner', 'quảng cáo'],
+            'contacts': ['liên hệ', 'phản hồi', 'contact']
+        };
+
+        searchForm.addEventListener('submit', function(event) {
+            const query = searchInput.value.trim().toLowerCase();
+
+            for (const pageName in adminPageKeywords) {
+                if (adminPageKeywords[pageName].some(keyword => query.includes(keyword))) {
+                    event.preventDefault(); // Prevent default form submission
+                    window.location.href = `index.php?page=${pageName}`;
+                    return;
+                }
+            }
+            // If no specific page keyword is found, let the form submit normally
+        });
+    }
 });
 </script>

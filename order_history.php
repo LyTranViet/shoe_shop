@@ -74,13 +74,13 @@ require_once __DIR__ . '/includes/header.php';
                                 <a href="product.php?id=<?php echo $item['product_id']; ?>"><?php echo htmlspecialchars($item['product_name']); ?></a>
                                 <span>Qty: <?php echo $item['quantity']; ?></span>
                             </div>
-                            <div class="order-item-price">$<?php echo number_format($item['price'] * $item['quantity'], 2); ?></div>
+                            <div class="order-item-price"><?php echo number_format($item['price'] * $item['quantity'], 0); ?>₫</div>
                         </div>
                     <?php endforeach; ?>
                 </div>
                 <div class="order-card-footer">
                     <div>
-                        <strong>Total: $<?php echo number_format($order['total_amount'], 2); ?></strong>
+                        <strong>Total: <?php echo number_format($order['total_amount'], 0); ?>₫</strong>
                     </div>
                     <a href="order_details.php?id=<?php echo $order['id']; ?>" class="btn small">View Details</a>
                 </div>

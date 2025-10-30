@@ -131,7 +131,7 @@ class ChatWidget {
                         <div class="product-image"><img src="${imgSrc}" onerror="this.src='assets/images/product/default.jpg'" alt="${p.name}"></div>
                     <div class="product-info">
                         <a href="${p.url}" target="_blank">${p.name}</a>
-                        <div class="price">${new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(p.price)}</div>
+                        <div class="price">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div>
                         <div class="details">
                             ${p.brand?'<span class="tag">'+p.brand+'</span>':''}
                             ${p.category?'<span class="tag">'+p.category+'</span>':''}

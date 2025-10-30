@@ -73,8 +73,9 @@ if ($db) {
 
 		<!-- User / Actions -->
 		<div class="topbar-right">
-			<a href="<?php echo $basePath; ?>/index.php" class="btn home-btn"><i class="fi fi-rr-home"></i> Trang chủ</a>
-
+			<?php if (is_superadmin()): ?>
+				<a href="<?php echo $basePath; ?>/index.php" class="btn home-btn"><i class="fi fi-rr-home"></i> Trang chủ</a>
+			<?php endif; ?>
 			<div class="user-menu">
 				<button class="user-name-btn">
 					<i class="fi fi-rr-user"></i> <?php echo htmlspecialchars($displayName); ?> <i class="fi fi-rr-angle-small-down"></i>

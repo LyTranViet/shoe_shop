@@ -1,7 +1,75 @@
 <?php
-require_once __DIR__ . '/includes/header.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/includes/functions.php';
+
 $db = get_db();
 $id = (int)($_GET['id'] ?? 0);
+
+// Handle review edit/delete
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if (!is_logged_in()) {
+        flash_set('error', 'Please login to manage your reviews.');
+        header('Location: login.php'); exit;
+    }
+
+    $review_id = (int)($_POST['review_id'] ?? 0);
+    $user_id = current_user_id();
+
+    if ($_POST['action'] === 'delete_review' || $_POST['action'] === 'edit_review') {
+        // Verify ownership only for edit/delete actions
+        $stmt = $db->prepare("SELECT user_id FROM product_reviews WHERE id = ?");
+        $stmt->execute([$review_id]);
+        $owner_id = $stmt->fetchColumn();
+
+        if ($owner_id != $user_id) {
+            flash_set('error', 'You can only manage your own reviews.');
+            header('Location: product.php?id=' . $id); exit;
+        }
+    }
+
+    if ($_POST['action'] === 'delete_review' && $review_id > 0) {
+        $del = $db->prepare("DELETE FROM product_reviews WHERE id = ?");
+        $del->execute([$review_id]);
+        flash_set('success', 'Your review has been deleted.');
+        header('Location: product.php?id=' . $id); exit;
+    } elseif ($_POST['action'] === 'edit_review') {
+        $rating = (int)($_POST['rating'] ?? 0);
+        $comment = trim($_POST['comment'] ?? '');
+        $upd = $db->prepare("UPDATE product_reviews SET rating = ?, comment = ? WHERE id = ?");
+        $upd->execute([$rating, $comment, $review_id]);
+        flash_set('success', 'Your review has been updated.');
+        header('Location: product.php?id=' . $id); exit;
+    }
+}
+
+// Handle review submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_review') {
+    if (!is_logged_in()) {
+        flash_set('error','Please login to submit a review');
+        header('Location: login.php'); exit;
+    }
+    $rating = (int)($_POST['rating'] ?? 0);
+    $comment = trim($_POST['comment'] ?? '');
+    if ($rating < 1 || $rating > 5) {
+        flash_set('error','Rating must be between 1 and 5');
+        header('Location: product.php?id=' . $id); exit;
+    } elseif ($comment === '') {
+        flash_set('error','Please enter a comment');
+        header('Location: product.php?id=' . $id); exit;
+    } else {
+        try {
+            $ins = $db->prepare('INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES (?,?,?,?)');
+            $ins->execute([$id, current_user_id(), $rating, $comment]);
+            flash_set('success','Thank you for your review');
+            header('Location: product.php?id=' . $id); exit;
+        } catch (PDOException $e) {
+            flash_set('error','Could not save review');
+            header('Location: product.php?id=' . $id); exit;
+        }
+    }
+}
+
+require_once __DIR__ . '/includes/header.php';
 
 // Load product with category, brand, and total stock
 $stmt = $db->prepare('
@@ -17,32 +85,6 @@ if (!$prod) {
     echo '<p>Product not found</p>';
     require_once __DIR__ . '/includes/footer.php';
     exit;
-}
-
-// Handle review submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_review') {
-    if (!is_logged_in()) {
-        flash_set('error','Please login to submit a review');
-        header('Location: login.php'); exit;
-    }
-    $rating = (int)($_POST['rating'] ?? 0);
-    $comment = trim($_POST['comment'] ?? '');
-    if ($rating < 1 || $rating > 5) {
-        flash_set('error','Rating must be between 1 and 5');
-        header('Location: product.php?id=' . $id); exit;
-    }
-    if ($comment === '') {
-        flash_set('error','Please enter a comment');
-        header('Location: product.php?id=' . $id); exit;
-    }
-    try {
-        $ins = $db->prepare('INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES (?,?,?,?)');
-        $ins->execute([$id, current_user_id(), $rating, $comment]);
-        flash_set('success','Thank you for your review');
-    } catch (PDOException $e) {
-        flash_set('error','Could not save review');
-    }
-    header('Location: product.php?id=' . $id); exit;
 }
 
 // Images (main + gallery)
@@ -125,6 +167,21 @@ document.addEventListener('DOMContentLoaded', function(){
         sizeSelectorDiv.appendChild(sizeMessageDiv);
     }
 
+    const stockDisplay = document.getElementById('stock-display');
+
+    function updateStockDisplay() {
+        if (!stockDisplay) return;
+        const selectedRadio = document.querySelector('input[name="size"]:checked');
+        if (selectedRadio) {
+            const stock = selectedRadio.dataset.stock;
+            stockDisplay.textContent = `Tồn kho: ${stock}`;
+        } else {
+            stockDisplay.textContent = 'Chọn size để xem tồn kho';
+        }
+    }
+
+    updateStockDisplay(); // Cập nhật lần đầu khi tải trang
+
     sizeBoxes.forEach((box, idx) => {
         box.addEventListener('click', function(){
             // Kiểm tra xem radio button tương ứng có bị vô hiệu hóa không
@@ -138,8 +195,30 @@ document.addEventListener('DOMContentLoaded', function(){
             sizeBoxes.forEach(b => b.classList.remove('selected'));
             box.classList.add('selected');
             sizeRadios[idx].checked = true;
+            updateStockDisplay(); // Cập nhật tồn kho khi chọn size mới
         });
     });
+
+    // Review edit logic
+    document.querySelectorAll('.btn-edit-review').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const reviewCard = this.closest('.review');
+            const editForm = reviewCard.querySelector('.edit-review-form');
+            const reviewContent = reviewCard.querySelector('.review-content');
+
+            if (editForm.style.display === 'none' || !editForm.style.display) {
+                reviewContent.style.display = 'none';
+                editForm.style.display = 'block';
+            } else { // This part is now handled by the cancel button
+                reviewContent.style.display = 'block';
+                editForm.style.display = 'none';
+            }
+        });
+    });
+
+    // Star rating for edit forms
+    // This logic is similar to the add review form, but needs to be applied to potentially multiple forms
 
     // Quantity + / -
     const qtyInput = document.querySelector('input[name="quantity"]');
@@ -203,6 +282,36 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     });
 
+    // Hủy sửa đánh giá
+    document.querySelectorAll('.btn-cancel-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const form = this.closest('.edit-review-form');
+            const reviewDiv = form.closest('.review');
+            const reviewContent = reviewDiv.querySelector('.review-content');
+            form.style.display = 'none';
+            if (reviewContent) reviewContent.style.display = 'block';
+        });
+    });
+
+    // Star rating for EACH edit form
+    document.querySelectorAll('.edit-review-form').forEach(formContainer => {
+        const starsInForm = formContainer.querySelectorAll('.star-rating-js .star');
+        const ratingInputInForm = formContainer.querySelector('input[name="rating"]');
+
+        if (starsInForm.length > 0 && ratingInputInForm) {
+            starsInForm.forEach(star => {
+                star.addEventListener('click', function() {
+                    const val = parseInt(this.dataset.value, 10);
+                    ratingInputInForm.value = val;
+                    // Update stars within the same form
+                    starsInForm.forEach(s => {
+                        s.textContent = parseInt(s.dataset.value, 10) <= val ? '★' : '☆';
+                    });
+                });
+            });
+        }
+    });
+
     // Paste and Validate button logic
     const pasteBtn = document.getElementById('paste-and-validate-btn');
     if (pasteBtn) {
@@ -244,9 +353,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 resultDiv.textContent = `✓ Áp dụng thành công! Giảm ${discountPercent}%.`;
                 resultDiv.className = 'coupon-result success';
-                originalPriceEl.textContent = '$' + originalPrice.toFixed(2);
+                originalPriceEl.textContent = new Intl.NumberFormat('vi-VN').format(originalPrice) + '₫';
                 originalPriceEl.style.display = 'block';
-                priceEl.textContent = '$' + newPrice.toFixed(2);
+                priceEl.textContent = new Intl.NumberFormat('vi-VN').format(newPrice) + '₫';
             } else {
                 throw new Error(data.message || 'Mã không hợp lệ.');
             }
@@ -254,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function(){
             resultDiv.textContent = `✗ ${err.message}`;
             resultDiv.className = 'coupon-result error';
             originalPriceEl.style.display = 'none';
-            priceEl.textContent = '$' + originalPrice.toFixed(2);
+            priceEl.textContent = new Intl.NumberFormat('vi-VN').format(originalPrice) + '₫';
         }
     }
 });
@@ -288,10 +397,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
         <div class="details">
             <h1><?php echo htmlspecialchars($prod['name']); ?></h1>
-            <p class="meta">Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> | Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a></p>
+            <p class="meta">
+                Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> | 
+                Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a> | 
+                <span id="stock-display" style="font-weight: 500;"></span></p>
             <div class="price-container">
-                <p class="price" data-original-price="<?php echo $prod['price']; ?>">$<?php echo number_format($prod['price'], 2); ?></p>
-                <p class="price-original" style="display: none;"></p>
+                <p class="price" data-original-price="<?php echo $prod['price']; ?>"><?php echo number_format($prod['price'], 0); ?>₫</p>
+                <p class="price-original" style="display: none;"></p> <!-- Giữ lại để JS hoạt động -->
             </div>
 
             <?php if ($is_out_of_stock): ?>
@@ -376,12 +488,44 @@ document.addEventListener('DOMContentLoaded', function(){
             <p>No reviews yet.</p>
         <?php else: foreach ($reviews as $rev): ?>
             <div class="review">
-                <div class="review-header">
-                    <strong><?php echo htmlspecialchars($rev['user_name'] ?? 'Guest'); ?></strong>
-                    <span class="review-rating">Rating: <?php echo str_repeat('★', (int)$rev['rating']) . str_repeat('☆', 5 - (int)$rev['rating']); ?></span>
+                <div class="review-content">
+                    <div class="review-header">
+                        <strong><?php echo htmlspecialchars($rev['user_name'] ?? 'Guest'); ?></strong>
+                        <span class="review-rating">Rating: <?php echo str_repeat('★', (int)$rev['rating']) . str_repeat('☆', 5 - (int)$rev['rating']); ?></span>
+                    </div>
+                    <p class="review-comment"><?php echo nl2br(htmlspecialchars($rev['comment'])); ?></p>
+                    <small class="review-date"><?php echo date('d M Y', strtotime($rev['created_at'])); ?></small>
                 </div>
-                <p class="review-comment"><?php echo nl2br(htmlspecialchars($rev['comment'])); ?></p>
-                <small class="review-date"><?php echo date('d M Y', strtotime($rev['created_at'])); ?></small>
+
+                <?php if (is_logged_in() && current_user_id() == $rev['user_id']): ?>
+                    <div class="review-actions">
+                        <button class="btn-edit-review" title="Sửa đánh giá"><i class="fi fi-rr-pencil"></i></button>
+                        <form method="post" action="product.php?id=<?php echo $id; ?>" onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?');" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_review">
+                            <input type="hidden" name="review_id" value="<?php echo $rev['id']; ?>">
+                            <button type="submit" class="btn-delete-review" title="Xóa đánh giá"><i class="fi fi-rr-trash"></i></button>
+                        </form>
+                    </div>
+                    <div class="edit-review-form" style="display:none; margin-top: 15px;">
+                        <form method="post" action="product.php?id=<?php echo $id; ?>">
+                            <input type="hidden" name="action" value="edit_review">
+                            <input type="hidden" name="review_id" value="<?php echo $rev['id']; ?>">
+                            <div class="form-group">
+                                <label>Rating</label>
+                                <div class="star-rating-js">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <span class="star" data-value="<?php echo $i; ?>"><?php echo $i <= $rev['rating'] ? '★' : '☆'; ?></span>
+                                    <?php endfor; ?>
+                                </div>
+                                <input type="hidden" name="rating" value="<?php echo $rev['rating']; ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea name="comment" rows="3" required><?php echo htmlspecialchars($rev['comment']); ?></textarea>
+                            </div>
+                            <button class="btn" type="submit">Lưu thay đổi</button>
+                        </form>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endforeach; endif; ?>
 
@@ -426,8 +570,8 @@ document.addEventListener('DOMContentLoaded', function(){
                         <?php $simg = $imagesBy[$s['id']] ?? 'assets/images/product-placeholder.png'; ?>
                         <div class="swiper-slide product">
                             <div class="thumb"><a href="product.php?id=<?php echo $s['id']; ?>"><img src="<?php echo htmlspecialchars($simg); ?>" alt="<?php echo htmlspecialchars($s['name']); ?>"></a></div>
-                            <h4><a href="product.php?id=<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></a></h4>
-                            <p class="price">$<?php echo number_format($s['price'],2); ?></p>
+                            <h4><a href="product.php?id=<?php echo $s['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($s['name']); ?></a></h4>
+                            <p class="price"><?php echo number_format($s['price'], 0); ?>₫</p>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -522,6 +666,40 @@ document.addEventListener('DOMContentLoaded', function(){
     color: #dc3545; /* Red color for error/warning */
     font-weight: 500;
     height: 1em; /* Reserve space to prevent layout shift */
+}
+
+/* Review Actions */
+.review {
+    position: relative;
+}
+.review-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex; /* Changed to inline-flex */
+    align-items: center; /* Vertically align items */
+    gap: 10px;
+}
+.btn-edit-review, .btn-delete-review {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em; /* Tăng kích thước icon */
+    text-decoration: none; /* Bỏ gạch chân */
+}
+.btn-delete-review { color: #dc3545; }
+
+/* Review Actions */
+.review {
+    position: relative;
+}
+.review-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex; /* Changed to inline-flex */
+    align-items: center; /* Vertically align items */
+    gap: 10px;
 }
 </style>
  

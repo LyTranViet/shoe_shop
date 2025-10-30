@@ -9,55 +9,6 @@ $id = (int)($_GET['id'] ?? 0);
 $supplier = null;
 $errors = [];
 
-// --- CREATE / UPDATE ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	$id = (int)($_POST['id'] ?? 0);
-	$name = trim($_POST['name'] ?? '');
-	$phone = trim($_POST['phone'] ?? '');
-	$email = trim($_POST['email'] ?? '');
-	$address = trim($_POST['address'] ?? '');
-
-	if ($name === '') $errors[] = "Tên nhà cung cấp không được để trống.";
-    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Định dạng email không hợp lệ.";
-    }
-
-	if (empty($errors)) {
-		try {
-			if ($id > 0) {
-				$stmt = $db->prepare("UPDATE supplier SET supplierName = ?, Sdt = ?, Address = ?, Email = ? WHERE supplier_id = ?");
-				$stmt->execute([$name, $phone, $address, $email, $id]);
-				$msg = "Cập nhật nhà cung cấp thành công!";
-			} else {
-				$stmt = $db->prepare("INSERT INTO supplier (supplierName, Sdt, Address, Email) VALUES (?, ?, ?, ?)");
-				$stmt->execute([$name, $phone, $address, $email]);
-				$msg = "Thêm nhà cung cấp thành công!";
-			}
-			header("Location: index.php?page=suppliers&msg=" . urlencode($msg));
-			exit;
-		} catch (PDOException $e) {
-			$errors[] = "❌ Lỗi cơ sở dữ liệu: " . $e->getMessage();
-		}
-	}
-}
-
-// --- DELETE ---
-if ($action === 'delete' && $id > 0) {
-	try {
-		$stmt = $db->prepare("DELETE FROM supplier WHERE supplier_id = ?");
-		$stmt->execute([$id]);
-		header("Location: index.php?page=suppliers&msg=" . urlencode("Đã xóa nhà cung cấp!"));
-		exit;
-	} catch (PDOException $e) {
-		// Check for foreign key constraint violation
-        if ($e->getCode() == '23000') {
-             $errors[] = "Không thể xóa nhà cung cấp này vì đang có dữ liệu liên quan (ví dụ: phiếu nhập hàng).";
-        } else {
-            $errors[] = "Lỗi cơ sở dữ liệu khi xóa: " . $e->getMessage();
-        }
-	}
-}
-
 // --- FETCH FOR EDIT ---
 if ($action === 'edit' && $id > 0) {
 	$stmt = $db->prepare("SELECT * FROM supplier WHERE supplier_id = ?");
@@ -73,6 +24,9 @@ if ($action === 'edit' && $id > 0) {
 			<a href="index.php?page=suppliers" class="btn-back"><i class="fi fi-rr-arrow-left"></i> Quay lại</a>
 		</div>
 		<div>
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (!empty($errors)): ?>
 				<div class="alert alert-error"><?php foreach ($errors as $e) echo "<div>$e</div>"; ?></div>
 			<?php endif; ?>

@@ -25,7 +25,7 @@ if ($q !== '') {
                         <img src="<?php echo htmlspecialchars($p['image'] ?? 'assets/images/product-placeholder.png'); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" style="width:100%;max-width:160px;height:160px;object-fit:cover;border-radius:8px;">
                         <h3 style="margin:0.5rem 0 0.25rem;font-size:1.1rem;color:var(--dark);"><?php echo htmlspecialchars($p['name']); ?></h3>
                     </a>
-                    <div style="color:var(--primary);font-weight:600;">$<?php echo number_format($p['price'],2); ?></div>
+                    <div style="color:var(--primary);font-weight:600;"><?php echo number_format($p['price'], 0); ?>₫</div>
                 </div>
             <?php endforeach; ?>
         </div>

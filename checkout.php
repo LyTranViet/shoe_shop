@@ -6,7 +6,9 @@ require_once __DIR__ . '/includes/functions.php';
 // require login for checkout
 if (!is_logged_in()) {
     flash_set('info','Please login to checkout');
-    header('Location: /login.php'); exit;
+    // Lưu lại URL để quay lại sau khi đăng nhập
+    $_SESSION['return_to'] = 'checkout.php';
+    header('Location: login.php'); exit;
 }
 
 $db = get_db();
@@ -216,7 +218,7 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
                             <span class="summary-item-name"><?php echo htmlspecialchars($it['name']); ?></span>
                             <span class="summary-item-size"><?php if (!empty($it['size'])) echo 'Size: ' . htmlspecialchars($it['size']); ?></span>
                         </div>
-                        <div class="summary-item-price">$<?php echo number_format($it['price'] * $it['quantity'], 2); ?></div>
+                        <div class="summary-item-price"><?php echo number_format($it['price'] * $it['quantity'], 0); ?>₫</div>
                     </div>
                 <?php endforeach; ?>
             </div>

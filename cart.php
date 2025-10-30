@@ -244,7 +244,7 @@ if (!empty($items)) {
                             <?php if (!empty($it['size'])): ?>
                                 <p class="cart-item-meta">Size: <?php echo htmlspecialchars($it['size']); ?></p>
                             <?php endif; ?>
-                            <p class="cart-item-meta cart-item-price-mobile">Price: $<?php echo number_format($it['price'], 2); ?></p>
+                            <p class="cart-item-meta cart-item-price-mobile">Price: <?php echo number_format($it['price'], 0); ?>₫</p>
                         </div>
                     </div>
                     <div class="cart-item-quantity">
@@ -263,7 +263,7 @@ if (!empty($items)) {
                         </form>
                     </div>
                     <div class="cart-item-subtotal">
-                        $<span><?php echo number_format($it['price'] * $it['quantity'], 2); ?></span>
+                        <span><?php echo number_format($it['price'] * $it['quantity'], 0); ?></span>₫
                     </div>
                     <div class="cart-item-remove">
                         <form class="ajax-cart-remove" method="post" action="cart.php">
@@ -283,7 +283,7 @@ if (!empty($items)) {
             <h3>Order Summary</h3>
             <div class="summary-row">
                 <span>Subtotal</span>
-                <strong id="cart-total">$<?php echo number_format($total, 2); ?></strong>
+                <strong id="cart-total"><?php echo number_format($total, 0); ?>₫</strong>
             </div>
             <p>Shipping & taxes calculated at checkout.</p>
             <a class="btn checkout-btn" href="checkout.php">Proceed to checkout</a>
@@ -324,8 +324,8 @@ function updateCartItem(item, qty, inputEl, subtotalEl, cartTotalEl){
     fetch('cart.php',{method:'POST', body: formData})
     .then(r=>r.json()).then(data=>{
         if(data.success){
-            subtotalEl.textContent = parseFloat(data.item_subtotal).toFixed(2);
-            cartTotalEl.textContent = parseFloat(data.total).toFixed(2);
+            subtotalEl.textContent = new Intl.NumberFormat('vi-VN').format(data.item_subtotal);
+            cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(data.total) + '₫';
         }
     });
 }
@@ -340,7 +340,7 @@ function removeCartItem(item, cartTotalEl){
     .then(r=>r.json()).then(data=>{
         if(data.success){
             item.remove();
-            cartTotalEl.textContent = parseFloat(data.total).toFixed(2);
+            cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(data.total) + '₫';
         }
     });
 }
