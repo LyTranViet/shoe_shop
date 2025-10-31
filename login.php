@@ -52,15 +52,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($_SESSION['wishlist']);
             }
 
+            // Hợp nhất giỏ hàng từ session vào DB
+            if (!empty($_SESSION['cart'])) {
+                $st_cart = $db->prepare('SELECT id FROM carts WHERE user_id = ? LIMIT 1');
+                $st_cart->execute([$u['id']]);
+                $cartId = $st_cart->fetchColumn();
+                if (!$cartId) {
+                    $ins_cart = $db->prepare('INSERT INTO carts (user_id) VALUES (?)');
+                    $ins_cart->execute([$u['id']]);
+                    $cartId = $db->lastInsertId();
+                }
+
+                foreach ($_SESSION['cart'] as $sessionKey => $item) {
+                    // Sử dụng logic tương tự như trong cart.php để thêm/cập nhật sản phẩm
+                    $pid = (int)$item['product_id'];
+                    $qty = (int)$item['quantity'];
+                    $size = $item['size'] ?? null;
+                    
+                    add_or_update_cart_item($db, $cartId, $pid, $qty, $size);
+                }
+                unset($_SESSION['cart']); // Xóa giỏ hàng của khách
+            }
+
             flash_set('success', 'Đăng nhập thành công!');
 
-            // Kiểm tra role
-            $role_stmt = $db->prepare('SELECT r.name FROM user_roles ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ?');
-            $role_stmt->execute([$u['id']]);
-            $roles = array_map('strtolower', $role_stmt->fetchAll(PDO::FETCH_COLUMN));
-            $is_admin = in_array('admin', $roles) || in_array('staff', $roles);
-
-header('Location: ' . ($is_admin ? '/shoe_shop/admin/' : '/shoe_shop/index.php'));
+            // Chuyển hướng dựa trên vai trò người dùng
+            // Admin và Staff sẽ được chuyển thẳng đến trang quản trị.
+            // SuperAdmin sẽ được chuyển đến trang chủ của người dùng và có thể truy cập cả hai khu vực.
+            if (is_admin() || is_staff()) {
+                header('Location: ' . BASE_URL . 'admin/');
+            } elseif (isset($_SESSION['return_to'])) {
+                $return_url = $_SESSION['return_to'];
+                unset($_SESSION['return_to']); // Xóa session sau khi sử dụng
+                header('Location: ' . $return_url);
+            } else {
+                // SuperAdmin và Customer sẽ được chuyển đến trang chủ
+                header('Location: ' . BASE_URL . 'index.php');
+            }
             exit;
         } else {
             flash_set('error', 'Email hoặc mật khẩu không đúng.');
@@ -293,10 +321,10 @@ require_once __DIR__ . '/includes/header.php';
       </div>
       <div class="form-actions">
         <button class="btn" type="submit">Đăng nhập</button>
-        <a class="btn secondary small" href="register.php">Tạo tài khoản</a>
+        <a class="btn secondary small" href="<?php echo BASE_URL; ?>register.php">Tạo tài khoản</a>
       </div>
       <div class="auth-divider"><span>hoặc</span></div>
-      <div class="helper" style="text-align:center;">Tiếp tục với tư cách khách — <a href="index.php">Vào cửa hàng</a></div>
+      <div class="helper" style="text-align:center;">Tiếp tục với tư cách khách — <a href="<?php echo BASE_URL; ?>index.php">Vào cửa hàng</a></div>
     </form>
   </div>
 </div>

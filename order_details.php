@@ -61,7 +61,7 @@ require_once __DIR__ . '/includes/header.php';
                 <strong>Order Date:</strong><span><?php echo date('d M Y, H:i', strtotime($order['created_at'])); ?></span>
                 <strong>Status:</strong><span><span class="status <?php echo strtolower(str_replace(' ', '-', $order['status_name'])); ?>"><?php echo htmlspecialchars($order['status_name']); ?></span></span>
                 <strong>Payment Method:</strong><span><?php echo htmlspecialchars($order['payment_method']); ?></span>
-                <strong>Total Amount:</strong><span><strong>$<?php echo number_format($order['total_amount'], 2); ?></strong></span>
+                <strong>Total Amount:</strong><span><strong><?php echo number_format($order['total_amount'], 0); ?>₫</strong></span>
             </div>
         </div>
         <div class="panel">
@@ -80,7 +80,7 @@ require_once __DIR__ . '/includes/header.php';
                         <a href="product.php?id=<?php echo $item['product_id']; ?>"><?php echo htmlspecialchars($item['product_name']); ?></a>
                         <span>Qty: <?php echo $item['quantity']; ?> | Size: <?php echo htmlspecialchars($item['size'] ?? 'N/A'); ?></span>
                     </div>
-                    <div class="order-item-price">$<?php echo number_format($item['price'] * $item['quantity'], 2); ?></div>
+                    <div class="order-item-price"><?php echo number_format($item['price'] * $item['quantity'], 0); ?>₫</div>
                 </div>
             <?php endforeach; ?>
         </div>

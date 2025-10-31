@@ -1,8 +1,6 @@
 <?php
-ob_start(); // Bắt đầu bộ đệm output để tránh lỗi header
-if (session_status() === PHP_SESSION_NONE) session_start();
-
-require_once __DIR__ . '/includes/header.php';
+// ob_start() và session_start() được xử lý trong init.php và header.php
+require_once __DIR__ . '/includes/init.php'; // Bao gồm init.php trước để định nghĩa BASE_URL
 $db = get_db();
 
 // Helper: generate a simple math captcha and store in session
@@ -68,7 +66,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ur->execute([$userId, $roleId]);
             $db->commit();
             $_SESSION['user_id'] = $userId;
-            flash_set('success', 'Welcome! Your account has been created successfully.');
+
+            // Hợp nhất giỏ hàng từ session vào DB sau khi đăng ký
+            if (!empty($_SESSION['cart'])) {
+                $cartId = null;
+                // Tạo giỏ hàng mới cho người dùng
+                $ins_cart = $db->prepare('INSERT INTO carts (user_id) VALUES (?)');
+                $ins_cart->execute([$userId]);
+                $cartId = $db->lastInsertId();
+
+                foreach ($_SESSION['cart'] as $sessionKey => $item) {
+                    $pid = (int)$item['product_id'];
+                    $qty = (int)$item['quantity'];
+                    $size = $item['size'] ?? null;
+                    add_or_update_cart_item($db, $cartId, $pid, $qty, $size);
+                }
+                unset($_SESSION['cart']);
+            }
+
+            if (isset($_SESSION['return_to'])) {
+                $return_url = $_SESSION['return_to'];
+                unset($_SESSION['return_to']);
+                header('Location: ' . $return_url);
+                exit;
+            }
+
+            flash_set('success', 'Chào mừng! Tài khoản của bạn đã được tạo thành công.');
             header('Location: index.php');
             exit;
         } catch (Exception $e) {
@@ -79,6 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+?>
+<?php
+require_once __DIR__ . '/includes/header.php';
 ?>
 
 
@@ -301,10 +327,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-actions">
                 <button class="btn" type="submit">Register</button>
-                <a class="btn secondary small" href="login.php">Sign in</a>
+                <a class="btn secondary small" href="<?php echo BASE_URL; ?>login.php">Sign in</a>
             </div>
         </form>
-        <div class="helper" style="margin-top:18px;text-align:center;">Already have an account? <a href="login.php">Sign in</a></div>
+        <div class="helper" style="margin-top:18px;text-align:center;">Already have an account? <a href="<?php echo BASE_URL; ?>login.php">Sign in</a></div>
     </div>
 </div>
 

@@ -223,7 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 var j = null; try { j = JSON.parse(text); } catch (e) { console.warn('Wishlist remove non-JSON', text); return; }
                 if (!j) return;
                 if (j.success) {
-                    var el = form.closest('.product'); if (el) el.remove();
+                    // Find the correct product card to remove, whether it's on the category page (.product) or wishlist page (.wishlist-card)
+                    var el = form.closest('.wishlist-card') || form.closest('.product'); 
+                    if (el) el.remove();
                 }
             })
             .catch(function (err) { console.error('Wishlist remove failed', err); });
@@ -381,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const price = parseFloat(priceText.textContent.replace(/[^0-9.]/g, ''));
 
             const formData = new FormData();
-            formData.append('code', code); // The API can get the price itself if needed
+            formData.append('code', code);
 
             fetch((window.siteBasePath || '') + '/validate_coupon.php', { method: 'POST', body: formData })
                 .then(response => response.json())

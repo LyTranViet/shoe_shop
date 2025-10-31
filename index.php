@@ -1,7 +1,5 @@
 <?php
 require_once __DIR__ . '/includes/header.php';
-$db = get_db();
-
 // Load banners (if table exists)
 $banners = [];
 try {
@@ -104,7 +102,7 @@ try {
     .hero-banner {
         position: relative;
         height: 500px;
-        background: linear-gradient(45deg, #1a1a1a, #2c3e50);
+        background: linear-gradient(45deg, var(--text-dark), #2c3e50);
         overflow: hidden;
         margin-bottom: 3rem;
     }
@@ -133,7 +131,7 @@ try {
     .banner-cta {
         display: inline-block;
         padding: 1rem 2rem;
-        background: #0056b3;
+        background: var(--accent);
         color: white;
         text-decoration: none;
         border-radius: 30px;
@@ -141,12 +139,12 @@ try {
         transition: transform 0.3s, background 0.3s;
     }
     .banner-cta:hover {
-        background: #003d82;
+        background: var(--accent-hover);
         transform: translateY(-2px);
     }
     .features-section {
         padding: 4rem 0;
-        background: #f8f9fa;
+        background: var(--bg-light);
     }
     .features-grid {
         display: grid;
@@ -159,9 +157,9 @@ try {
     .feature-card {
         text-align: center;
         padding: 2rem;
-        background: white;
+        background: var(--bg-white);
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         transition: transform 0.3s;
     }
     .feature-card:hover {
@@ -170,11 +168,11 @@ try {
     .feature-icon {
         font-size: 2.5rem;
         margin-bottom: 1rem;
-        color: #0056b3;
+        color: var(--accent);
     }
     .feature-title {
         font-size: 1.2rem;
-        color: #1a1a1a;
+        color: var(--text-dark);
         margin-bottom: 0.5rem;
         font-weight: 600;
     }
@@ -189,11 +187,11 @@ try {
     }
     .section-title h2 {
         font-size: 2.5rem;
-        color: #1a1a1a;
+        color: var(--text-dark);
         margin-bottom: 1rem;
     }
     .section-title p {
-        color: #6c757d;
+        color: var(--text-muted);
         font-size: 1.1rem;
         max-width: 600px;
         margin: 0 auto;
@@ -308,7 +306,7 @@ try {
     <style>
         .product-section {
             padding: 4rem 0;
-            background: white;
+            background: var(--bg-white);
         }
         .product-grid {
             display: grid;
@@ -319,10 +317,11 @@ try {
             margin: 0 auto;
         }
         .product-card {
-            background: white;
+            background: var(--bg-white);
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             overflow: hidden;
+            border: 1px solid var(--border);
             transition: transform 0.3s;
         }
         .product-card:hover {
@@ -351,45 +350,42 @@ try {
         .product-name {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #1a1a1a;
+            color: var(--text-dark);
             margin-bottom: 0.5rem;
             text-decoration: none;
         }
         .product-name:hover {
-            color: #0056b3;
+            color: var(--accent);
         }
         .product-price {
-            color: #0056b3;
+            color: var(--text-dark);
             font-size: 1.2rem;
             font-weight: 700;
             margin-bottom: 1rem;
         }
         .product-actions {
-            display: flex;
-            gap: 0.5rem;
+            display: flex; 
+            justify-content: center; 
+            gap: 8px; 
+            margin-top: 10px; 
         }
-        .btn-cart, .btn-wishlist {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
+        .product-actions .btn {
+            font-size: 0.98em; 
+            padding: 8px 14px; 
+            border-radius: 7px; 
         }
-        .btn-cart {
-            background: #0056b3;
-            color: white;
+        .product-actions .ajax-add-cart .btn {
+            background: linear-gradient(90deg,#0ea5ff 60%,#2563eb 100%);
+            color: #fff;
         }
-        .btn-cart:hover {
-            background: #003d82;
+        .product-actions .ajax-wishlist .btn {
+            background: #f1f5f9; 
+            color: #0ea5ff; 
+            border: 1px solid #bae6fd; 
         }
-        .btn-wishlist {
-            background: #f8f9fa;
-            color: #1a1a1a;
-        }
-        .btn-wishlist:hover {
-            background: #e9ecef;
+        .product-actions .ajax-wishlist .btn:hover {
+            background: #0ea5ff; 
+            color: #fff; 
         }
         .section-header {
             text-align: center;
@@ -397,11 +393,11 @@ try {
         }
         .section-header h2 {
             font-size: 2rem;
-            color: #1a1a1a;
+            color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
         .section-header p {
-            color: #6c757d;
+            color: var(--text-muted);
             font-size: 1.1rem;
         }
         .view-more {
@@ -411,8 +407,8 @@ try {
         .view-more-link {
             display: inline-block;
             padding: 0.75rem 2rem;
-            background: #f8f9fa;
-            color: #1a1a1a;
+            background: var(--bg-light);
+            color: var(--text-dark);
             text-decoration: none;
             border-radius: 30px;
             font-weight: 500;
@@ -421,6 +417,20 @@ try {
         .view-more-link:hover {
             background: #e9ecef;
             transform: translateX(5px);
+        }s
+    </style>
+    <style>
+        .out-of-stock-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(220, 53, 69, 0.95); /* Badge color from suggestion */
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+            border-radius: 4px;
+            z-index: 1;
         }
     </style>
 
@@ -439,8 +449,8 @@ try {
                         <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
                         <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                     </div>
-                    <h3><a href="product.php?id=<?php echo $p['id']; ?>"><?php echo htmlspecialchars($p['name']); ?></a></h3>
-                    <p class="price">$<?php echo number_format($p['price'],2); ?></p>
+                    <h3><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
+                    <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                     <div class="product-actions">
                         <form class="ajax-add-cart" method="post" action="cart.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
@@ -478,8 +488,8 @@ try {
                         <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
                         <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                     </div>
-                    <h3><a href="product.php?id=<?php echo $p['id']; ?>"><?php echo htmlspecialchars($p['name']); ?></a></h3>
-                    <p class="price">$<?php echo number_format($p['price'],2); ?></p>
+                    <h3><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
+                    <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                     <div class="product-actions">
                         <form class="ajax-add-cart" method="post" action="cart.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
@@ -522,8 +532,8 @@ try {
                                     <?php endif; ?>
                                     <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
                                     <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a></div>
-                                <h4><a href="product.php?id=<?php echo $p['id']; ?>"><?php echo htmlspecialchars($p['name']); ?></a></h4>
-                                <p class="price">$<?php echo number_format($p['price'],2); ?></p>
+                                <h4><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
+                                <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                             </div>
                         <?php endforeach; endif; ?>
                         </div>
@@ -544,7 +554,7 @@ try {
 <style>
     .testimonials-section {
         padding: 4rem 0;
-        background: #f8f9fa;
+        background: var(--bg-light);
     }
     .testimonials-grid {
         display: grid;
@@ -555,13 +565,13 @@ try {
         padding: 0 1rem;
     }
     .testimonial-card {
-        background: white;
+        background: var(--bg-white);
         padding: 2rem;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .testimonial-text {
-        color: #495057;
+        color: var(--text-muted);
         font-size: 1.1rem;
         line-height: 1.6;
         margin-bottom: 1.5rem;
@@ -583,18 +593,18 @@ try {
         font-size: 1.5rem;
     }
     .author-info h4 {
-        color: #1a1a1a;
+        color: var(--text-dark);
         margin: 0;
         font-size: 1.1rem;
     }
     .author-info p {
-        color: #6c757d;
+        color: var(--text-muted);
         margin: 0;
         font-size: 0.9rem;
     }
     .newsletter-section {
         padding: 4rem 0;
-        background: linear-gradient(45deg, #0056b3, #0077cc);
+        background: linear-gradient(45deg, var(--text-dark), #2c3e50);
         color: white;
         text-align: center;
     }
@@ -626,16 +636,16 @@ try {
     }
     .newsletter-button {
         padding: 1rem 2rem;
-        background: #1a1a1a;
+        background: var(--accent);
         color: white;
         border: none;
         border-radius: 30px;
         cursor: pointer;
         font-weight: 600;
-        transition: background 0.3s;
+        transition: background 0.3s, transform 0.3s;
     }
     .newsletter-button:hover {
-        background: #333;
+        background: var(--accent-hover);
     }
     @media (max-width: 992px) {
         .testimonials-grid {

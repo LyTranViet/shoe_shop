@@ -64,7 +64,7 @@ if (is_logged_in()) {
 }
 
 // --- Pagination Logic ---
-$productsPerPage = 20; // 5 columns * 4 rows
+$productsPerPage = 20; // 4 columns * 5 rows
 $totalProducts = count($ids);
 $totalPages = ceil($totalProducts / $productsPerPage);
 $currentPage = isset($_GET['p']) ? (int)$_GET['p'] : 1;
@@ -79,7 +79,11 @@ if (!empty($ids)) {
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
     $paginated_placeholders = implode(',', array_fill(0, count($paginated_ids), '?'));
 
-    $stmt = $db->prepare("SELECT * FROM products WHERE id IN ($paginated_placeholders)");
+    $stmt = $db->prepare("
+        SELECT p.*, 
+               (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock 
+        FROM products p 
+        WHERE p.id IN ($paginated_placeholders)");
     $stmt->execute($paginated_ids);
     $products = $stmt->fetchAll();
 
@@ -95,33 +99,46 @@ if (!empty($ids)) {
 
 <style>
     /* Wishlist page compact styles */
+    .out-of-stock-badge { position: absolute; top: 10px; left: 10px; background: rgba(239, 68, 68, 0.9); color: white; padding: 4px 8px; font-size: 0.8em; font-weight: bold; border-radius: 4px; z-index: 1; }
     .wishlist-wrap { max-width:1200px; margin: 18px auto 40px; padding: 0 16px; }
     .wishlist-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
     .wishlist-header h2 { font-size:1.6rem; color:#0ea5ff; margin:0; }
     .wishlist-empty { color:#64748b; font-size:1.02rem; padding:28px; background:#fff; border-radius:10px; text-align:center; }
-    .wishlist-grid { display:grid; grid-template-columns: repeat(5, 1fr); gap:22px; }
-    .wishlist-card { background:#0f1724; color:#e6eefb; border-radius:12px; padding:14px; border:1px solid #21303a; display:flex; flex-direction:column; align-items:center; position:relative; box-shadow: 0 6px 20px #0008; }
-    .wishlist-card .thumb img { width:100%; height:160px; object-fit:cover; border-radius:8px; margin-bottom:10px; }
-    .wishlist-card h4 { margin:6px 0; font-size:1.02rem; color:#0ea5ff; text-align:center; }
-    .wishlist-card .price { font-weight:800; color:#0ea5ff; margin-bottom:10px; }
-    .wishlist-actions { display:flex; gap:10px; width:100%; justify-content:center; }
-    .wishlist-actions .btn { padding:10px 16px; border-radius:10px; font-weight:700; }
-    .btn-add { background:linear-gradient(90deg,#0ea5ff,#2563eb); color:#fff; }
-    .btn-remove { background:#1f2937; color:#fff; border:1px solid #334155; }
-    .btn-remove:hover { background:#ef4444; border-color:#ef4444; }
-    .btn-remove-circle { position:absolute; right:12px; top:12px; width:36px; height:36px; border-radius:50%; background:#111827; color:#fff; border:1px solid #2b3942; display:inline-flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; }
+    .wishlist-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:28px; }
+    .product {
+        background: #fff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        text-align: center;
+        padding: 18px 12px 16px 12px;
+        box-shadow: 0 4px 18px #cbd5e122;
+        transition: box-shadow 0.2s, transform 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+    }
+    .product:hover { box-shadow: 0 8px 28px #0ea5ff22; transform: translateY(-6px) scale(1.03); }
+    .product .thumb { margin-bottom: 14px; position: relative; }
+    .product .thumb img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px #bae6fd33; }
+    .product h4 { font-size: 1.13em; margin: 8px 0 6px 0; font-weight: 700; color: #2563eb; }
+    .product p.price { font-size: 1.08em; color: #0ea5ff; margin: 0 0 8px 0; font-weight: 700; }
+    .product-actions { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+    .product-actions .btn { font-size: 0.98em; padding: 8px 14px; border-radius: 7px; background: linear-gradient(90deg,#0ea5ff 60%,#2563eb 100%); }
+    .btn-remove-circle { position:absolute; right:10px; top:10px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.8); color:#ef4444; border:1px solid #fecaca; display:inline-flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; z-index: 2; transition: all 0.2s; }
+    .btn-remove-circle:hover { background: #ef4444; color: #fff; border-color: #ef4444; transform: scale(1.1); }
     .pagination { display:flex; gap:16px; justify-content:center; margin:48px 0 0 0; }
     .pagination .btn { border-radius:10px; padding:10px 14px; }
-    @media (max-width:1100px) { .wishlist-grid { grid-template-columns: repeat(4,1fr); } }
-    @media (max-width:900px) { .wishlist-grid { grid-template-columns: repeat(3,1fr); } }
-    @media (max-width:700px) { .wishlist-grid { grid-template-columns: repeat(2,1fr); } .btn-add{padding:8px 12px} }
+    @media (max-width:900px) { .wishlist-grid { grid-template-columns: repeat(3,1fr); gap: 20px; } }
+    @media (max-width:700px) { .wishlist-grid { grid-template-columns: repeat(2,1fr); } }
     @media (max-width:480px) { .wishlist-grid { grid-template-columns: 1fr; } .wishlist-wrap{padding:0 8px} }
 </style>
 
 <div class="wishlist-wrap">
     <div class="wishlist-header">
         <h2>Wishlist của bạn</h2>
-        <div class="wishlist-count"><?php echo $totalProducts; ?> sản phẩm</div>
+        <div class="wishlist-count" style="font-weight: 500; color: #475569;"><?php echo $totalProducts; ?> sản phẩm</div>
     </div>
 
     <?php if (empty($products)): ?>
@@ -129,23 +146,33 @@ if (!empty($ids)) {
     <?php else: ?>
         <div class="grid wishlist-grid">
             <?php foreach ($products as $p): ?>
-                <div class="wishlist-card">
+                <div class="product">
                     <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
-                    <button type="submit" form="remove-<?php echo $p['id']; ?>" class="btn-remove-circle" title="Xóa">&times;</button>
-                    <div class="thumb"><a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a></div>
-                    <h4><?php echo htmlspecialchars($p['name']); ?></h4>
-                    <div class="price">$<?php echo number_format($p['price'],2); ?></div>
-                    <div class="wishlist-actions">
-                        <form class="ajax-add-cart" method="post" action="cart.php">
-                            <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
-                            <input type="hidden" name="quantity" value="1">
-                            <button class="btn btn-add" type="submit">Thêm vào giỏ</button>
-                        </form>
-                        <form id="remove-<?php echo $p['id']; ?>" class="ajax-wishlist-remove" method="post" action="wishlist.php">
+                    <div class="thumb">
+                        <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
+                            <div class="out-of-stock-badge">Hết hàng</div>
+                        <?php endif; ?>
+                        <form class="ajax-wishlist-remove" method="post" action="wishlist.php">
                             <input type="hidden" name="action" value="remove">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
-                            <button type="submit" class="btn btn-remove">Xóa</button>
+                            <button type="submit" class="btn-remove-circle" title="Xóa">&times;</button>
                         </form>
+                        <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                    </div>
+                    <h4><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
+                    <p class="price"><strong><?php echo number_format($p['price'], 0); ?>₫</strong></p>
+                    <div class="product-actions">
+                        <?php if (isset($p['total_stock']) && $p['total_stock'] > 0): ?>
+                            <form class="ajax-add-cart" method="post" action="cart.php">
+                                <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button class="btn" type="submit">Thêm vào giỏ</button>
+                            </form>
+                        <?php else: ?>
+                            <form class="ajax-add-cart" method="post" action="cart.php">
+                                <button class="btn" type="submit" disabled style="background: #9ca3af; cursor: not-allowed;">Thêm vào giỏ</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>

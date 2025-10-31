@@ -28,6 +28,13 @@ if ($driver === 'mysql') {
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+    $db->exec("CREATE TABLE IF NOT EXISTS password_resets (
+        email VARCHAR(255) NOT NULL,
+        token VARCHAR(255) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        PRIMARY KEY (email, token)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
     $db->beginTransaction();
     $db->exec("INSERT IGNORE INTO categories (id, name) VALUES (1,'Sneakers'),(2,'Boots');");
     $db->exec("INSERT IGNORE INTO products (id, name, description, price, category_id) VALUES
@@ -56,6 +63,12 @@ if ($driver === 'mysql') {
         price REAL,
         category_id INTEGER,
         FOREIGN KEY(category_id) REFERENCES categories(id)
+    );
+    CREATE TABLE IF NOT EXISTS password_resets (
+        email TEXT NOT NULL,
+        token TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        PRIMARY KEY (email, token)
     );
     ");
 

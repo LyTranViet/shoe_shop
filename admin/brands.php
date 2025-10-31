@@ -10,45 +10,6 @@ $id = (int)($_GET['id'] ?? 0);
 $brand = null;
 $errors = [];
 
-// --- SAVE (CREATE / UPDATE) ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	$id = (int)($_POST['id'] ?? 0);
-	$name = trim($_POST['name'] ?? '');
-	$description = trim($_POST['description'] ?? '');
-
-	if ($name === '') $errors[] = "⚠️ Brand name cannot be empty.";
-
-	if (empty($errors)) {
-		try {
-			if ($id > 0) {
-				$stmt = $db->prepare("UPDATE brands SET name = ?, description = ? WHERE id = ?");
-				$stmt->execute([$name, $description, $id]);
-				$msg = "✅ Brand updated successfully!";
-			} else {
-				$stmt = $db->prepare("INSERT INTO brands (name, description) VALUES (?, ?)");
-				$stmt->execute([$name, $description]);
-				$msg = "✅ Brand added successfully!";
-			}
-			header("Location: index.php?page=brands&msg=" . urlencode($msg));
-			exit;
-		} catch (PDOException $e) {
-			$errors[] = "❌ Database error: " . $e->getMessage();
-		}
-	}
-}
-
-// --- DELETE ---
-if ($action === 'delete' && $id > 0) {
-	try {
-		$stmt = $db->prepare("DELETE FROM brands WHERE id = ?");
-		$stmt->execute([$id]); 
-		header("Location: index.php?page=brands&msg=" . urlencode("Brand deleted successfully!"));
-		exit;
-	} catch (PDOException $e) {
-		$errors[] = "❌ Cannot delete brand (might be in use).";
-	}
-}
-
 // --- FETCH FOR EDIT ---
 if ($action === 'edit' && $id > 0) {
 	$stmt = $db->prepare("SELECT * FROM brands WHERE id = ?");
@@ -63,6 +24,9 @@ if ($action === 'edit' && $id > 0) {
 			<a href="index.php?page=brands" class="btn-back"><i class="fi fi-rr-arrow-left"></i> Quay lại</a>
 		</div>
 		<div>
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (!empty($errors)): ?>
 				<div class="alert alert-error"><?php foreach ($errors as $e) echo "<div>$e</div>"; ?></div>
 			<?php endif; ?>
@@ -124,6 +88,9 @@ if ($action === 'edit' && $id > 0) {
     </header>
 
 	<div class="table-wrapper">
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error" style="margin: 10px;"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (isset($_GET['msg'])): ?>
 				<div class="alert alert-success"><?= htmlspecialchars($_GET['msg']); ?></div>
 			<?php endif; ?>

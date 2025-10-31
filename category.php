@@ -29,7 +29,6 @@ if (!empty($filters['category_id'])) {
     // if no category filter, remove previous selection
     if (isset($_SESSION['selected_category_id'])) unset($_SESSION['selected_category_id']);
 }
-
 // Build products query with filters
 $params = [];
 $joins = [];
@@ -202,6 +201,20 @@ try {
         .sidebar { padding: 14px 6px; }
     }
 </style>
+<style>
+    .out-of-stock-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        padding: 4px 8px;
+        font-size: 0.8em;
+        font-weight: bold;
+        border-radius: 4px;
+        z-index: 1;
+    }
+</style>
 <div class="layout">
     <aside class="sidebar">
         <form method="get" action="category.php">
@@ -281,8 +294,8 @@ try {
                         <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
                         <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                     </div>
-                    <h4><?php echo htmlspecialchars($p['name']); ?></h4>
-                    <p><strong>$<?php echo number_format($p['price'],2); ?></strong></p>
+                    <h4><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
+                    <p><strong><?php echo number_format($p['price'], 0); ?>₫</strong></p>
                     <div class="product-actions">
                         <form class="ajax-add-cart" method="post" action="cart.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">

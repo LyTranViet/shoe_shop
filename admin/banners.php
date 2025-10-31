@@ -23,71 +23,6 @@ $errors = [];
 const UPLOAD_DIR_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'banners' . DIRECTORY_SEPARATOR;
 const UPLOAD_DIR_URL = 'assets/images/banners/';
 
-
-// --- CREATE / UPDATE ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	$id = (int)($_POST['id'] ?? 0);
-	$title = trim($_POST['title'] ?? '');
-	$link = trim($_POST['link'] ?? '');
-	$is_active = isset($_POST['is_active']) ? 1 : 0;
-
-    // CSRF token validation
-    if (!isset($_POST['csrf_token']) || !hash_equals($csrf_token, $_POST['csrf_token'])) {
-        $errors[] = "Lỗi xác thực (CSRF token không hợp lệ). Vui lòng thử lại.";
-    }
-
-	if ($title === '') $errors[] = "Tiêu đề không được để trống.";
-
-    // Image handling
-    $image_url = $_POST['current_image'] ?? ''; // Keep old image by default
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) { // UPLOAD_OK = 0
-        $file = $_FILES['image'];
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-        if (!in_array(strtolower($ext), $allowed_exts)) {
-            $errors[] = "Định dạng ảnh không hợp lệ. Chỉ chấp nhận: " . implode(', ', $allowed_exts);
-        } elseif ($file['size'] > 2 * 1024 * 1024) { // 2MB limit
-            $errors[] = "Kích thước ảnh không được vượt quá 2MB.";
-        } else {
-            if (!is_dir(UPLOAD_DIR_PATH)) mkdir(UPLOAD_DIR_PATH, 0777, true);
-            
-            $new_filename = uniqid('banner_', true) . '.' . $ext;
-            $destination = UPLOAD_DIR_PATH . $new_filename;
-
-            if (move_uploaded_file($file['tmp_name'], $destination)) {
-                // Delete old image if updating and a new one is uploaded
-                if ($id > 0 && !empty($image_url)) {
-                    delete_banner_image($image_url);
-                }
-                $image_url = UPLOAD_DIR_URL . $new_filename;
-            } else {
-                $errors[] = "Có lỗi xảy ra khi tải ảnh lên.";
-            }
-        }
-    } elseif ($id === 0 && empty($image_url)) {
-        $errors[] = "Ảnh banner là bắt buộc khi thêm mới.";
-    }
-
-	if (empty($errors)) {
-		try {
-			if ($id > 0) {
-				$stmt = $db->prepare("UPDATE banners SET title = ?, image_url = ?, link = ?, is_active = ? WHERE id = ?");
-				$stmt->execute([$title, $image_url, $link, $is_active, $id]); 
-				$msg = "Cập nhật banner thành công!";
-			} else {
-				$stmt = $db->prepare("INSERT INTO banners (title, image_url, link, is_active) VALUES (?, ?, ?, ?)");
-				$stmt->execute([$title, $image_url, $link, $is_active]);
-				$msg = "Thêm banner thành công!";
-			}
-			header("Location: index.php?page=banners&msg=" . urlencode($msg));
-			exit;
-		} catch (PDOException $e) {
-			$errors[] = "Lỗi cơ sở dữ liệu: " . $e->getMessage();
-		}
-	}
-}
-
 // --- DELETE ---
 if ($action === 'delete' && $id > 0) {
     // CSRF check from GET request
@@ -142,6 +77,9 @@ function delete_banner_image(?string $image_url): void {
 			<a href="index.php?page=banners" class="btn-back"><i class="fi fi-rr-arrow-left"></i> Quay lại</a>
 		</div>
 		<div>
+			<?php if ($msg = flash_get('error')): ?>
+				<div class="alert alert-error"><?= htmlspecialchars($msg) ?></div>
+			<?php endif; ?>
 			<?php if (!empty($errors)): ?>
 				<div class="alert alert-error"><?php foreach ($errors as $e) echo "<div>$e</div>"; ?></div>
 			<?php endif; ?>
