@@ -4,149 +4,210 @@ require_admin_or_staff();
 
 $db = get_db();
 
-// --- Lấy danh sách liên hệ ---
+// --- Lọc và tìm kiếm ---
+$q = trim($_GET['q'] ?? '');
+
 try {
-    $stmt = $db->query("SELECT * FROM contacts ORDER BY created_at DESC");
-    $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	if ($q) {
+		$stmt = $db->prepare("
+			SELECT * FROM contacts
+			WHERE name LIKE :q OR email LIKE :q OR message LIKE :q
+			ORDER BY created_at DESC
+		");
+		$stmt->execute(['q' => "%$q%"]);
+	} else {
+		$stmt = $db->query("SELECT * FROM contacts ORDER BY created_at DESC");
+	}
+	$contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $contacts = [];
+	$contacts = [];
 }
 ?>
 
-<div class="container py-5">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h3 class="fw-bold text-primary mb-1">
-                <i class="bi bi-chat-square-text me-2"></i> Quản lý liên hệ khách hàng
-            </h3>
-            <p class="text-muted mb-0">Theo dõi, xem và quản lý phản hồi của khách hàng.</p>
-        </div>
-        <span class="badge bg-gradient text-white px-4 py-2 fs-6 shadow-sm">
-            <i class="bi bi-people-fill me-1"></i> <?= count($contacts) ?> liên hệ
-        </span>
-    </div>
+<div class="contact-admin">
+	<header class="contact-header">
+		<div>
+			<h2>📨 Liên hệ khách hàng</h2>
+			<p class="text-muted">Xem và phản hồi tin nhắn của khách hàng.</p>
+		</div>
+		<form method="get" class="search-bar">
+			<input type="hidden" name="page" value="contacts">
+			<input type="text" name="q" placeholder="🔍 Tìm theo tên, email, nội dung..."
+				value="<?= htmlspecialchars($q) ?>">
+			<button type="submit">Tìm</button>
+		</form>
+	</header>
 
-    <!-- Nội dung -->
-    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-        <div class="card-header bg-light py-3 px-4 border-0 d-flex justify-content-between align-items-center">
-            <h5 class="fw-semibold text-dark mb-0">
-                <i class="bi bi-list-task me-2 text-primary"></i> Danh sách liên hệ
-            </h5>
-        </div>
-
-        <div class="card-body p-0">
-            <?php if (empty($contacts)): ?>
-                <div class="p-5 text-center text-muted">
-                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                    <h6 class="fw-semibold mb-1">Chưa có liên hệ nào</h6>
-                    <p class="small mb-0">Khi khách hàng gửi phản hồi, dữ liệu sẽ hiển thị tại đây.</p>
-                </div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table align-middle table-hover mb-0">
-                        <thead class="table-header text-center small text-uppercase">
-                            <tr>
-                                <th>#</th>
-                                <th>Họ và tên</th>
-                                <th>Email</th>
-                                <th>Nội dung</th>
-                                <th>Ngày gửi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($contacts as $index => $c): ?>
-                                <tr>
-                                    <td class="text-center fw-bold text-muted"><?= $index + 1 ?></td>
-                                    <td class="fw-semibold"><?= htmlspecialchars($c['name']) ?></td>
-                                    <td>
-                                        <a href="mailto:<?= htmlspecialchars($c['email']) ?>" 
-                                           class="text-decoration-none text-primary fw-semibold">
-                                           <i class="bi bi-envelope-at me-1"></i><?= htmlspecialchars($c['email']) ?>
-                                        </a>
-                                    </td>
-                                    <td class="small text-wrap"><?= nl2br(htmlspecialchars($c['message'])) ?></td>
-                                    <td class="text-center text-muted small">
-                                        <i class="bi bi-clock me-1"></i><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
+	<div class="contact-table">
+		<?php if (empty($contacts)): ?>
+			<div class="empty-state">
+				<i class="fi fi-rr-inbox"></i>
+				<h4>Chưa có liên hệ nào</h4>
+				<p>Dữ liệu sẽ hiển thị khi khách hàng gửi phản hồi.</p>
+			</div>
+		<?php else: ?>
+			<table>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Khách hàng</th>
+						<th>Email</th>
+						<th>Nội dung</th>
+						<th>Ngày gửi</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($contacts as $i => $c): ?>
+					<tr>
+						<td><?= $i + 1 ?></td>
+						<td><strong><?= htmlspecialchars($c['name']) ?></strong></td>
+						<td><a href="mailto:<?= htmlspecialchars($c['email']) ?>"><?= htmlspecialchars($c['email']) ?></a></td>
+						<td><?= nl2br(htmlspecialchars($c['message'])) ?></td>
+						<td><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?></td>
+						<td class="text-center">
+							<a href="send_single_mailjet.php?to=<?= urlencode($c['email']) ?>" class="btn-reply">Phản hồi</a>
+						</td>
+					</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+	</div>
 </div>
 
-<!-- CSS -->
 <style>
-body {
-    background: #f4f6f9;
-    font-family: "Inter", "Segoe UI", sans-serif;
+/* ===== Tổng thể ===== */
+.contact-admin {
+	background: #ffffff;
+	padding: 30px;
+	border-radius: 16px;
+	box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+	font-family: "Inter", "Segoe UI", sans-serif;
+	color: #333;
 }
 
-.card {
-    border-radius: 1rem;
-    transition: 0.3s ease;
+/* ===== Header ===== */
+.contact-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	margin-bottom: 20px;
+	gap: 10px;
 }
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+.contact-header h2 {
+	font-weight: 600;
+	color: #2d5fff;
+	margin: 0;
 }
-
-.badge.bg-gradient {
-    background: linear-gradient(45deg, #4e73df, #1cc88a);
-    border-radius: 1rem;
-}
-
-.table {
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.table-header {
-    background: linear-gradient(90deg, #4e73df 0%, #1cc88a 100%);
-    color: #fff;
-    letter-spacing: 0.5px;
+.text-muted {
+	color: #6c757d;
+	font-size: 14px;
 }
 
-.table th, .table td {
-    padding: 1rem;
-    vertical-align: middle;
+/* ===== Tìm kiếm ===== */
+.search-bar {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+.search-bar input {
+	padding: 8px 14px;
+	border-radius: 8px;
+	border: 1px solid #ddd;
+	min-width: 240px;
+	transition: 0.2s;
+}
+.search-bar input:focus {
+	border-color: #2d5fff;
+	box-shadow: 0 0 0 0.15rem rgba(45,95,255,0.15);
+	outline: none;
+}
+.search-bar button {
+	background: #2d5fff;
+	color: white;
+	border: none;
+	padding: 8px 16px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: 0.3s;
+}
+.search-bar button:hover {
+	background: #2448d8;
 }
 
-.table-hover tbody tr {
-    transition: all 0.25s ease;
+/* ===== Bảng ===== */
+.contact-table table {
+	width: 100%;
+	border-collapse: collapse;
 }
-.table-hover tbody tr:hover {
-    background-color: #eef5ff !important;
-    transform: scale(1.01);
+.contact-table th {
+	background: #f5f7ff;
+	color: #444;
+	padding: 12px;
+	text-align: left;
+	font-weight: 600;
+	font-size: 14px;
+	border-bottom: 2px solid #e3e6f0;
+}
+.contact-table td {
+	padding: 12px;
+	border-bottom: 1px solid #eee;
+	vertical-align: top;
+	font-size: 14px;
+}
+.contact-table tr:hover {
+	background: #f9fbff;
+}
+.contact-table a {
+	color: #2d5fff;
+	text-decoration: none;
+}
+.contact-table a:hover {
+	text-decoration: underline;
 }
 
-.table tbody tr td:first-child {
-    border-left: 4px solid transparent;
+/* ===== Nút phản hồi ===== */
+.btn-reply {
+	background: #e8f0ff;
+	color: #2d5fff;
+	padding: 6px 14px;
+	border-radius: 6px;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
+	transition: 0.3s;
 }
-.table tbody tr:hover td:first-child {
-    border-left: 4px solid #0d6efd;
+.btn-reply:hover {
+	background: #2d5fff;
+	color: #fff;
 }
 
-a.text-primary:hover {
-    color: #0056b3 !important;
-    text-decoration: underline;
+/* ===== Empty state ===== */
+.empty-state {
+	text-align: center;
+	padding: 50px 10px;
+	color: #777;
+}
+.empty-state i {
+	font-size: 48px;
+	color: #2d5fff;
+	display: block;
+	margin-bottom: 10px;
 }
 
-.bi {
-    vertical-align: middle;
-}
-
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-    h3.fw-bold {
-        font-size: 1.25rem;
-    }
-    .table th, .table td {
-        font-size: 0.875rem;
-        padding: 0.7rem;
-    }
+	.contact-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.search-bar {
+		width: 100%;
+	}
+	table {
+		font-size: 13px;
+	}
 }
 </style>

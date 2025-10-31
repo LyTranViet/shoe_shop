@@ -20,8 +20,8 @@ $is_superadmin = is_superadmin();
 $is_admin = is_admin() && !$is_superadmin;
 $is_staff = is_staff();
 
-$superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts'];
-$admin_pages      = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts'];
+$superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet'];
+$admin_pages      = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet'];
 $staff_pages      = ['orders', 'customers', 'products'];
 
 if ($is_superadmin) {
@@ -107,9 +107,11 @@ if (!in_array($page, $allowed_pages, true)) {
                     <a href="index.php?page=contacts" class="<?= ($page === 'contacts') ? 'active' : '' ?>">
                         <i class="fi fi-rr-inbox"></i> Liên hệ khách hàng
                     </a>
+                     <a href="index.php?page=send_single_mailjet" class="<?= ($page === 'send_single_mailjet') ? 'active' : '' ?>">
+                        <i class="fi fi-rr-inbox"></i> Gửi Mmail Khuyến Mãi
+                    </a>
                 </div>
             <?php endif; ?>
-
             <!-- Kho & Nhà cung cấp -->
             <?php if ($is_superadmin || $is_admin): ?>
                 <div class="nav-section">
