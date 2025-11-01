@@ -22,21 +22,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const swiper = new Swiper(carousel, {
             // Optional parameters
             loop: false,
-            slidesPerView: 2,
+            slidesPerView: 2, // Default for mobile
             spaceBetween: 15,
             // Navigation arrows
             navigation: {
-                nextEl: carousel.nextElementSibling.nextElementSibling, // .swiper-button-next
-                prevEl: carousel.nextElementSibling, // .swiper-button-prev
+                nextEl: carousel.parentElement.querySelector('.swiper-button-next'),
+                prevEl: carousel.parentElement.querySelector('.swiper-button-prev'),
             },
             // Responsive breakpoints
             breakpoints: {
                 // when window width is >= 640px
                 640: { slidesPerView: 3, spaceBetween: 20 },
                 // when window width is >= 768px
-                768: { slidesPerView: 4, spaceBetween: 20 },
+                768: { slidesPerView: 4, spaceBetween: 15 },
                 // when window width is >= 1024px
-                1024: { slidesPerView: 5, spaceBetween: 24 },
+                1024: { slidesPerView: 5, spaceBetween: 15 },
+                // when window width is >= 1200px
+                1400: { slidesPerView: 7, spaceBetween: 20 } // Show 7 on very large screens
             }
         });
     });
@@ -45,30 +47,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const slider = document.querySelector('.banner-slider');
     if (slider) {
         const slidesContainer = slider.querySelector('.slides');
-        const slides = slider.querySelectorAll('.slide');
+        const slides = Array.from(slider.querySelectorAll('.slide'));
         const prevBtn = slider.querySelector('.slider-nav.prev');
         const nextBtn = slider.querySelector('.slider-nav.next');
+        const dotsContainer = slider.querySelector('.slider-dots');
         let currentIndex = 0;
+        let slideInterval;
+
+        if (slides.length === 0) return;
 
         function goToSlide(index) {
-            slidesContainer.style.transform = `translateX(-${index * 100}%)`;
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+            
+            if (dotsContainer) {
+                Array.from(dotsContainer.children).forEach(dot => dot.classList.remove('active'));
+                dotsContainer.children[index].classList.add('active');
+            }
             currentIndex = index;
         }
 
-        function nextSlide() {
-            const nextIndex = (currentIndex + 1) % slides.length;
-            goToSlide(nextIndex);
+        function startSlider() {
+            stopSlider(); // Clear existing interval
+            slideInterval = setInterval(() => {
+                const nextIndex = (currentIndex + 1) % slides.length;
+                goToSlide(nextIndex);
+            }, 3000); // Changed to 3 seconds
+        }
+
+        function stopSlider() {
+            clearInterval(slideInterval);
         }
 
         if (prevBtn && nextBtn) {
             prevBtn.addEventListener('click', () => {
                 const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
                 goToSlide(prevIndex);
+                startSlider(); // Reset interval on manual navigation
             });
-            nextBtn.addEventListener('click', nextSlide);
+            nextBtn.addEventListener('click', () => {
+                const nextIndex = (currentIndex + 1) % slides.length;
+                goToSlide(nextIndex);
+                startSlider(); // Reset interval on manual navigation
+            });
         }
 
-        if (slides.length > 1) setInterval(nextSlide, 5000); // Auto-play every 5 seconds
+        // Create dots
+        if (dotsContainer && slides.length > 1) {
+            slides.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.classList.add('dot');
+                dot.addEventListener('click', () => {
+                    goToSlide(index);
+                    startSlider(); // Reset interval
+                });
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        // Initial setup
+        goToSlide(0);
+        if (slides.length > 1) {
+            startSlider();
+            slider.addEventListener('mouseenter', stopSlider);
+            slider.addEventListener('mouseleave', startSlider);
+        }
     }
 
     // Display file names for product image upload

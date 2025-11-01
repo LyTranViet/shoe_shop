@@ -23,6 +23,7 @@ $errors = [];
 const UPLOAD_DIR_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'banners' . DIRECTORY_SEPARATOR;
 const UPLOAD_DIR_URL = 'assets/images/banners/';
 
+
 // --- DELETE ---
 if ($action === 'delete' && $id > 0) {
     // CSRF check from GET request

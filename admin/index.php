@@ -72,13 +72,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($page === 'banners') {
         // Banner handling is complex due to file uploads.
         // The logic will be kept in banners.php for now, but the header() call will be removed.
-        // This prevents the "headers already sent" error.
-        $title = trim($_POST['title'] ?? '');
-        if (isset($_POST['csrf_token']) && empty($title)) {
-            flash_set('error', "Tiêu đề không được để trống.");
-        }
-        if (isset($_POST['csrf_token']) && (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']))) {
-            flash_set('error', "Lỗi xác thực (CSRF token không hợp lệ). Vui lòng thử lại.");
+        // This prevents the "headers already sent" error.        
+        if (isset($_POST['csrf_token'])) {
+            if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+                flash_set('error', "Lỗi xác thực (CSRF token không hợp lệ). Vui lòng thử lại.");
+            } else {
+                $id = (int)($_POST['id'] ?? 0);
+                $title = trim($_POST['title'] ?? '');
+                $link = trim($_POST['link'] ?? '');
+                $is_active = isset($_POST['is_active']) ? 1 : 0;
+                $current_image = $_POST['current_image'] ?? '';
+                $image_url = $current_image;
+
+                if (empty($title)) {
+                    flash_set('error', "Tiêu đề không được để trống.");
+                } else {
+                    // Handle file upload without validation
+                    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                        $upload_dir_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'banners' . DIRECTORY_SEPARATOR;
+                        $upload_dir_url = 'assets/images/banners/';
+                        if (!is_dir($upload_dir_path)) {
+                            mkdir($upload_dir_path, 0777, true);
+                        }
+                        $filename = uniqid() . '-' . basename($_FILES['image']['name']);
+                        $target_file = $upload_dir_path . $filename;
+
+                        if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                            // Delete old image if a new one is uploaded
+                            if (!empty($current_image)) {
+                                $old_image_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $current_image);
+                                if (file_exists($old_image_path)) {
+                                    @unlink($old_image_path);
+                                }
+                            }
+                            $image_url = $upload_dir_url . $filename;
+                        }
+                    }
+
+                    try {
+                        if ($id > 0) { // Update
+                            $stmt = $db->prepare("UPDATE banners SET title = ?, image_url = ?, link = ?, is_active = ? WHERE id = ?");
+                            $stmt->execute([$title, $image_url, $link, $is_active, $id]);
+                            flash_set('success', "Cập nhật banner thành công!");
+                        } else { // Insert
+                            $stmt = $db->prepare("INSERT INTO banners (title, image_url, link, is_active) VALUES (?, ?, ?, ?)");
+                            $stmt->execute([$title, $image_url, $link, $is_active]);
+                            flash_set('success', "Thêm banner mới thành công!");
+                        }
+                        header("Location: index.php?page=banners");
+                        exit;
+                    } catch (PDOException $e) {
+                        flash_set('error', "Lỗi cơ sở dữ liệu: " . $e->getMessage());
+                    }
+                }
+            }
         }
     }
     // --- CATEGORIES ---

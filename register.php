@@ -109,7 +109,7 @@ require_once __DIR__ . '/includes/header.php';
 
 
 <style>
-.auth-card {
+    .auth-card {
     width: 100%;
     max-width: 420px;
     background: #fff;

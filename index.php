@@ -9,7 +9,7 @@ try {
 // New products (latest by id)
 $newProducts = [];
 try {
-    $newProducts = $db->query('SELECT p.*, (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock FROM products p ORDER BY id DESC LIMIT 7')->fetchAll();
+    $newProducts = $db->query('SELECT p.*, (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock FROM products p ORDER BY (total_stock > 0) DESC, id DESC LIMIT 7')->fetchAll();
 } catch (PDOException $e) { /* ignore */ }
 
 // Best sellers (by quantity in order_items) - fallback to popular by price if not available
@@ -22,7 +22,7 @@ try {
         FROM products p 
         LEFT JOIN order_items oi ON p.id = oi.product_id 
         GROUP BY p.id 
-        ORDER BY sold DESC, p.id DESC 
+        ORDER BY (total_stock > 0) DESC, sold DESC, p.id DESC 
         LIMIT 7
     ")->fetchAll();
 } catch (PDOException $e) {
@@ -58,7 +58,7 @@ if (!empty($categories)) {
             SELECT 
                 p.*,
                 (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock,
-                ROW_NUMBER() OVER (PARTITION BY p.category_id ORDER BY p.id DESC) as rn
+                ROW_NUMBER() OVER (PARTITION BY p.category_id ORDER BY (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) > 0 DESC, p.id DESC) as rn
             FROM products p
             WHERE p.category_id IN ($placeholders)
         )
@@ -200,14 +200,22 @@ try {
         margin-top: 2rem;
     }
     .slides {
-        position: relative;
+        display: flex; /* Changed for new JS logic */
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        position: relative; /* For absolute positioning of slides */
+        height: 400px; /* Set a fixed height */
+    }
+    .slide {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out;
     }
     .slide img {
         width: 100%;
-        height: 400px;
+        height: 100%;
         object-fit: cover;
     }
     .slider-nav {
@@ -225,11 +233,39 @@ try {
         justify-content: center;
         cursor: pointer;
         z-index: 2;
-        transition: background 0.3s;
+        transition: background 0.3s, transform 0.2s;
     }
     .slider-nav.prev { left: 20px; }
     .slider-nav.next { right: 20px; }
     .slider-nav:hover {
+        background: white;
+        transform: scale(1.1);
+    }
+    .slide.active {
+        opacity: 1;
+        z-index: 1;
+    }
+    .slider-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 2;
+    }
+    .slider-dots .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+    }
+    .slider-dots .dot:hover {
+        transform: scale(1.2);
+    }
+    .slider-dots .dot.active {
         background: white;
     }
     @media (max-width: 992px) {
@@ -433,14 +469,40 @@ try {
             z-index: 1;
         }
     </style>
+    <style>
+        /* Custom styles to make product cards smaller in carousels */
+        .product-carousel-wrapper .product {
+            padding: 10px; /* Reduce padding */
+        }
+        .product-carousel-wrapper .product .thumb {
+            margin-bottom: 8px; /* Reduce space below image */
+        }
+        .product-carousel-wrapper .product h3,
+        .product-carousel-wrapper .product h4 {
+            font-size: 0.9rem; /* Smaller product name */
+            margin-bottom: 4px;
+            height: 2.7rem; /* Set a fixed height for 2 lines */
+            overflow: hidden;
+        }
+        .product-carousel-wrapper .product .price {
+            font-size: 1rem; /* Smaller price */
+            margin-bottom: 8px;
+        }
+        .product-carousel-wrapper .product .product-actions .btn {
+            font-size: 0.85rem; /* Smaller button text */
+            padding: 6px 10px; /* Smaller button padding */
+        }
+    </style>
 
     <section class="product-section">
         <div class="section-header">
             <h2>New Arrivals</h2>
-            <p>Be the first to discover our latest shoe collections</p>
+            <p>Những sản phẩm mới nhất vừa cập bến</p>
         </div>
-        <div class="product-grid">
-            <?php foreach ($newProducts as $p): ?>
+        <div class="product-carousel-wrapper">
+            <div class="swiper product-carousel">
+                <div class="swiper-wrapper">
+                <?php foreach ($newProducts as $p): ?>
                     <div class="swiper-slide product">
                     <div class="thumb">
                         <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
@@ -463,12 +525,12 @@ try {
                         </form>
                     </div>
                 </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+                </div>
             </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
         </div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
-    </div>
     <div class="section-footer">
         <a href="category.php?sort=newest" class="section-view-more">View more →</a>
     </div>
@@ -541,11 +603,10 @@ try {
                     <div class="swiper-button-prev"></div>
                     <div class="swiper-button-next"></div>
                 </div>
-                <?php if (($categoryProductCounts[$c['id']] ?? 0) > 7): ?>
-                    <div class="section-footer">
-                        <a href="category.php?category_id=<?php echo $c['id']; ?>" class="section-view-more">View all →</a>
-                    </div>
-                <?php endif; ?>
+                <!-- Luôn hiển thị link "View more" cho mỗi danh mục -->
+                <div class="section-footer">
+                    <a href="category.php?category_id[]=<?php echo $c['id']; ?>" class="section-view-more">View more →</a>
+                </div>
             </section>
         <?php endforeach; ?>
     </div>
@@ -714,5 +775,96 @@ try {
         </form>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.banner-slider');
+    if (slider) {
+        const slides = Array.from(slider.querySelectorAll('.slide'));
+        const prevBtn = slider.querySelector('.slider-nav.prev');
+        const nextBtn = slider.querySelector('.slider-nav.next');
+        const dotsContainer = slider.querySelector('.slider-dots');
+        let currentIndex = 0;
+        let slideInterval;
+
+        if (slides.length === 0) return;
+
+        function goToSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            if (dotsContainer) {
+                Array.from(dotsContainer.children).forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+            currentIndex = index;
+        }
+
+        function nextSlide() {
+            const nextIndex = (currentIndex + 1) % slides.length;
+            goToSlide(nextIndex);
+        }
+
+        function prevSlide() {
+            const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+            goToSlide(prevIndex);
+        }
+
+        function startSlider() {
+            stopSlider(); // Clear any existing interval
+            slideInterval = setInterval(nextSlide, 10000); // Change slide every 10 seconds
+        }
+
+        function stopSlider() {
+            clearInterval(slideInterval);
+        }
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => { prevSlide(); startSlider(); });
+            nextBtn.addEventListener('click', () => { nextSlide(); startSlider(); });
+        }
+
+        // Initial setup
+        goToSlide(0);
+        if (slides.length > 1) {
+            startSlider();
+            slider.addEventListener('mouseenter', stopSlider);
+            slider.addEventListener('mouseleave', startSlider);
+        }
+    }
+});
+</script>
+
+<!-- Thêm thư viện Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<!-- Khởi tạo Swiper cho các carousel sản phẩm -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Lặp qua mỗi product-carousel-wrapper để khởi tạo Swiper riêng
+    document.querySelectorAll('.product-carousel-wrapper').forEach(function(wrapper) {
+        const swiper = new Swiper(wrapper.querySelector('.swiper.product-carousel'), {
+            // Số lượng slide hiển thị
+            slidesPerView: 2, // Mặc định cho màn hình nhỏ nhất
+            spaceBetween: 20, // Khoảng cách giữa các slide
+
+            // Kích hoạt các nút điều hướng
+            navigation: {
+                nextEl: wrapper.querySelector('.swiper-button-next'),
+                prevEl: wrapper.querySelector('.swiper-button-prev'),
+            },
+
+            // Responsive breakpoints
+            breakpoints: {
+                576: { slidesPerView: 2, spaceBetween: 20 }, // Màn hình điện thoại lớn
+                768: { slidesPerView: 3, spaceBetween: 20 }, // Màn hình máy tính bảng
+                992: { slidesPerView: 4, spaceBetween: 20 }, // Màn hình máy tính nhỏ
+                1200: { slidesPerView: 5, spaceBetween: 20 }  // Màn hình máy tính lớn (hiển thị 5 sản phẩm)
+            }
+        });
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

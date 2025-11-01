@@ -68,14 +68,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // validate stock for each item
     foreach ($items as $it) {
-        $size = $it['size'] ?? null;
-        if ($size) {
-            $sSt = $db->prepare('SELECT stock FROM product_sizes WHERE product_id = ? AND size = ? LIMIT 1');
-            $sSt->execute([$it['product_id'],$size]);
-            $stock = $sSt->fetchColumn();
-            if ($stock === false) { flash_set('error','Size not available for product: ' . $it['name']); header('Location: cart.php'); exit; }
-            if ((int)$stock < (int)$it['quantity']) { flash_set('error','Not enough stock for ' . $it['name'] . ' size ' . $size); header('Location: cart.php'); exit; }
+        $size = $it['size'];
+        $quantity_needed = (int)$it['quantity'];
+
+        // Lấy productsize_id
+        $psStmt = $db->prepare("SELECT id FROM product_sizes WHERE product_id = ? AND size = ?");
+        $psStmt->execute([$it['product_id'], $size]);
+        $productsize_id = $psStmt->fetchColumn();
+
+        if (!$productsize_id) {
+            flash_set('error', 'Sản phẩm ' . htmlspecialchars($it['name']) . ' size ' . htmlspecialchars($size) . ' không tồn tại.'); header('Location: cart.php'); exit;
         }
+
+        $stockCheckStmt = $db->prepare("SELECT SUM(quantity_remaining) FROM product_batch WHERE productsize_id = ?");
+        $stockCheckStmt->execute([$productsize_id]);
+        $total_stock_in_batches = (int)$stockCheckStmt->fetchColumn();
+
+        if ($total_stock_in_batches < $quantity_needed) { flash_set('error','Không đủ hàng cho sản phẩm: ' . htmlspecialchars($it['name']) . ' size ' . htmlspecialchars($size) . '. Chỉ còn ' . $total_stock_in_batches . ' sản phẩm.'); header('Location: cart.php'); exit; }
     }
 
     $coupon = validate_coupon($db, $couponCode);
@@ -142,9 +151,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $db->commit();
-        // clear session cart as well
+        // Xóa giỏ hàng session
         unset($_SESSION['cart']);
-        flash_set('success','Đặt hàng thành công. Mã đơn hàng của bạn là: ' . $orderId);
+        flash_set('success','Đặt hàng thành công (Mã đơn hàng: #' . $orderId . '). Phiếu xuất kho tương ứng đã được tạo và đang chờ xử lý.');
         header('Location: index.php'); exit;
     } catch (Exception $e) {
         $db->rollBack();
