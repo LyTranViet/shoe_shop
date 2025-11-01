@@ -16,6 +16,7 @@ $filters = [
     'price_min' => isset($_GET['price_min']) && $_GET['price_min'] !== '' ? (float)$_GET['price_min'] : null,
     'price_max' => isset($_GET['price_max']) && $_GET['price_max'] !== '' ? (float)$_GET['price_max'] : null,
     'size' => !empty($_GET['size']) && is_array($_GET['size']) ? array_map('htmlspecialchars', $_GET['size']) : [],
+    'q' => trim($_GET['q'] ?? ''),
     'sort' => $_GET['sort'] ?? 'popularity',
     'page' => isset($_GET['page']) ? (int)$_GET['page'] : 1,
     'perPage' => 16,
@@ -34,6 +35,11 @@ $params = [];
 $joins = [];
 $where = [];
 
+if ($filters['q'] !== '') {
+    $where[] = "(p.name LIKE ? OR p.description LIKE ?)";
+    $params[] = "%{$filters['q']}%";
+    $params[] = "%{$filters['q']}%";
+}
 if (!empty($filters['category_id'])) {
     $placeholders = implode(',', array_fill(0, count($filters['category_id']), '?'));
     $where[] = "p.category_id IN ($placeholders)";
@@ -257,6 +263,9 @@ try {
     <section class="products-area">
         <div class="products-header">
             <h2>Sản phẩm</h2>
+            <?php if ($filters['q']): ?>
+                <p style="margin: 0; font-size: 1.1rem;">Kết quả cho: <strong>"<?= htmlspecialchars($filters['q']) ?>"</strong></p>
+            <?php endif; ?>
             <form method="get" action="category.php" class="sort-form">
                 <?php // preserve filters when changing sort ?>
                 <?php foreach ($filters as $key => $values):
