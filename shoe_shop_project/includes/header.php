@@ -280,6 +280,11 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             font-weight: 600;
             margin: 0;
         }
+        .search-result-category {
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-top: 2px;
+        }
         .search-result-price {
             color: var(--accent);
             font-size: 0.9em;
@@ -318,7 +323,7 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                 <div>Púp<span>Bờ Si</span></div>
             </a>
 
-            <form class="search-form" action="<?php echo BASE_URL; ?>search.php" method="GET">
+            <form class="search-form" action="<?php echo BASE_URL; ?>category.php" method="GET">
                 <input type="text" name="q" id="ajax-search-input" placeholder="Tìm kiếm sản phẩm, thương hiệu..." required autocomplete="off">
                 <button type="submit">🔍</button>
                 <div class="search-results-box" id="search-results-container">
@@ -353,7 +358,7 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             </div>
         </div>
     </header>
-    <main class="container" style="flex-grow: 1;">
+    <main class="container-fluid" style="flex-grow: 1;">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -393,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <img src="${item.image_url}" alt="${item.name}">
                                 <div class="search-result-info">
                                     <div class="search-result-name">${item.name}</div>
+                                    <div class="search-result-category">${item.category_name || ''}</div>
                                     <div class="search-result-price">${priceFormatted}</div>
                                 </div>
                             `;
