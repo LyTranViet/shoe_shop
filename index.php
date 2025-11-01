@@ -100,11 +100,16 @@ try {
 
 <style>
     .hero-banner {
-        position: relative;
-        height: 500px;
-        background: linear-gradient(45deg, var(--text-dark), #2c3e50);
-        overflow: hidden;
-        margin-bottom: 3rem;
+    position: relative;
+    height: 450px;
+    background: linear-gradient(45deg, var(--text-dark), #2c3e50);
+    overflow: hidden;
+    border-radius: 0; /* Xóa bo góc */
+    margin-bottom: 3rem;
+    /* Kỹ thuật CSS để tràn viền */
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
     }
     .banner-content {
         position: absolute;
@@ -149,7 +154,7 @@ try {
     .features-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 2rem;
+        gap: 2rem; 
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 1rem;
@@ -197,13 +202,15 @@ try {
         margin: 0 auto;
     }
     .banner-slider {
-        margin-top: 2rem;
+        /* Xóa CSS tràn viền cũ, vì giờ section đã nằm ngoài container */
+        width: 100%;
+        margin-top: 0;
     }
     .slides {
-        display: flex; /* Changed for new JS logic */
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex; /* Giữ nguyên */
+        /* Xóa bo góc và đổ bóng để ảnh tràn viền */
+        border-radius: 0;
+        box-shadow: none;
         position: relative; /* For absolute positioning of slides */
         height: 400px; /* Set a fixed height */
     }
@@ -292,30 +299,31 @@ try {
             <?php foreach ($banners as $b): ?>
                 <div class="slide">
                 <?php if (!empty($b['link'])): ?><a href="<?php echo htmlspecialchars($b['link']); ?>"><?php endif; ?>
-                    <img src="<?php echo htmlspecialchars($b['image_url'] ?? 'shoe_shop-main/assets/images/banner/banner2.jpg'); ?>" alt="<?php echo htmlspecialchars($b['title'] ?? 'Banner'); ?>">
+                    <img src="<?php echo htmlspecialchars($b['image_url'] ?? 'assets/images/banner/banner2.jpg'); ?>" alt="<?php echo htmlspecialchars($b['title'] ?? 'Banner'); ?>" style="width:100%; height:100%; object-fit:cover;">
                 <?php if (!empty($b['link'])): ?></a><?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
         <button class="slider-nav prev" aria-label="Previous slide">‹</button>
         <button class="slider-nav next" aria-label="Next slide">›</button>
+        <div class="slider-dots"></div>
     </section>
 <?php endif; ?>
 
 <section class="hero-banner">
-    <div class="banner-content">
-        <h1 class="banner-title">Step into Style</h1>
-        <p class="banner-subtitle">Discover our latest collection of trendy and comfortable footwear for every occasion</p>
-        <a href="category.php?sort=newest" class="banner-cta">Shop Now</a>
-    </div>
+        <div class="banner-content">
+            <h1 class="banner-title">Step into Style</h1>
+            <p class="banner-subtitle">Discover our latest collection of trendy and comfortable footwear for every occasion</p>
+            <a href="category.php?sort=newest" class="banner-cta">Shop Now</a>
+        </div>
 </section>
 
 <section class="features-section">
-    <div class="section-title">
-        <h2>Why Choose Us</h2>
-        <p>Experience the best in footwear shopping with our premium services and guarantees</p>
-    </div>
-    <div class="features-grid">
+        <div class="section-title">
+            <h2>Why Choose Us</h2>
+            <p>Experience the best in footwear shopping with our premium services and guarantees</p>
+        </div>
+        <div class="features-grid">
         <div class="feature-card">
             <div class="feature-icon">🚚</div>
             <h3 class="feature-title">Free Shipping</h3>
@@ -348,7 +356,7 @@ try {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 2rem;
-            padding: 0 1rem;
+            padding: 0 1rem; 
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -495,11 +503,11 @@ try {
     </style>
 
     <section class="product-section">
-        <div class="section-header">
-            <h2>New Arrivals</h2>
-            <p>Những sản phẩm mới nhất vừa cập bến</p>
-        </div>
-        <div class="product-carousel-wrapper">
+            <div class="section-header">
+                <h2>New Arrivals</h2>
+                <p>Những sản phẩm mới nhất vừa cập bến</p>
+            </div>
+            <div class="product-carousel-wrapper">
             <div class="swiper product-carousel">
                 <div class="swiper-wrapper">
                 <?php foreach ($newProducts as $p): ?>
@@ -531,14 +539,15 @@ try {
             <div class="swiper-button-prev"></div>
             <div class="swiper-button-next"></div>
         </div>
-    <div class="section-footer">
-        <a href="category.php?sort=newest" class="section-view-more">View more →</a>
-    </div>
+            <div class="section-footer">
+                <a href="category.php?sort=newest" class="section-view-more">View more →</a>
+            </div>
+    </section>
 <?php endif; ?>
 
 <?php if (!empty($bestSellers)): ?>
-    <div class="section-header"><h2>Best Sellers</h2></div>
-    <div class="product-carousel-wrapper">
+        <div class="section-header"><h2>Best Sellers</h2></div>
+        <div class="product-carousel-wrapper">
         <div class="swiper product-carousel">
             <div class="swiper-wrapper">
             <?php foreach ($bestSellers as $p): ?>
@@ -570,14 +579,14 @@ try {
         <div class="swiper-button-prev"></div>
         <div class="swiper-button-next"></div>
     </div>
-    <div class="section-footer">
-        <a href="category.php?sort=bestsellers" class="section-view-more">View more →</a>
-    </div>
+        <div class="section-footer">
+            <a href="category.php?sort=bestsellers" class="section-view-more">View more →</a>
+        </div>
 <?php endif; ?>
 
 <?php if (!empty($categories)): ?>
-    <div class="section-header"><h2>Categories</h2></div>
-    <div class="category-sections">
+        <div class="section-header"><h2>Categories</h2></div>
+        <div class="category-sections">
         <?php foreach ($categories as $c): ?>
             <section class="category-showcase">
                 <div class="section-header">
@@ -621,7 +630,7 @@ try {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
-        max-width: 1200px;
+        max-width: 1200px; 
         margin: 0 auto;
         padding: 0 1rem;
     }
@@ -727,11 +736,11 @@ try {
 </style>
 
 <section class="testimonials-section">
-    <div class="section-title">
-        <h2>What Our Customers Say</h2>
-        <p>Real experiences from our satisfied customers</p>
-    </div>
-    <div class="testimonials-grid">
+        <div class="section-title">
+            <h2>What Our Customers Say</h2>
+            <p>Real experiences from our satisfied customers</p>
+        </div>
+        <div class="testimonials-grid">
         <div class="testimonial-card">
             <p class="testimonial-text">"Amazing selection of shoes! The quality is outstanding, and the delivery was super fast. Will definitely shop here again!"</p>
             <div class="testimonial-author">

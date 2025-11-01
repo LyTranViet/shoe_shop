@@ -353,7 +353,7 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             </div>
         </div>
     </header>
-    <main style="flex-grow: 1;">
+    <main class="container" style="flex-grow: 1;">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

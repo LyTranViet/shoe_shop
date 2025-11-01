@@ -438,6 +438,35 @@ document.addEventListener('DOMContentLoaded', function(){
     <?php endif; ?>
 </div>
 
+<!-- Thêm thư viện Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<!-- Khởi tạo Swiper cho các carousel sản phẩm -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Lặp qua mỗi product-carousel-wrapper để khởi tạo Swiper riêng
+    document.querySelectorAll('.product-carousel-wrapper').forEach(function(wrapper) {
+        const swiper = new Swiper(wrapper.querySelector('.swiper.product-carousel'), {
+            // Số lượng slide hiển thị
+            slidesPerView: 2, // Mặc định cho màn hình nhỏ nhất
+            spaceBetween: 20, // Khoảng cách giữa các slide
+
+            // Kích hoạt các nút điều hướng
+            navigation: {
+                nextEl: wrapper.querySelector('.swiper-button-next'),
+                prevEl: wrapper.querySelector('.swiper-button-prev'),
+            },
+
+            // Responsive breakpoints
+            breakpoints: {
+                768: { slidesPerView: 3, spaceBetween: 20 }, // Màn hình máy tính bảng
+                992: { slidesPerView: 4, spaceBetween: 20 }, // Màn hình máy tính nhỏ
+            }
+        });
+    });
+});
+</script>
+
 <?php require_once __DIR__ . '/includes/footer.php';
 ?>
 <style>
