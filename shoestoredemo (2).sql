@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 27, 2025 lúc 06:14 PM
+-- Thời gian đã tạo: Th10 01, 2025 lúc 08:13 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.0.30
+-- Phiên bản PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -88,7 +88,9 @@ INSERT INTO `carts` (`id`, `user_id`, `session_id`, `created_at`, `updated_at`) 
 (2, 3, NULL, '2025-10-11 08:50:12', '2025-10-11 08:50:12'),
 (3, 4, NULL, '2025-10-11 11:01:24', '2025-10-11 11:01:24'),
 (4, 10, NULL, '2025-10-16 14:04:24', '2025-10-16 14:04:24'),
-(5, 6, NULL, '2025-10-23 00:17:24', '2025-10-23 00:17:24');
+(5, 6, NULL, '2025-10-23 00:17:24', '2025-10-23 00:17:24'),
+(6, 14, NULL, '2025-10-30 10:29:06', '2025-10-30 10:29:06'),
+(7, 16, NULL, '2025-10-31 23:20:15', '2025-10-31 23:20:15');
 
 -- --------------------------------------------------------
 
@@ -112,7 +114,6 @@ CREATE TABLE `cart_items` (
 INSERT INTO `cart_items` (`id`, `cart_id`, `product_id`, `size`, `quantity`, `price`) VALUES
 (1, 1, 1, '40', 1, 2500000.00),
 (14, 3, 8, NULL, 1, 2200000.00),
-(19, 4, 5, NULL, 2, 3000000.00),
 (27, 5, 3, '30', 1, 1200000.00);
 
 -- --------------------------------------------------------
@@ -151,16 +152,21 @@ CREATE TABLE `coupons` (
   `valid_from` datetime DEFAULT NULL,
   `valid_to` datetime DEFAULT NULL,
   `usage_limit` int(11) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `discount_type` text NOT NULL DEFAULT 'product' CHECK (`discount_type` in ('product','shipping'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `coupons`
 --
 
-INSERT INTO `coupons` (`id`, `code`, `discount_percent`, `valid_from`, `valid_to`, `usage_limit`, `created_at`) VALUES
-(1, 'SUMMER2025', 10, '2025-06-01 00:00:00', '2025-10-31 00:00:00', 100, '2025-10-11 08:50:12'),
-(2, '1234', 15, '2025-10-07 06:45:00', '2025-11-15 06:47:00', 200, '2025-10-12 15:43:44');
+INSERT INTO `coupons` (`id`, `code`, `discount_percent`, `valid_from`, `valid_to`, `usage_limit`, `created_at`, `discount_type`) VALUES
+(3, 'TEST10', 10, '2025-01-01 00:00:00', '2025-12-31 00:00:00', NULL, '2025-10-30 13:38:35', 'product'),
+(4, 'DISC20', 20, '2025-10-30 00:00:00', '2025-12-31 00:00:00', NULL, '2025-10-30 13:48:44', 'product'),
+(5, 'DISC30', 30, '2025-10-30 00:00:00', '2025-12-31 00:00:00', NULL, '2025-10-30 13:48:44', 'product'),
+(6, 'DISC50', 50, '2025-10-30 00:00:00', '2025-12-31 00:00:00', NULL, '2025-10-30 13:48:44', 'product'),
+(7, 'SHIP80', 80, '2025-10-30 00:00:00', '2025-12-31 00:00:00', NULL, '2025-10-30 13:53:40', 'shipping'),
+(8, 'SHIP100', 100, '2025-10-30 00:00:00', '2025-12-31 00:00:00', NULL, '2025-10-30 13:53:40', 'shipping');
 
 -- --------------------------------------------------------
 
@@ -196,7 +202,57 @@ INSERT INTO `export_receipt` (`id`, `receipt_code`, `export_date`, `export_type`
 (9, 'PX20251027082120', '2025-10-27 14:21:20', 'Xuất hủy', 3, 1800000.00, '', 'Đang xử lý', NULL),
 (10, 'PX20251027082650', '2025-10-27 14:26:50', 'Xuất hủy', 3, 1800000.00, 'hédasad', 'Đang xử lý', NULL),
 (11, 'PX20251027082853', '2025-10-27 14:28:53', 'Xuất hủy', 3, 900000.00, 'ádasda', 'Đang xử lý', NULL),
-(12, 'PX20251027083402', '2025-10-27 14:34:02', 'Điều chuyển', 3, 1800000.00, 'sadd', 'Đang xử lý', NULL);
+(12, 'PX20251027083402', '2025-10-27 14:34:02', 'Điều chuyển', 3, 1800000.00, 'sadd', 'Đang xử lý', NULL),
+(13, 'PX-ORD20', '2025-10-30 11:36:04', 'Bán hàng', 14, 7330000.00, 'Tự động tạo cho đơn hàng #20', 'Đang xử lý', 20),
+(14, 'PX-ORD21', '2025-10-30 11:49:25', 'Bán hàng', 10, 6030000.00, 'Tự động tạo cho đơn hàng #21', 'Đang xử lý', 21),
+(15, 'PX-ORD22', '2025-10-30 11:51:33', 'Bán hàng', 10, 18036501.00, 'Tự động tạo cho đơn hàng #22', 'Đang xử lý', 22),
+(16, 'PX-ORD23', '2025-10-30 11:53:09', 'Bán hàng', 14, 2736501.00, 'Tự động tạo cho đơn hàng #23', 'Đang xử lý', 23),
+(17, 'PX-ORD24', '2025-10-30 13:39:29', 'Bán hàng', 14, 2466501.00, 'Tự động tạo cho đơn hàng #24', 'Đang xử lý', 24),
+(18, 'PX-ORD25', '2025-10-30 13:44:51', 'Bán hàng', 14, 2730000.00, 'Tự động tạo cho đơn hàng #25', 'Đang xử lý', 25),
+(19, 'PX-ORD26', '2025-10-30 13:49:23', 'Bán hàng', 14, 1730000.00, 'Tự động tạo cho đơn hàng #26', 'Đang xử lý', 26),
+(20, 'PX-ORD27', '2025-10-30 14:16:01', 'Bán hàng', 14, 2736501.00, 'Tự động tạo cho đơn hàng #27', 'Đang xử lý', 27),
+(21, 'PX-ORD28', '2025-10-30 14:23:11', 'Bán hàng', 14, 2736501.00, 'Tự động tạo cho đơn hàng #28', 'Đang xử lý', 28),
+(22, 'PX-ORD29', '2025-10-30 14:23:51', 'Bán hàng', 14, 3036501.00, 'Tự động tạo cho đơn hàng #29', 'Đang xử lý', 29),
+(23, 'PX-ORD30', '2025-10-30 14:56:48', 'Bán hàng', 14, 2736501.00, 'Tự động tạo cho đơn hàng #30', 'Đang xử lý', 30),
+(24, 'PX-ORD37', '2025-10-30 16:18:49', 'Bán hàng', 14, 3041001.00, 'Tự động tạo cho đơn hàng #37', 'Đang xử lý', 37),
+(25, 'PX-ORD38', '2025-10-30 16:35:19', 'Bán hàng', 14, 4901001.00, 'Tự động tạo cho đơn hàng #38', 'Đang xử lý', 38),
+(26, 'PX-ORD39', '2025-10-30 16:41:41', 'Bán hàng', 14, 2841001.00, 'Tự động tạo cho đơn hàng #39', 'Đang xử lý', 39),
+(27, 'PX-ORD40', '2025-10-30 16:47:34', 'Bán hàng', 14, 3441001.00, 'Tự động tạo cho đơn hàng #40', 'Đang xử lý', 40),
+(28, 'PX-ORD41', '2025-10-30 16:53:37', 'Bán hàng', 14, 2742000.00, 'Tự động tạo cho đơn hàng #41', 'Đang xử lý', 41),
+(29, 'PX-ORD42', '2025-10-30 16:56:01', 'Bán hàng', 14, 2741001.00, 'Tự động tạo cho đơn hàng #42', 'Đang xử lý', 42),
+(30, 'PX-ORD43', '2025-10-30 16:58:12', 'Bán hàng', 14, 2700030.00, 'Tự động tạo cho đơn hàng #43', 'Đang xử lý', 43),
+(31, 'PX-ORD44', '2025-11-01 00:12:09', 'Bán hàng', 16, 2736501.00, 'Tự động tạo cho đơn hàng #44', 'Đang xử lý', 44),
+(32, 'PX-ORD45', '2025-11-01 00:42:21', 'Bán hàng', 16, 1736501.00, 'Tự động tạo cho đơn hàng #45', 'Đang xử lý', 45),
+(33, 'PX-ORD46', '2025-11-01 00:53:40', 'Bán hàng', 16, 3821001.00, 'Tự động tạo cho đơn hàng #46', 'Đang xử lý', 46),
+(34, 'PX-ORD47', '2025-11-01 00:58:26', 'Bán hàng', 16, 2136501.00, 'Tự động tạo cho đơn hàng #47', 'Đang xử lý', 47),
+(35, 'PX-ORD48', '2025-11-01 01:26:55', 'Bán hàng', 16, 6841001.00, 'Tự động tạo cho đơn hàng #48', 'Đang xử lý', 48),
+(36, 'PX-ORD49', '2025-11-01 01:33:45', 'Bán hàng', 16, 11795000.00, 'Tự động tạo cho đơn hàng #49', 'Đang xử lý', 49),
+(37, 'PX-ORD50', '2025-11-01 01:38:46', 'Bán hàng', 16, 6036501.00, 'Tự động tạo cho đơn hàng #50', 'Đang xử lý', 50),
+(38, 'PX-ORD51', '2025-11-01 01:43:55', 'Bán hàng', 16, 10845000.00, 'Tự động tạo cho đơn hàng #51', 'Đang xử lý', 51),
+(39, 'PX-ORD52', '2025-11-01 01:49:53', 'Bán hàng', 16, 1386501.00, 'Tự động tạo cho đơn hàng #52', 'Đang xử lý', 52),
+(40, 'PX-ORD53', '2025-11-01 02:05:37', 'Bán hàng', 16, 1393801.00, 'Tự động tạo cho đơn hàng #53', 'Đang xử lý', 53),
+(41, 'PX-ORD54', '2025-11-01 02:12:11', 'Bán hàng', 14, 6209201.00, 'Tự động tạo cho đơn hàng #54', 'Đang xử lý', 54),
+(42, 'PX-ORD55', '2025-11-01 02:24:35', 'Bán hàng', 14, 1932000.00, 'Tự động tạo cho đơn hàng #55', 'Đang xử lý', 55),
+(43, 'PX-ORD61', '2025-11-01 09:52:00', 'Bán hàng', 16, 1799201.00, 'Tự động tạo cho đơn hàng #61', 'Đang xử lý', 61),
+(44, 'PX-ORD62', '2025-11-01 09:54:33', 'Bán hàng', 16, 3041001.00, 'Tự động tạo cho đơn hàng #62', 'Đang xử lý', 62),
+(45, 'PX-ORD63', '2025-11-01 09:58:04', 'Bán hàng', 16, 2741001.00, 'Tự động tạo cho đơn hàng #63', 'Đang xử lý', 63),
+(46, 'PX-ORD64', '2025-11-01 10:02:30', 'Bán hàng', 14, 41001.00, 'Tự động tạo cho đơn hàng #64', 'Đang xử lý', 64),
+(47, 'PX-ORD65', '2025-11-01 11:22:39', 'Bán hàng', 14, 6001640.04, 'Tự động tạo cho đơn hàng #65', 'Đang xử lý', 65),
+(48, 'PX-ORD66', '2025-11-01 11:27:36', 'Bán hàng', 14, 3001360.00, 'Tự động tạo cho đơn hàng #66', 'Đang xử lý', 66),
+(49, 'PX-ORD67', '2025-11-01 11:48:04', 'Bán hàng', 16, 3001640.04, 'Tự động tạo cho đơn hàng #67', 'Đang xử lý', 67),
+(50, 'PX-ORD68', '2025-11-01 11:49:48', 'Bán hàng', 16, 1501640.04, 'Tự động tạo cho đơn hàng #68', 'Đang xử lý', 68),
+(51, 'PX-ORD69', '2025-11-01 11:57:18', 'Bán hàng', 16, 561640.04, 'Tự động tạo cho đơn hàng #69', 'Đang xử lý', 69),
+(52, 'PX-ORD70', '2025-11-01 11:59:45', 'Bán hàng', 16, 1401640.04, 'Tự động tạo cho đơn hàng #70', 'Đang xử lý', 70),
+(53, 'PX-ORD71', '2025-11-01 12:02:00', 'Bán hàng', 16, 1501640.04, 'Tự động tạo cho đơn hàng #71', 'Đang xử lý', 71),
+(54, 'PX-ORD72', '2025-11-01 12:03:48', 'Bán hàng', 16, 1751640.04, 'Tự động tạo cho đơn hàng #72', 'Đang xử lý', 72),
+(55, 'PX-ORD73', '2025-11-01 12:09:33', 'Bán hàng', 16, 1501640.04, 'Tự động tạo cho đơn hàng #73', 'Đang xử lý', 73),
+(56, 'PX-ORD74', '2025-11-01 12:15:32', 'Bán hàng', 16, 1501640.04, 'Tự động tạo cho đơn hàng #74', 'Đang xử lý', 74),
+(57, 'PX-ORD75', '2025-11-01 12:27:06', 'Bán hàng', 16, 1751640.04, 'Tự động tạo cho đơn hàng #75', 'Đang xử lý', 75),
+(58, 'PX-ORD76', '2025-11-01 13:03:18', 'Bán hàng', 16, 4508200.20, 'Tự động tạo cho đơn hàng #76', 'Đang xử lý', 76),
+(59, 'PX-ORD77', '2025-11-01 13:06:14', 'Bán hàng', 16, 2458200.20, 'Tự động tạo cho đơn hàng #77', 'Đang xử lý', 77),
+(60, 'PX-ORD78', '2025-11-01 13:36:35', 'Bán hàng', 16, 12041001.00, 'Tự động tạo cho đơn hàng #78', 'Đang xử lý', 78),
+(61, 'PX-ORD79', '2025-11-01 14:01:26', 'Bán hàng', 16, 4508200.20, 'Tự động tạo cho đơn hàng #79', 'Đang xử lý', 79),
+(62, 'PX-ORD80', '2025-11-01 14:05:37', 'Bán hàng', 16, 3041001.00, 'Tự động tạo cho đơn hàng #80', 'Đang xử lý', 80);
 
 -- --------------------------------------------------------
 
@@ -228,7 +284,21 @@ INSERT INTO `export_receipt_detail` (`id`, `export_id`, `batch_id`, `productsize
 (8, 9, 3, 5, 2, 900000.00),
 (9, 10, 3, 5, 2, 900000.00),
 (10, 11, 3, 5, 1, 900000.00),
-(11, 12, 3, 5, 2, 900000.00);
+(11, 12, 3, 5, 2, 900000.00),
+(12, 17, 7, 66, 1, 2700000.00),
+(13, 19, 16, 48, 1, 3400000.00),
+(14, 20, 7, 66, 1, 2700000.00),
+(15, 21, 7, 66, 1, 2700000.00),
+(16, 23, 7, 66, 1, 2700000.00),
+(17, 31, 7, 66, 1, 2700000.00),
+(18, 33, 11, 66, 1, 2700000.00),
+(19, 35, 16, 48, 1, 3400000.00),
+(20, 36, 14, 84, 4, 2800000.00),
+(21, 36, 15, 84, 2, 2800000.00),
+(22, 41, 11, 66, 1, 2700000.00),
+(23, 45, 11, 66, 1, 2700000.00),
+(24, 46, 11, 66, 2, 2700000.00),
+(25, 51, 15, 84, 1, 2800000.00);
 
 -- --------------------------------------------------------
 
@@ -347,30 +417,100 @@ CREATE TABLE `orders` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `coupon_code` varchar(50) DEFAULT NULL,
+  `shipping_fee` int(11) DEFAULT 0,
+  `shipping_carrier` varchar(50) DEFAULT NULL,
   `shipping_address` text DEFAULT NULL,
   `status_id` int(11) DEFAULT NULL,
   `coupon_id` int(11) DEFAULT NULL,
   `payment_method` varchar(50) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `shipping_discount_amount` decimal(10,2) DEFAULT 0.00,
+  `shipping_coupon_code` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `total_amount`, `shipping_address`, `status_id`, `coupon_id`, `payment_method`, `created_at`, `updated_at`) VALUES
-(1, 2, 2500000.00, '123 Đường ABC, HCM', 4, NULL, 'COD', '2025-10-11 08:50:12', '2025-10-12 08:49:05'),
-(2, 4, 15400000.00, '26', 3, NULL, 'CARD', '2025-10-12 08:42:59', '2025-10-12 08:56:47'),
-(3, 4, 4600000.00, 'ho chi minh', 1, NULL, 'COD', '2025-10-12 12:07:16', '2025-10-12 12:07:16'),
-(4, 4, 2300000.00, 'ho chi minh', 1, NULL, 'CARD', '2025-10-12 12:35:28', '2025-10-12 12:35:28'),
-(5, 4, 2300000.00, 'hồ chí mình', 2, NULL, 'COD', '2025-10-12 13:55:06', '2025-10-12 14:04:16'),
-(6, 4, 2380000.00, 'hồ chí minh', 2, 2, 'COD', '2025-10-12 15:46:09', '2025-10-21 12:58:37'),
-(10, 6, 3600030.00, '26', 5, NULL, 'CARD', '2025-10-23 00:20:49', '2025-10-23 00:23:52'),
-(11, 6, 2800030.00, '3,đường số 3', 5, NULL, 'CARD', '2025-10-23 00:24:46', '2025-10-23 00:25:50'),
-(12, 6, 2600030.00, '26', 5, NULL, 'CARD', '2025-10-23 00:31:02', '2025-10-23 00:31:25'),
-(13, 6, 1600030.00, '26', 5, NULL, 'CARD', '2025-10-23 00:31:57', '2025-10-23 00:32:32'),
-(14, 6, 1200030.00, 'ihdashj', 5, NULL, 'CARD', '2025-10-23 08:41:31', '2025-10-23 08:43:02');
+INSERT INTO `orders` (`id`, `user_id`, `total_amount`, `discount_amount`, `coupon_code`, `shipping_fee`, `shipping_carrier`, `shipping_address`, `status_id`, `coupon_id`, `payment_method`, `phone`, `created_at`, `updated_at`, `shipping_discount_amount`, `shipping_coupon_code`) VALUES
+(1, 2, 2500000.00, 0.00, NULL, 0, NULL, '123 Đường ABC, HCM', 4, NULL, 'COD', NULL, '2025-10-11 08:50:12', '2025-10-12 08:49:05', 0.00, NULL),
+(2, 4, 15400000.00, 0.00, NULL, 0, NULL, '26', 3, NULL, 'CARD', NULL, '2025-10-12 08:42:59', '2025-10-12 08:56:47', 0.00, NULL),
+(3, 4, 4600000.00, 0.00, NULL, 0, NULL, 'ho chi minh', 1, NULL, 'COD', NULL, '2025-10-12 12:07:16', '2025-10-12 12:07:16', 0.00, NULL),
+(4, 4, 2300000.00, 0.00, NULL, 0, NULL, 'ho chi minh', 1, NULL, 'CARD', NULL, '2025-10-12 12:35:28', '2025-10-12 12:35:28', 0.00, NULL),
+(5, 4, 2300000.00, 0.00, NULL, 0, NULL, 'hồ chí mình', 2, NULL, 'COD', NULL, '2025-10-12 13:55:06', '2025-10-12 14:04:16', 0.00, NULL),
+(6, 4, 2380000.00, 0.00, NULL, 0, NULL, 'hồ chí minh', 1, 2, 'COD', NULL, '2025-10-12 15:46:09', '2025-10-12 15:46:09', 0.00, NULL),
+(7, 14, 5300030.00, 0.00, NULL, 0, NULL, '223a/9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-22 22:53:23', '2025-10-22 22:53:23', 0.00, NULL),
+(8, 14, 2100030.00, 0.00, NULL, 0, NULL, '2231 , Xã Sốp Cộp, huyện Sốp Cộp, Sơn La', 1, NULL, 'COD', NULL, '2025-10-22 23:01:08', '2025-10-22 23:01:08', 0.00, NULL),
+(9, 14, 18800030.00, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-23 09:42:46', '2025-10-23 09:42:46', 0.00, NULL),
+(10, 14, 2100030.00, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-23 09:44:26', '2025-10-23 09:44:26', 0.00, NULL),
+(11, 14, 6000030.00, 0.00, NULL, 0, NULL, '223A/9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-29 15:59:44', '2025-10-29 15:59:44', 0.00, NULL),
+(12, 14, 4600001.20, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã Bình Chánh, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 16:51:35', '2025-10-29 16:51:35', 0.00, NULL),
+(13, 14, 2600030.00, 0.00, NULL, 30, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 23:35:16', '2025-10-29 23:35:16', 0.00, NULL),
+(14, 14, 2600030.00, 0.00, NULL, 30, 'GHN', '223A/9 tổ 9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 23:54:46', '2025-10-29 23:54:46', 0.00, NULL),
+(15, 14, 2300001.20, 0.00, NULL, 1, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:18:41', '2025-10-30 00:18:41', 0.00, NULL),
+(16, 14, 1600001.20, 0.00, NULL, 1, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:45:37', '2025-10-30 00:45:37', 0.00, NULL),
+(17, 14, 1600030.00, 0.00, NULL, 30, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:49:13', '2025-10-30 00:49:13', 0.00, NULL),
+(19, 14, 4200030.00, 0.00, NULL, 30, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 09:09:30', '2025-10-30 09:09:30', 0.00, NULL),
+(20, 14, 7330000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:36:04', '2025-10-30 11:36:04', 0.00, NULL),
+(21, 10, 6030000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:49:25', '2025-10-30 11:49:25', 0.00, NULL),
+(22, 10, 18036501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:51:33', '2025-10-30 11:51:33', 0.00, NULL),
+(23, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:53:09', '2025-10-30 11:53:09', 0.00, NULL),
+(24, 14, 2466501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 3, 'COD', NULL, '2025-10-30 13:39:29', '2025-10-30 13:39:29', 0.00, NULL),
+(25, 14, 2730000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 3, 'COD', NULL, '2025-10-30 13:44:51', '2025-10-30 13:44:51', 0.00, NULL),
+(26, 14, 1730000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 6, 'COD', NULL, '2025-10-30 13:49:23', '2025-10-30 13:49:23', 0.00, NULL),
+(27, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:16:01', '2025-10-30 14:16:01', 0.00, NULL),
+(28, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã Bình Chánh, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:23:11', '2025-10-30 14:23:11', 0.00, NULL),
+(29, 14, 3036501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:23:51', '2025-10-30 14:23:51', 0.00, NULL),
+(30, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:56:48', '2025-10-30 14:56:48', 0.00, NULL),
+(31, 14, 1391001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phú Nghĩa, Huyện Lạc Thủy, Hòa Bình', 1, 6, 'COD', NULL, '2025-10-30 15:54:21', '2025-10-30 15:54:21', 0.00, NULL),
+(32, 14, 1931001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Xuân Giao, Huyện Bảo Thắng, Lào Cai', 1, 5, 'COD', NULL, '2025-10-30 15:56:06', '2025-10-30 15:56:06', 0.00, NULL),
+(33, 14, 1745000.00, 0.00, NULL, 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, 6, 'COD', NULL, '2025-10-30 15:57:54', '2025-10-30 15:57:54', 0.00, NULL),
+(34, 14, 1741001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Thị trấn Trần Cao, Huyện Phù Cừ, Hưng Yên', 1, 6, 'COD', NULL, '2025-10-30 16:01:04', '2025-10-30 16:01:04', 0.00, NULL),
+(35, 14, 2475000.00, 0.00, NULL, 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Tả Thàng, Huyện Mường Khương, Lào Cai', 1, 3, 'COD', NULL, '2025-10-30 16:04:07', '2025-10-30 16:04:07', 0.00, NULL),
+(36, 14, 1392000.00, 0.00, NULL, 42000, 'GHTK', 'Địa chỉ chi tiết, Xã Tiền Tiến, Huyện Phù Cừ, Hưng Yên', 1, 6, 'COD', NULL, '2025-10-30 16:05:54', '2025-10-30 16:05:54', 0.00, NULL),
+(37, 14, 3041001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Lạc, Huyện Yên Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:18:49', '2025-10-30 16:18:49', 0.00, NULL),
+(38, 14, 4901001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 3, 'COD', NULL, '2025-10-30 16:35:19', '2025-10-30 16:35:19', 0.00, NULL),
+(39, 14, 2841001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:41:41', '2025-10-30 16:41:41', 0.00, NULL),
+(40, 14, 3441001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phú Nghĩa, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:47:34', '2025-10-30 16:47:34', 0.00, NULL),
+(41, 14, 2742000.00, 0.00, NULL, 42000, 'GHTK', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-10-30 16:53:37', '2025-10-30 16:53:37', 0.00, NULL),
+(42, 14, 2741001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Phú, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:56:01', '2025-10-30 16:56:01', 0.00, NULL),
+(43, 14, 2700030.00, 0.00, NULL, 0, NULL, 'ágsG', 3, NULL, 'COD', NULL, '2025-10-30 16:58:12', '2025-10-30 17:01:20', 0.00, NULL),
+(44, 16, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã Ngũ Phụng, Huyện đảo Phú Quý, Bình Thuận', 1, NULL, 'COD', NULL, '2025-11-01 00:12:09', '2025-11-01 00:12:09', 0.00, NULL),
+(45, 16, 1736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Hải, Huyện Tuy An, Phú Yên', 1, 6, 'COD', NULL, '2025-11-01 00:42:21', '2025-11-01 00:42:21', 0.00, NULL),
+(46, 16, 3821001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 00:53:40', '2025-11-01 00:53:40', 0.00, NULL),
+(47, 16, 2136501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Phú Thứ, Huyện Tây Hòa, Phú Yên', 1, 5, 'COD', NULL, '2025-11-01 00:58:26', '2025-11-01 00:58:26', 0.00, NULL),
+(48, 16, 6841001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Thành Sơn, Huyện Mai Châu, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 01:26:55', '2025-11-01 01:26:55', 0.00, NULL),
+(49, 16, 11795000.00, 5040000.00, 'DISC30', 35000, 'GHTK', 'Địa chỉ chi tiết, Phường Nhơn Hưng, Thị xã An Nhơn, Bình Định', 1, 5, 'COD', NULL, '2025-11-01 01:33:45', '2025-11-01 01:33:45', 0.00, NULL),
+(50, 16, 6036501.00, 6000000.00, 'DISC50', 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Sa Thầy, Huyện Sa Thầy, Kon Tum', 1, 6, 'COD', NULL, '2025-11-01 01:38:46', '2025-11-01 01:38:46', 0.00, NULL),
+(51, 16, 10845000.00, 10800000.00, 'DISC50', 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Thanh Bình, Huyện Mường Khương, Lào Cai', 1, 6, 'COD', NULL, '2025-11-01 01:43:55', '2025-11-01 01:43:55', 0.00, NULL),
+(52, 16, 1386501.00, 1350000.00, 'DISC50', 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Thuận Nam, Huyện Hàm Thuận Nam, Bình Thuận', 1, 6, 'COD', NULL, '2025-11-01 01:49:53', '2025-11-01 01:49:53', 0.00, NULL),
+(53, 16, 1393801.00, 1350000.00, 'DISC50', 43801, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Ia Dom, Huyện Ia H Drai, Kon Tum', 1, 6, 'COD', NULL, '2025-11-01 02:05:37', '2025-11-01 02:05:37', 0.00, NULL),
+(54, 14, 6209201.00, 2640000.00, 'DISC30', 49201, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Tống Trân, Huyện Phù Cừ, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 02:12:11', '2025-11-01 02:12:11', 0.00, NULL),
+(55, 14, 1932000.00, 810000.00, 'DISC30', 42000, 'GHTK', 'Địa chỉ chi tiết, Thị trấn Sa Thầy, Huyện Sa Thầy, Kon Tum', 1, 5, 'COD', NULL, '2025-11-01 02:24:35', '2025-11-01 02:24:35', 0.00, NULL),
+(61, 16, 1799201.00, 1750000.00, 'DISC50', 49201, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 09:52:00', '2025-11-01 09:52:00', 0.00, NULL),
+(62, 16, 3041001.00, 3000000.00, 'DISC50', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phiêng Khoài, Huyện Yên Châu, Sơn La', 1, 6, 'COD', NULL, '2025-11-01 09:54:33', '2025-11-01 09:54:33', 0.00, NULL),
+(63, 16, 2741001.00, 2700000.00, 'DISC50', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phụng Công, Huyện Văn Giang, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 09:58:04', '2025-11-01 09:58:04', 0.00, NULL),
+(64, 14, 41001.00, 5400000.00, 'SHIP100', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, 8, 'COD', NULL, '2025-11-01 10:02:30', '2025-11-01 10:02:30', 0.00, NULL),
+(65, 14, 6001640.04, 6000000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Kim Lập, Huyện Kim Bôi, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 11:22:39', '2025-11-01 11:22:39', 6560.16, 'SHIP80'),
+(66, 14, 3001360.00, 3000000.00, 'DISC50', 1360, 'GHN', 'Địa chỉ chi tiết, Xã Thụy Lôi, Huyện Tiên Lữ, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 11:27:36', '2025-11-01 11:27:36', 5440.00, 'SHIP80'),
+(67, 16, 3001640.04, 3000000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Xuất Hóa, Huyện Lạc Sơn, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 11:48:04', '2025-11-01 11:48:04', 6560.16, 'SHIP80'),
+(68, 16, 1501640.04, 1500000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Xuân Giao, Huyện Bảo Thắng, Lào Cai', 1, 6, 'COD', NULL, '2025-11-01 11:49:48', '2025-11-01 11:49:48', 6560.16, 'SHIP80'),
+(69, 16, 561640.04, 2240000.00, 'SHIP80', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Tân Xuân, Huyện Vân Hồ, Sơn La', 1, 7, 'COD', NULL, '2025-11-01 11:57:18', '2025-11-01 11:57:18', 6560.16, 'SHIP80'),
+(70, 16, 1401640.04, 1400000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Thanh Kim, Thị xã Sa Pa, Lào Cai', 1, 6, 'COD', NULL, '2025-11-01 11:59:45', '2025-11-01 11:59:45', 6560.16, 'SHIP80'),
+(71, 16, 1501640.04, 1500000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Thẩm Dương, Huyện Văn Bàn, Lào Cai', 1, 6, 'COD', NULL, '2025-11-01 12:02:00', '2025-11-01 12:02:00', 6560.16, 'SHIP80'),
+(72, 16, 1751640.04, 1750000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Quài Tở, Huyện Tuần Giáo, Điện Biên', 1, 6, 'COD', NULL, '2025-11-01 12:03:48', '2025-11-01 12:03:48', 6560.16, 'SHIP80'),
+(73, 16, 1501640.04, 1500000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 12:09:33', '2025-11-01 12:09:33', 6560.16, 'SHIP80'),
+(74, 16, 1501640.04, 1500000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 12:15:32', '2025-11-01 12:15:32', 6560.16, 'SHIP80'),
+(75, 16, 1751640.04, 1750000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Liên Nghĩa, Huyện Văn Giang, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 12:27:06', '2025-11-01 12:27:06', 6560.16, 'SHIP80'),
+(76, 16, 4508200.20, 4500000.00, 'DISC50', 8200, 'GHN', 'Địa chỉ chi tiết, Xã Phìn Hồ, Huyện Sìn Hồ, Lai Châu', 1, 6, 'COD', NULL, '2025-11-01 13:03:18', '2025-11-01 13:03:18', 32800.80, 'SHIP80'),
+(77, 16, 2458200.20, 1050000.00, 'DISC30', 8200, 'GHN', 'Địa chỉ chi tiết, Xã Thắng Lợi, Huyện Văn Giang, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 13:06:14', '2025-11-01 13:06:14', 32800.80, 'SHIP80'),
+(78, 16, 12041001.00, 0.00, '', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Pi Toong, Huyện Mường La, Sơn La', 1, NULL, 'COD', NULL, '2025-11-01 13:36:35', '2025-11-01 13:36:35', 0.00, 'SHIP8'),
+(79, 16, 4508200.20, 4500000.00, 'DISC50', 8200, 'GHN', 'Địa chỉ chi tiết, Xã Pa Vây Sử, Huyện Phong Thổ, Lai Châu', 1, 6, 'COD', NULL, '2025-11-01 14:01:26', '2025-11-01 14:01:26', 32800.80, 'SHIP80'),
+(80, 16, 3041001.00, 0.00, '', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Xuân, Huyện Vân Hồ, Sơn La', 1, NULL, 'COD', NULL, '2025-11-01 14:05:37', '2025-11-01 14:05:37', 0.00, '');
 
 -- --------------------------------------------------------
 
@@ -404,7 +544,72 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `quantity`, `
 (13, 11, 4, '42', 1, 2800000.00),
 (14, 12, 12, '30', 2, 1300000.00),
 (15, 13, 22, '31', 1, 1600000.00),
-(16, 14, 3, '30', 1, 1200000.00);
+(16, 14, 3, '30', 1, 1200000.00),
+(17, 20, 22, NULL, 1, 1600000.00),
+(18, 20, 5, '38', 1, 3000000.00),
+(19, 20, 11, NULL, 1, 2700000.00),
+(20, 21, 5, NULL, 2, 3000000.00),
+(21, 22, 5, NULL, 5, 3000000.00),
+(22, 22, 5, '38', 1, 3000000.00),
+(23, 23, 11, NULL, 1, 2700000.00),
+(24, 24, 11, '38', 1, 2700000.00),
+(25, 25, 5, '38', 1, 3000000.00),
+(26, 26, 17, '42', 1, 3400000.00),
+(27, 27, 11, '38', 1, 2700000.00),
+(28, 28, 11, '38', 1, 2700000.00),
+(29, 29, 5, NULL, 1, 3000000.00),
+(30, 30, 11, '38', 1, 2700000.00),
+(31, 37, 5, '38', 1, 3000000.00),
+(32, 38, 11, NULL, 2, 2700000.00),
+(33, 39, 4, NULL, 1, 2800000.00),
+(34, 40, 17, NULL, 1, 3400000.00),
+(35, 41, 11, NULL, 1, 2700000.00),
+(36, 42, 11, NULL, 1, 2700000.00),
+(37, 43, 11, NULL, 1, 2700000.00),
+(38, 44, 11, '38', 1, 2700000.00),
+(39, 45, 17, NULL, 1, 3400000.00),
+(40, 46, 11, NULL, 1, 2700000.00),
+(41, 46, 11, '38', 1, 2700000.00),
+(42, 47, 5, '38', 1, 3000000.00),
+(43, 48, 17, NULL, 3, 3400000.00),
+(44, 48, 17, '42', 1, 3400000.00),
+(45, 49, 4, '40', 6, 2800000.00),
+(46, 50, 5, '39', 4, 3000000.00),
+(47, 51, 11, NULL, 8, 2700000.00),
+(48, 52, 11, NULL, 1, 2700000.00),
+(49, 53, 11, NULL, 1, 2700000.00),
+(50, 54, 17, NULL, 1, 3400000.00),
+(51, 54, 11, NULL, 1, 2700000.00),
+(52, 54, 11, '38', 1, 2700000.00),
+(53, 55, 11, NULL, 1, 2700000.00),
+(54, 61, 7, NULL, 1, 3500000.00),
+(55, 62, 5, NULL, 1, 3000000.00),
+(56, 62, 5, '38', 1, 3000000.00),
+(57, 63, 11, NULL, 1, 2700000.00),
+(58, 63, 11, '38', 1, 2700000.00),
+(59, 64, 11, '38', 2, 2700000.00),
+(60, 65, 5, '38', 3, 3000000.00),
+(61, 65, 5, '39', 1, 3000000.00),
+(62, 66, 5, NULL, 1, 3000000.00),
+(63, 66, 5, '38', 1, 3000000.00),
+(64, 67, 5, NULL, 1, 3000000.00),
+(65, 67, 5, '38', 1, 3000000.00),
+(66, 68, 5, '38', 1, 3000000.00),
+(67, 69, 4, '40', 1, 2800000.00),
+(68, 70, 4, NULL, 1, 2800000.00),
+(69, 71, 5, NULL, 1, 3000000.00),
+(70, 72, 7, NULL, 1, 3500000.00),
+(71, 73, 5, NULL, 1, 3000000.00),
+(72, 74, 5, NULL, 1, 3000000.00),
+(73, 75, 7, NULL, 1, 3500000.00),
+(74, 76, 5, NULL, 2, 3000000.00),
+(75, 76, 5, '38', 1, 3000000.00),
+(76, 77, 7, '41', 1, 3500000.00),
+(77, 78, 5, NULL, 2, 3000000.00),
+(78, 78, 5, '38', 2, 3000000.00),
+(79, 79, 5, NULL, 2, 3000000.00),
+(80, 79, 5, '38', 1, 3000000.00),
+(81, 80, 5, NULL, 1, 3000000.00);
 
 -- --------------------------------------------------------
 
@@ -427,6 +632,18 @@ INSERT INTO `order_status` (`id`, `name`) VALUES
 (3, 'Hoàn tất'),
 (4, 'Hủy'),
 (5, 'Hoàn hàng');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -502,16 +719,16 @@ INSERT INTO `product_batch` (`id`, `productsize_id`, `batch_code`, `quantity_in`
 (4, 37, 'L20251020-22-37', 2, 2, '2025-10-21 01:48:47', NULL, NULL),
 (5, 64, 'L20251020-12-64', 2, 2, '2025-10-21 01:51:52', NULL, NULL),
 (6, 5, 'L20251020-3-5', 3, 0, '2025-10-21 01:51:52', NULL, NULL),
-(7, 66, 'L20251027-11-66', 5, 5, '2025-10-27 14:29:28', NULL, NULL),
+(7, 66, 'L20251027-11-66', 5, 0, '2025-10-27 14:29:28', NULL, NULL),
 (8, 37, 'L20251027-22-37', 17, 17, '2025-10-27 14:33:16', NULL, NULL),
 (9, 37, 'L20251027-22-37', 17, 17, '2025-10-27 14:33:44', NULL, NULL),
 (10, 43, 'L20251027-19-43', 3, 3, '2025-10-27 14:37:03', NULL, NULL),
-(11, 66, 'L20251027-11-66', 5, 5, '2025-10-27 14:39:35', NULL, NULL),
+(11, 66, 'L20251027-11-66', 5, 0, '2025-10-27 14:39:35', NULL, NULL),
 (12, 5, 'L20251027-3-5', 1, 1, '2025-10-27 14:48:58', NULL, NULL),
 (13, 37, 'L20251027-22-37', 4, 4, '2025-10-27 14:55:06', NULL, NULL),
-(14, 84, 'L20251027-4-84', 4, 4, '2025-10-27 14:58:57', NULL, NULL),
-(15, 84, 'L20251027-4-84', 4, 4, '2025-10-27 14:59:07', NULL, NULL),
-(16, 48, 'L20251027-17-48', 2, 2, '2025-10-27 15:02:33', NULL, NULL),
+(14, 84, 'L20251027-4-84', 4, 0, '2025-10-27 14:58:57', NULL, NULL),
+(15, 84, 'L20251027-4-84', 4, 1, '2025-10-27 14:59:07', NULL, NULL),
+(16, 48, 'L20251027-17-48', 2, 0, '2025-10-27 15:02:33', NULL, NULL),
 (17, 43, 'L20251027-19-43', 5, 5, '2025-10-27 15:14:23', NULL, NULL),
 (18, 84, 'L20251027-4-84', 3, 3, '2025-10-28 00:02:18', NULL, NULL);
 
@@ -603,7 +820,8 @@ INSERT INTO `product_reviews` (`id`, `product_id`, `user_id`, `rating`, `comment
 (1, 1, 2, 5, 'Giày rất đẹp và êm chân', '2025-10-11 08:50:12'),
 (2, 2, 3, 4, 'Chạy bộ thoải mái, màu sắc đẹp', '2025-10-11 08:50:12'),
 (3, 3, 4, 5, 'sản phẩm sử dụng tốt, bền', '2025-10-11 10:26:37'),
-(4, 2, 4, 5, 'giày đẹp, đi thoải mái,', '2025-10-11 10:49:07');
+(4, 2, 4, 5, 'giày đẹp, đi thoải mái,', '2025-10-11 10:49:07'),
+(5, 5, 14, 5, 'kkkk', '2025-10-30 13:43:54');
 
 -- --------------------------------------------------------
 
@@ -635,7 +853,7 @@ INSERT INTO `product_sizes` (`id`, `product_id`, `size`, `stock`) VALUES
 (41, 20, '40', 0),
 (43, 19, '32', 8),
 (45, 18, '36', 0),
-(48, 17, '42', 2),
+(48, 17, '42', 0),
 (50, 16, '39', 0),
 (53, 15, '37', 0),
 (54, 15, '38', 0),
@@ -644,7 +862,7 @@ INSERT INTO `product_sizes` (`id`, `product_id`, `size`, `stock`) VALUES
 (61, 13, '40', 0),
 (62, 13, '41', 0),
 (64, 12, '30', 2),
-(66, 11, '38', 10),
+(66, 11, '38', 0),
 (68, 10, '42', 0),
 (70, 9, '39', 0),
 (72, 8, '37', 0),
@@ -652,7 +870,7 @@ INSERT INTO `product_sizes` (`id`, `product_id`, `size`, `stock`) VALUES
 (77, 6, '31', 5),
 (80, 5, '38', 10),
 (81, 5, '39', 7),
-(84, 4, '40', 19),
+(84, 4, '40', 12),
 (85, 4, '42', 6),
 (86, 23, '43', 0),
 (87, 3, '35', 0),
@@ -683,6 +901,29 @@ INSERT INTO `roles` (`id`, `name`) VALUES
 (1, 'Guest'),
 (3, 'Staff'),
 (5, 'SupperAdmin');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `shipping_coupons`
+--
+
+CREATE TABLE `shipping_coupons` (
+  `id` int(11) NOT NULL,
+  `CODE` varchar(50) DEFAULT NULL,
+  `TYPE` enum('percent','fixed') NOT NULL DEFAULT 'fixed',
+  `VALUE` int(11) NOT NULL,
+  `expire_date` date NOT NULL,
+  `active` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shipping_coupons`
+--
+
+INSERT INTO `shipping_coupons` (`id`, `CODE`, `TYPE`, `VALUE`, `expire_date`, `active`) VALUES
+(1, 'SHIP80', 'percent', 80, '2025-12-31', 1),
+(2, 'FREESHIP100', 'percent', 100, '2025-12-31', 1);
 
 -- --------------------------------------------------------
 
@@ -736,7 +977,9 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `created_at`, `
 (6, 'Viet', 'Viet234@gmail.com', '$2y$10$.kSL/wKcpnhtQFpzI9WECen2Eyw2BQiCpdWaDYNJEDk1cdoQ8BvV2', NULL, '2025-10-12 15:05:13', '2025-10-12 15:05:13'),
 (9, 'Viet', 'lytranviet23@gmail.com', '$2y$10$ZBbhcz/yCkIMOzkXtGG8euXgHQVx7o7oVLfk6ZvEXrTB.yhA81V8W', NULL, '2025-10-12 16:26:17', '2025-10-12 16:26:17'),
 (10, 'Trần Khánh', 'khanh@gmail.com', '$2y$10$2bdfSKMpXG9kfd0B7E/.7OiL.8ZpOzho4v3myNVJR0qOpMiUlnnJ2', NULL, '2025-10-16 11:48:25', '2025-10-16 11:48:25'),
-(13, 'Trần Văn Khang', 'nguyentranankhang10@gmail.com', '$2y$10$G7oLJcjrc8CpXWJ5T1uZzeldeP60Vgaubb4xapC2/fzVuDvLZ/b8G', NULL, '2025-10-18 08:57:21', '2025-10-18 08:57:21');
+(13, 'Trần Văn Khang', 'nguyentranankhang10@gmail.com', '$2y$10$G7oLJcjrc8CpXWJ5T1uZzeldeP60Vgaubb4xapC2/fzVuDvLZ/b8G', NULL, '2025-10-18 08:57:21', '2025-10-18 08:57:21'),
+(14, 'nhan', 'nhanle1219@gmail.com', '$2y$10$/zznUxp7/bvoPQmPedWfi.jLLXsY.08MRfaVRmVBdvvDA5xuVFkhu', NULL, '2025-10-30 10:28:57', '2025-10-30 10:28:57'),
+(16, 'API', 'nhanle1210@gmail.com', '$2y$10$BhUCN0hemfFNhwUfHRdOeeqKrRxsHw8eShihCzb4egvfHTil5HF8W', NULL, '2025-10-31 23:09:50', '2025-10-31 23:09:50');
 
 -- --------------------------------------------------------
 
@@ -761,7 +1004,9 @@ INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
 (6, 3),
 (9, 2),
 (10, 4),
-(13, 2);
+(13, 2),
+(14, 4),
+(16, 5);
 
 -- --------------------------------------------------------
 
@@ -944,6 +1189,13 @@ ALTER TABLE `roles`
   ADD UNIQUE KEY `name` (`name`);
 
 --
+-- Chỉ mục cho bảng `shipping_coupons`
+--
+ALTER TABLE `shipping_coupons`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `CODE` (`CODE`);
+
+--
 -- Chỉ mục cho bảng `supplier`
 --
 ALTER TABLE `supplier`
@@ -991,13 +1243,13 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT cho bảng `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -1009,19 +1261,19 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT cho bảng `coupons`
 --
 ALTER TABLE `coupons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `export_receipt`
 --
 ALTER TABLE `export_receipt`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT cho bảng `export_receipt_detail`
 --
 ALTER TABLE `export_receipt_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT cho bảng `import_receipt`
@@ -1045,13 +1297,13 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT cho bảng `order_status`
@@ -1081,7 +1333,7 @@ ALTER TABLE `product_images`
 -- AUTO_INCREMENT cho bảng `product_reviews`
 --
 ALTER TABLE `product_reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `product_sizes`
@@ -1096,6 +1348,12 @@ ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT cho bảng `shipping_coupons`
+--
+ALTER TABLE `shipping_coupons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT cho bảng `supplier`
 --
 ALTER TABLE `supplier`
@@ -1105,7 +1363,7 @@ ALTER TABLE `supplier`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT cho bảng `wishlists`
@@ -1168,65 +1426,11 @@ ALTER TABLE `notifications`
   ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Các ràng buộc cho bảng `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `order_status` (`id`),
-  ADD CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`);
-
---
 -- Các ràng buộc cho bảng `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
-
---
--- Các ràng buộc cho bảng `products`
---
-ALTER TABLE `products`
-  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-  ADD CONSTRAINT `products_ibfk_2` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`);
-
---
--- Các ràng buộc cho bảng `product_batch`
---
-ALTER TABLE `product_batch`
-  ADD CONSTRAINT `product_batch_ibfk_1` FOREIGN KEY (`productsize_id`) REFERENCES `product_sizes` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `product_images`
---
-ALTER TABLE `product_images`
-  ADD CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `product_reviews`
---
-ALTER TABLE `product_reviews`
-  ADD CONSTRAINT `product_reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `product_reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `product_sizes`
---
-ALTER TABLE `product_sizes`
-  ADD CONSTRAINT `product_sizes_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `user_roles`
---
-ALTER TABLE `user_roles`
-  ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
-
---
--- Các ràng buộc cho bảng `wishlists`
---
-ALTER TABLE `wishlists`
-  ADD CONSTRAINT `wishlists_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `wishlists_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
