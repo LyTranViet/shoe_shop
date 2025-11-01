@@ -1,56 +1,55 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
+header('Content-Type: application/json; charset=utf-8');
 
-$GHN_TOKEN = "658b57db-acf1-11f0-93b8-b675d1187f91";
+// ✅ Nhận dữ liệu gửi từ AJAX
+$districtId     = $_POST['districtId'] ?? null;
+$wardCode       = $_POST['wardCode'] ?? null;
+$serviceTypeId  = $_POST['serviceTypeId'] ?? null;
+$carrier        = $_POST['carrier'] ?? 'GHN'; // <-- Lấy hãng vận chuyển được chọn
 
-// Lấy dữ liệu POST
-$district_id = $_POST['districtId'] ?? null;
-$ward_code   = $_POST['wardCode'] ?? null;
-
-if (!$district_id || !$ward_code) {
-    echo json_encode(["error" => true, "message" => "Missing params"]);
+// 🧩 Kiểm tra dữ liệu đầu vào
+if (!$districtId || !$wardCode) {
+    echo json_encode(['error' => true, 'message' => 'Thiếu thông tin địa chỉ']);
     exit;
 }
 
-// Dữ liệu cố định của người gửi (quận 7 - Tân Hưng)
-$from_district = 6084; // Quận 7
-$from_ward = "550307"; // phường Tân Hưng
+// 🧮 Hàm tính phí mẫu cho từng hãng (bạn có thể thay bằng gọi API thật)
+function getGHNFee($districtId, $wardCode, $serviceTypeId) {
+    // Gọi API GHN thật ở đây nếu bạn có
+    // Ví dụ tạm thời:
+    return ['error' => false, 'fee' => 25000];
+}
 
-// Body gửi lên GHN
-$data = [
-    "shop_id" => 179319, // có thể bỏ nếu không cần
-    "from_district_id" => $from_district,
-    "from_ward_code"   => $from_ward,
-    "service_type_id"  => 2, // chuẩn COD
-    "to_district_id"   => intval($district_id),
-    "to_ward_code"     => $ward_code,
-    "weight"           => 500, // gram
-    "length"           => 20,
-    "width"            => 15,
-    "height"           => 10
-];
+function getGHTKFee($districtId, $wardCode) {
+    // Gọi API GHTK thật ở đây nếu có
+    // Ví dụ tạm:
+    return ['error' => false, 'fee' => 30000];
+}
 
-$curl = curl_init();
-curl_setopt_array($curl, [
-    CURLOPT_URL => "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee",
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
-        "Content-Type: application/json",
-        "Token: " . $GHN_TOKEN
-    ],
-    CURLOPT_POSTFIELDS => json_encode($data)
-]);
+function getShoeShopShipFee($districtId, $wardCode) {
+    // Ship nội bộ (phí cố định)
+    return ['error' => false, 'fee' => 15000];
+}
 
-$response = curl_exec($curl);
-curl_close($curl);
+// ⚙️ Xử lý theo nhà vận chuyển
+$response = ['error' => true, 'fee' => 0];
 
-$res = json_decode($response, true);
-$fee = $res['data']['total'] ?? 0;
+switch ($carrier) {
+    case 'GHN':
+        $response = getGHNFee($districtId, $wardCode, $serviceTypeId);
+        break;
+    case 'GHTK':
+        $response = getGHTKFee($districtId, $wardCode);
+        break;
+    case 'ShoeShopShip':
+        $response = getShoeShopShipFee($districtId, $wardCode);
+        break;
+    default:
+        $response = ['error' => true, 'message' => 'Nhà vận chuyển không hợp lệ'];
+        break;
+}
 
-echo json_encode([
-    "error" => false,
-    "fee"   => $fee
-]);
+// 🚀 Trả kết quả JSON về cho frontend
+echo json_encode($response);
+exit;
+?>

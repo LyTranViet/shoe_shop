@@ -463,6 +463,9 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
 <script src="https://code.jquery.com/jquery-3.4.0.min.js"></script>
 <script>
    document.addEventListener('DOMContentLoaded', function () {
+    $('.carrier-select').on('change', function () {
+        calculateShippingFee();
+    });
     // === BIẾN TOÀN CỤC ===
     window.shippingDiscountPercent = 0;
     window.shippingDiscountAmount = 0;
@@ -496,66 +499,84 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
     };
 
     // === HÀM TÍNH PHÍ VẬN CHUYỂN ===
-    window.calculateShippingFee = function () {
-        if (!selectedDistrictId || !selectedWardCode) {
-            $('#shipping-fee-text').html('Vui lòng chọn đủ địa chỉ');
-            $('#shipping-fee-input').val(0);
-            updateSummaryTotal(0);
-            return;
-        }
+   window.calculateShippingFee = function () 
+   {
+    if (!selectedDistrictId || !selectedWardCode) {
+        $('#shipping-fee-text').html('Vui lòng chọn đủ địa chỉ');
+        $('#shipping-fee-input').val(0);
+        updateSummaryTotal(0);
+        return;
+    }
 
-        $('#shipping-fee-text').html('Đang tính...');
+    $('#shipping-fee-text').html('Đang tính...');
 
-        $.ajax({
-            url: "CalculateFee.php",
-            method: "POST",
-            dataType: "json",
-            data: { districtId: selectedDistrictId, wardCode: selectedWardCode, serviceTypeId: serviceTypeId },
-            success: function (response) {
-                if (response && response.error === false) {
-                    const feeVND = Number(response.fee);
-                    if (isNaN(feeVND) || feeVND <= 0) {
-                        $('#shipping-fee-text').html('<span style="color:red">Không lấy được phí</span>');
-                        $('#shipping-fee-input').val(0);
-                        updateSummaryTotal(0);
-                        return;
-                    }
+    // 🧩 Lấy carrier được chọn
+    const selectedCarrier = $('input[name="carrier"]:checked').val() || 'GHN';
+    $('#shipping-carrier-input').val(selectedCarrier);
 
-                    let finalFeeVND = feeVND;
-                    let discountText = '';
-
-                    const couponData = localStorage.getItem('shipping_coupon_data');
-                    if (couponData) {
-                        const coupon = JSON.parse(couponData);
-                        if (coupon.type === 'percent') {
-                            const discount = (feeVND * coupon.value) / 100;
-                            finalFeeVND = Math.max(0, feeVND - discount);
-                            discountText = `Giảm ${coupon.value}% phí vận chuyển`;
-                        } else if (coupon.type === 'fixed') {
-                            finalFeeVND = Math.max(0, feeVND - coupon.value);
-                            discountText = `Giảm ${coupon.value.toLocaleString('vi-VN')}₫ phí vận chuyển`;
-                        }
-                    }
-                    
-
-                    $('#shipping-fee-text').html('<strong>' + finalFeeVND.toLocaleString('vi-VN') + ' ₫</strong>');
-                    $('#shipping-fee-detail').text('GHN - tính theo địa chỉ đã chọn');
-                    $('#shipping-fee-input').val(finalFeeVND); // GỬI PHÍ CUỐI (đã giảm) lên server
-                    $('#shipping-carrier-input').val('GHN');
-                    updateSummaryTotal(finalFeeVND, feeVND, discountText);
-                } else {
-                    $('#shipping-fee-text').html('<span style="color:red">Lỗi GHN</span>');
+    $.ajax({
+        url: "CalculateFee.php",
+        method: "POST",
+        dataType: "json",
+        data: { 
+            districtId: selectedDistrictId, 
+            wardCode: selectedWardCode, 
+            serviceTypeId: serviceTypeId, 
+            carrier: selectedCarrier // 👉 TRUYỀN VÀO BACKEND
+        },
+        success: function (response) {
+            if (response && response.error === false) {
+                const feeVND = Number(response.fee);
+                if (isNaN(feeVND) || feeVND <= 0) {
+                    $('#shipping-fee-text').html('<span style="color:red">Không lấy được phí</span>');
                     $('#shipping-fee-input').val(0);
                     updateSummaryTotal(0);
+                    return;
                 }
-            },
-            error: function () {
-                $('#shipping-fee-text').html('<span style="color:red">Lỗi mạng</span>');
+
+                let finalFeeVND = feeVND;
+                let discountText = '';
+
+                // 🧾 Áp dụng mã giảm phí nếu có
+                const couponData = localStorage.getItem('shipping_coupon_data');
+                if (couponData) {
+                    const coupon = JSON.parse(couponData);
+                    if (coupon.type === 'percent') {
+                        const discount = (feeVND * coupon.value) / 100;
+                        finalFeeVND = Math.max(0, feeVND - discount);
+                        discountText = `Giảm ${coupon.value}% phí vận chuyển`;
+                    } else if (coupon.type === 'fixed') {
+                        finalFeeVND = Math.max(0, feeVND - coupon.value);
+                        discountText = `Giảm ${coupon.value.toLocaleString('vi-VN')}₫ phí vận chuyển`;
+                    }
+                }
+
+                // 🖋️ Cập nhật giao diện
+                $('#shipping-fee-text').html('<strong>' + finalFeeVND.toLocaleString('vi-VN') + ' ₫</strong>');
+                $('#shipping-fee-detail').text(selectedCarrier + ' - tính theo địa chỉ đã chọn');
+                $('#shipping-fee-input').val(finalFeeVND);
+                updateSummaryTotal(finalFeeVND, feeVND, discountText);
+            } else {
+                $('#shipping-fee-text').html('<span style="color:red">Lỗi tính phí</span>');
                 $('#shipping-fee-input').val(0);
                 updateSummaryTotal(0);
             }
-        });
-    };
+        },
+        error: function () {
+            $('#shipping-fee-text').html('<span style="color:red">Lỗi mạng</span>');
+            $('#shipping-fee-input').val(0);
+            updateSummaryTotal(0);
+        }
+    });
+};
+// 👉 Khi người dùng đổi hãng vận chuyển, gọi lại hàm tính phí
+$(document).ready(function () {
+    $('.carrier-select').on('change', function () {
+        calculateShippingFee();
+    });
+});
+
+
 
     // === HÀM LẤY GÓI DỊCH VỤ ===
     window.getAvailableServices = function (toDistrictId) {
