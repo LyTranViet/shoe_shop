@@ -8,13 +8,13 @@ require_once __DIR__ . '/functions.php';
 // Admin và Staff sẽ bị chuyển hướng về trang quản trị nếu cố gắng truy cập trang người dùng.
 if (is_logged_in() && !is_superadmin() && (is_admin() || is_staff())) {
     // Chuyển hướng về trang quản trị
-    header('Location: /shoe_shop/admin/');
+    header('Location: ' . rtrim(BASE_URL, '/') . '/admin/');
     exit;
 }
 
 // Define BASE_URL if it's not already defined (e.g., by init.php)
 if (!defined('BASE_URL')) {
-    define('BASE_URL', '/shoe_shop/');
+    define('BASE_URL', '/shoe_shop/shoe_shop_project/');
 }
 
 // Database connection

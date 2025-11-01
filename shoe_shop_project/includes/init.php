@@ -2,7 +2,7 @@
 // Khởi tạo session và các biến người dùng, KHÔNG xuất HTML
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/functions.php';
-define('BASE_URL', '/shoe_shop/'); // Định nghĩa BASE_URL tại đây
+define('BASE_URL', '/shoe_shop/shoe_shop_project/');
 
 $db = get_db();
 $isLoggedIn = is_logged_in();

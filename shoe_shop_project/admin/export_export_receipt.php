@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/includes/init.php';
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;

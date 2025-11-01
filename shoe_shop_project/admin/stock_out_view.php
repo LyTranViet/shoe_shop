@@ -9,7 +9,7 @@ if (!isset($db) || !isset($receipt) || !isset($receipt_details)) {
     <header class="admin-header">
         <h2>📤 Chi tiết Phiếu xuất #<?= htmlspecialchars($receipt['receipt_code']) ?></h2>
         <div class="admin-tools" style="display: flex; gap: 10px;">
-            <a href="generate_pdf.php?type=stock_out&id=<?= $receipt['id'] ?>" class="btn" target="_blank" style="background-color: #2980b9; color: white;">📄 Xuất DOCX</a>
+            <a href="export_export_receipt.php?id=<?= $receipt['id'] ?>" class="btn" target="_blank" style="background-color: #2980b9; color: white;">📄 Xuất DOCX</a>
             <a href="index.php?page=stock_out" class="btn-back">⬅ Quay lại</a>
         </div>
     </header>

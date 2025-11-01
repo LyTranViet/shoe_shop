@@ -314,7 +314,7 @@ try {
         <div class="banner-content">
             <h1 class="banner-title">Step into Style</h1>
             <p class="banner-subtitle">Discover our latest collection of trendy and comfortable footwear for every occasion</p>
-            <a href="category.php?sort=newest" class="banner-cta">Shop Now</a>
+            <a href="<?php echo BASE_URL; ?>category.php?sort=newest" class="banner-cta">Shop Now</a>
         </div>
 </section>
 
@@ -516,18 +516,18 @@ try {
                         <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
                             <div class="out-of-stock-badge">Hết hàng</div>
                         <?php endif; ?>
-                        <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
-                        <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                        <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
+                        <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                     </div>
-                    <h3><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
+                    <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
                     <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                     <div class="product-actions">
-                        <form class="ajax-add-cart" method="post" action="cart.php">
+                        <form class="ajax-add-cart" method="post" action="<?php echo BASE_URL; ?>cart.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <input type="hidden" name="quantity" value="1">
                             <button class="btn" type="submit" <?= (isset($p['total_stock']) && $p['total_stock'] <= 0) ? 'disabled' : '' ?>>Add to cart</button>
                         </form>
-                        <form class="ajax-wishlist" method="post" action="wishlist.php">
+                        <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <button class="btn" type="submit">❤</button>
                         </form>
@@ -540,7 +540,7 @@ try {
             <div class="swiper-button-next"></div>
         </div>
             <div class="section-footer">
-                <a href="category.php?sort=newest" class="section-view-more">View more →</a>
+                <a href="<?php echo BASE_URL; ?>category.php?sort=newest" class="section-view-more">View more →</a>
             </div>
     </section>
 <?php endif; ?>
@@ -556,18 +556,18 @@ try {
                         <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
                             <div class="out-of-stock-badge">Hết hàng</div>
                         <?php endif; ?>
-                        <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
-                        <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                        <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
+                        <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                     </div>
-                    <h3><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
+                    <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
                     <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                     <div class="product-actions">
-                        <form class="ajax-add-cart" method="post" action="cart.php">
+                        <form class="ajax-add-cart" method="post" action="<?php echo BASE_URL; ?>cart.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <input type="hidden" name="quantity" value="1">
                             <button class="btn" type="submit" <?= (isset($p['total_stock']) && $p['total_stock'] <= 0) ? 'disabled' : '' ?>>Add to cart</button>
                         </form>
-                        <form class="ajax-wishlist" method="post" action="wishlist.php">
+                        <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <button class="btn" type="submit">❤</button>
                         </form>
@@ -580,7 +580,7 @@ try {
         <div class="swiper-button-next"></div>
     </div>
         <div class="section-footer">
-            <a href="category.php?sort=bestsellers" class="section-view-more">View more →</a>
+            <a href="<?php echo BASE_URL; ?>category.php?sort=bestsellers" class="section-view-more">View more →</a>
         </div>
 <?php endif; ?>
 
@@ -601,9 +601,9 @@ try {
                                     <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
                                         <div class="out-of-stock-badge">Hết hàng</div>
                                     <?php endif; ?>
-                                    <?php $img = $imagesByProduct[$p['id']] ?? 'assets/images/product-placeholder.png'; ?>
-                                    <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a></div>
-                                <h4><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
+                                    <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
+                                    <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a></div>
+                                <h4><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
                                 <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                             </div>
                         <?php endforeach; endif; ?>
@@ -614,7 +614,7 @@ try {
                 </div>
                 <!-- Luôn hiển thị link "View more" cho mỗi danh mục -->
                 <div class="section-footer">
-                    <a href="category.php?category_id[]=<?php echo $c['id']; ?>" class="section-view-more">View more →</a>
+                    <a href="<?php echo BASE_URL; ?>category.php?category_id[]=<?php echo $c['id']; ?>" class="section-view-more">View more →</a>
                 </div>
             </section>
         <?php endforeach; ?>

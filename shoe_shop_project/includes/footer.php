@@ -1,6 +1,7 @@
 </main> 
 <footer class="footer-modern">
     <style>
+    
         .footer-modern {
             background: #181c1f;
             color: #f3f4f6;
@@ -137,23 +138,23 @@
         <div class="footer-col">
             <h3>Quick Links</h3>
             <ul class="footer-links">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Shop</a></li>
-                <li><a href="#">New Arrivals</a></li>
-                <li><a href="#">Sale</a></li>
-                <li><a href="#">Size Guide</a></li>
-                <li><a href="#">Contact Us</a></li>
+                <li><a href="<?php echo BASE_URL; ?>index.php">Home</a></li>
+                <li><a href="<?php echo BASE_URL; ?>category.php">Shop</a></li>
+                <li><a href="<?php echo BASE_URL; ?>category.php?sort=newest">New Arrivals</a></li>
+                <li><a href="<?php echo BASE_URL; ?>category.php?on_sale=1">Sale</a></li>
+                <li><a href="<?php echo BASE_URL; ?>size-guide.php">Size Guide</a></li>
+                <li><a href="<?php echo BASE_URL; ?>contact.php">Contact Us</a></li>
             </ul>
         </div>
         <div class="footer-col">
             <h3>Customer Service</h3>
             <ul class="footer-service">
-                <li><a href="#">Shipping Information</a></li>
-                <li><a href="#">Returns & Exchange</a></li>
-                <li><a href="#">Payment Methods</a></li>
-                <li><a href="#">Order Tracking</a></li>
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms & Conditions</a></li>
+                <li><a href="<?php echo BASE_URL; ?>shipping-information.php">Shipping Information</a></li>
+                <li><a href="<?php echo BASE_URL; ?>returns-exchange.php">Returns & Exchange</a></li>
+                <li><a href="<?php echo BASE_URL; ?>payment-methods.php">Payment Methods</a></li>
+                <li><a href="<?php echo BASE_URL; ?>order-tracking.php">Order Tracking</a></li>
+                <li><a href="<?php echo BASE_URL; ?>privacy-policy.php">Privacy Policy</a></li>
+                <li><a href="<?php echo BASE_URL; ?>terms-conditions.php">Terms & Conditions</a></li>
             </ul>
         </div>
         <div class="footer-col">
