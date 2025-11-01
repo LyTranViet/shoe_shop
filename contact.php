@@ -89,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="#" class="btn btn-outline-primary rounded-circle"><i class="fi fi-rr-facebook"></i></a>
                 <a href="#" class="btn btn-outline-danger rounded-circle"><i class="fi fi-rr-instagram"></i></a>
                 <a href="#" class="btn btn-outline-info rounded-circle"><i class="fi fi-rr-twitter"></i></a>
+                            <a href="#" class="btn btn-outline-info rounded-circle"><i class="fi fi-rr-twitter"></i></a>
+
             </div>
         </div>
     </div>
