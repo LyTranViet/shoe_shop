@@ -58,12 +58,6 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <style>
-.form-auth {
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .auth-card {
   width: 100%;
   max-width: 450px;
@@ -72,6 +66,7 @@ require_once __DIR__ . '/includes/header.php';
   padding: 38px 32px;
   box-shadow: 0 8px 32px rgba(15,23,42,0.13);
   border: 1px solid #e3e8ee;
+  margin: 48px auto; /* Căn giữa form sau khi bỏ form-auth */
 }
 .auth-head h2 {
   margin: 0 0 1rem 0;
@@ -80,7 +75,7 @@ require_once __DIR__ . '/includes/header.php';
 }
 </style>
 
-<div class="form-auth">
+<div>
   <div class="auth-card">
     <div class="auth-head">
       <h2>Đặt lại mật khẩu</h2>

@@ -1,5 +1,13 @@
 {
     "require": {
-        "mailjet/mailjet-apiv3-php": "^1.6"
+        "mailjet/mailjet-apiv3-php": "^1.6",
+        "phpoffice/phpword": "*",
+        "symfony/deprecation-contracts": "^3.6",
+        "symfony/polyfill-php83": "^1.33",
+        "symfony/polyfill-mbstring": "^1.33",
+        "symfony/polyfill-php80": "^1.33",
+        "ralouphie/getallheaders": "^3.0",
+        "dompdf/dompdf": "^3.1",
+        "phpmailer/phpmailer": "^7.0"
     }
 }

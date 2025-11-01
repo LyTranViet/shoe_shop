@@ -109,13 +109,6 @@ require_once __DIR__ . '/includes/header.php';
 
 
 <style>
-.form-auth {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
-}
 .auth-card {
     width: 100%;
     max-width: 420px;
@@ -124,9 +117,7 @@ require_once __DIR__ . '/includes/header.php';
     padding: 38px 32px 32px 32px;
     box-shadow: 0 8px 32px rgba(15,23,42,0.13);
     border: 1px solid #e3e8ee;
-    font-family: inherit;
-    position: relative;
-    margin: 32px 0;
+    margin: 48px auto; /* Căn giữa form sau khi bỏ form-auth */
 }
 .auth-card.shake { animation: shake 420ms cubic-bezier(.36,.07,.19,.97); }
 @keyframes shake { 10%,90%{transform:translate3d(-2px,0,0)} 20%,80%{transform:translate3d(3px,0,0)} 30%,50%,70%{transform:translate3d(-6px,0,0)} 40%,60%{transform:translate3d(6px,0,0)} }
@@ -287,7 +278,7 @@ require_once __DIR__ . '/includes/header.php';
 </style>
 
 
-<div class="form-auth" aria-labelledby="register-heading">
+<div aria-labelledby="register-heading">
     <div class="auth-card<?php echo $show_shake ? ' shake' : ''; ?>" id="authCard">
         <div class="auth-head">
             <h2 id="register-heading">Create your account</h2>

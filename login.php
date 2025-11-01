@@ -108,7 +108,6 @@ require_once __DIR__ . '/includes/header.php';
   align-items: center;
   justify-content: center;
   background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
-  font-family: 'Inter', sans-serif;
 }
 .auth-card {
   width: 100%;
@@ -118,8 +117,6 @@ require_once __DIR__ . '/includes/header.php';
   padding: 38px 32px 32px 32px;
   box-shadow: 0 8px 32px rgba(15,23,42,0.13);
   border: 1px solid #e3e8ee;
-  position: relative;
-  margin: 32px 0;
   transition: box-shadow .2s, transform .2s;
 }
 .auth-card.shake { animation: shake 420ms cubic-bezier(.36,.07,.19,.97); }
@@ -281,7 +278,7 @@ require_once __DIR__ . '/includes/header.php';
 </style>
 
 
-<div class="form-auth">
+<div>
   <div class="auth-card<?php echo $shake ? ' shake' : ''; ?>" id="authCard">
     <div class="auth-head">
       <h2>Đăng nhập</h2>
@@ -317,7 +314,12 @@ require_once __DIR__ . '/includes/header.php';
       </div>
       <div class="form-row row-inline" style="justify-content:space-between;align-items:center;">
         <label class="helper"><input type="checkbox" name="remember"> Ghi nhớ đăng nhập</label>
-        <a href="forgot.php" class="helper">Quên mật khẩu?</a>
+        <a href="forgot.php" class="helper" onclick="
+            <?php
+                unset($_SESSION['reset_step']);
+                unset($_SESSION['reset_email']);
+            ?>
+        ">Quên mật khẩu?</a>
       </div>
       <div class="form-actions">
         <button class="btn" type="submit">Đăng nhập</button>
