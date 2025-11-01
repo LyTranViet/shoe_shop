@@ -639,7 +639,8 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
         }
     }
 
-    function updateCheckoutSummary(discountPercent) {
+   // HÀM CẬP NHẬT TỔNG TIỀN (ĐÃ SỬA – KHÔNG GỌI updateSummaryTotal)
+function updateCheckoutSummary(discountPercent) {
     const subtotalEl = document.getElementById('summary-subtotal');
     const discountRowEl = document.getElementById('summary-discount-row');
     const discountAmountEl = document.getElementById('summary-discount-amount');
@@ -651,12 +652,10 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
     if (!subtotalEl || !totalEl) return;
 
     const subtotal = parseFloat(subtotalEl.dataset.value) || 0;
+    const discountAmount = (subtotal * discountPercent) / 100;
     const formatVND = (v) => Math.round(v).toLocaleString('vi-VN') + '₫';
 
-    // TÍNH GIẢM GIÁ MỚI (LUÔN TÍNH LẠI)
-    const discountAmount = (subtotal * discountPercent) / 100;
-
-    // CẬP NHẬT GIAO DIỆN
+    // HIỂN THỊ GIẢM GIÁ
     if (discountPercent > 0) {
         discountLabelEl.textContent = `Giảm giá (${discountPercent}%)`;
         discountAmountEl.textContent = `- ${formatVND(discountAmount)}`;
@@ -665,18 +664,18 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
         discountRowEl.style.display = 'table-row';
         subtotalAfterDiscountRowEl.style.display = 'table-row';
         subtotalEl.style.textDecoration = 'line-through';
-    } else {
+    } 
+    // ẨN + XÓA GIẢM GIÁ
+    else {
         discountRowEl.style.display = 'none';
         subtotalAfterDiscountRowEl.style.display = 'none';
         subtotalEl.style.textDecoration = 'none';
         discountAmountEl.dataset.vnd = 0;
-        discountAmountEl.textContent = '0₫'; // ĐẢM BẢO HIỂN THỊ 0
     }
 
-    // TỔNG TIỀN = TẠM TÍNH - GIẢM GIÁ + PHÍ SHIP
+    // CẬP NHẬT TỔNG (TỰ TÍNH, KHÔNG GỌI HÀM KHÁC)
     const shippingFee = parseFloat(document.getElementById('shipping-fee-input')?.value || '0');
     const total = subtotal - discountAmount + shippingFee;
-
     totalEl.textContent = formatVND(total);
 }
 
@@ -775,53 +774,56 @@ try { $ust = $db->prepare('SELECT phone FROM users WHERE id = ? LIMIT 1'); $ust-
             calculateShippingFee();
         });
 
-        // ÁP DỤNG MÃ VẬN CHUYỂN
-        document.getElementById("applyShippingCoupon").addEventListener("click", function () {
-            const code = document.getElementById("shipping_coupon_code").value.trim().toUpperCase();
-            const msgEl = document.getElementById("shippingCouponMessage");
+        async function handlePasteAndValidateCheckout(fromClick = true) {
+    const couponInput = document.getElementById('coupon_code');
+    const resultDiv = document.querySelector('.checkout-layout .coupon-result');
+    resultDiv.textContent = '';
+    resultDiv.className = 'coupon-result';
 
-            if (!code) {
-                msgEl.textContent = "Vui lòng nhập mã";
-                msgEl.className = "text-danger";
-                return;
-            }
+    let validatedCouponInput = document.getElementById('validated_coupon_code');
+    if (!validatedCouponInput) {
+        validatedCouponInput = document.createElement('input');
+        validatedCouponInput.type = 'hidden';
+        validatedCouponInput.id = 'validated_coupon_code';
+        validatedCouponInput.name = 'validated_coupon_code';
+        couponInput.form.appendChild(validatedCouponInput);
+    }
 
-            msgEl.textContent = "Đang kiểm tra...";
-            msgEl.className = "text-info";
+    let code = couponInput.value.trim().toUpperCase();
 
-            fetch("validate_shipping_coupon.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "code=" + encodeURIComponent(code)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    msgEl.textContent = data.message;
-                    msgEl.className = "text-success";
-                    localStorage.setItem("shipping_coupon_code", code);
-                    localStorage.setItem("shipping_coupon_data", JSON.stringify(data.coupon));
-                    if (data.coupon.type === 'percent') {
-                        window.shippingDiscountPercent = data.coupon.value;
-                    } else {
-                        window.shippingDiscountAmount = data.coupon.value;
-                    }
-                    calculateShippingFee();
-                } else {
-                    msgEl.textContent = data.message;
-                    msgEl.className = "text-danger";
-                    localStorage.removeItem("shipping_coupon_code");
-                    localStorage.removeItem("shipping_coupon_data");
-                    window.shippingDiscountPercent = 0;
-                    window.shippingDiscountAmount = 0;
-                    calculateShippingFee();
-                }
-            })
-            .catch(() => {
-                msgEl.textContent = "Lỗi kết nối";
-                msgEl.className = "text-danger";
-            });
+    if (!code) {
+        resultDiv.textContent = 'Vui lòng nhập mã giảm giá.';
+        resultDiv.className = 'coupon-result error';
+        validatedCouponInput.value = '';
+        updateCheckoutSummary(0);
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('code', code);
+        const response = await fetch('validate_coupon.php', { 
+            method: 'POST', 
+            body: formData 
         });
+        const data = await response.json();
+
+        // CHỈ CHẤP NHẬN KHI success: true + có coupon
+        if (data.success && data.coupon && data.coupon.code && data.coupon.discount_percent > 0) {
+            resultDiv.textContent = `Áp dụng thành công! Giảm ${data.coupon.discount_percent}%`;
+            resultDiv.className = 'coupon-result success';
+            validatedCouponInput.value = data.coupon.code; // Lưu mã chính xác từ DB
+            updateCheckoutSummary(data.coupon.discount_percent);
+        } else {
+            throw new Error(data.message || 'Mã không tồn tại hoặc không hợp lệ.');
+        }
+    } catch (err) {
+        resultDiv.textContent = err.message;
+        resultDiv.className = 'coupon-result error';
+        validatedCouponInput.value = '';
+        updateCheckoutSummary(0);
+    }
+}
 
         // GHTK & CARRIER
         $(document).on("change", ".carrier-select", function () {

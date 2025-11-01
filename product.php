@@ -89,7 +89,16 @@ try {
 }
 // Lọc vouchers theo discount_type
 $productVouchers = array_filter($vouchers, function($v) { return $v['discount_type'] === 'product'; });
-$shippingVouchers = array_filter($vouchers, function($v) { return $v['discount_type'] === 'shipping'; });
+$shippingVouchers = [];
+try {
+    $shippingVouchers = $db->query("
+        SELECT CODE AS code, VALUE AS discount_percent 
+        FROM shipping_coupons 
+        WHERE active = 1 
+        AND (expire_date IS NULL OR expire_date >= CURDATE()) 
+        ORDER BY VALUE DESC
+    ")->fetchAll();
+} catch (Exception $e) {}
 // Suggested products (same category)
 $suggested = [];
 try {
@@ -514,4 +523,3 @@ document.addEventListener('DOMContentLoaded', function(){
     height: 1em; /* Reserve space to prevent layout shift */
 }
 </style>
- 
