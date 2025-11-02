@@ -1,139 +1,184 @@
 <?php
-// Cart: handles add/update/remove via POST (AJAX-aware) and renders cart
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
 
-// helper to send JSON
-function json_res($arr) { header('Content-Type: application/json'); echo json_encode($arr); exit; }
-
-// compute session cart total
-function session_cart_total() {
-    $db = get_db();
-    $total = 0.0;
-    foreach ($_SESSION['cart'] ?? [] as $k => $it) {
-        $p = $db->prepare('SELECT price FROM products WHERE id = ?');
-        $p->execute([(int)$it['product_id']]);
-        $price = (float)($p->fetchColumn() ?: 0);
-        $total += $price * ((int)$it['quantity']);
-    }
-    return $total;
+// Kiểm tra AJAX
+function is_ajax() {
+    return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 }
 
+// Trả JSON
+function json_res($arr) {
+    header('Content-Type: application/json');
+    echo json_encode($arr);
+    exit;
+}
+
+// === TÍNH TỔNG GIỎ HÀNG (áp dụng mã giảm sản phẩm) ===
+function calculate_cart_total($db = null, $userId = null) {
+    if (!$db) $db = get_db();
+    $subtotal = 0;
+    $items = [];
+
+    if ($userId) {
+        $stmt = $db->prepare('SELECT ci.price, ci.quantity FROM cart_items ci JOIN carts c ON c.id = ci.cart_id WHERE c.user_id = ?');
+        $stmt->execute([$userId]);
+        $items = $stmt->fetchAll();
+    } else {
+        foreach ($_SESSION['cart'] ?? [] as $it) {
+            $p = $db->prepare('SELECT price FROM products WHERE id = ?');
+            $p->execute([(int)$it['product_id']]);
+            $price = (float)($p->fetchColumn() ?: 0);
+            $items[] = ['price' => $price, 'quantity' => (int)$it['quantity']];
+        }
+    }
+
+    foreach ($items as $it) $subtotal += $it['price'] * $it['quantity'];
+
+    // Áp dụng mã giảm giá sản phẩm
+    if (!empty($_SESSION['coupon_code'])) {
+        $code = strtoupper($_SESSION['coupon_code']);
+        $stmt = $db->prepare("SELECT discount_percent FROM coupons WHERE UPPER(code) = ? AND discount_type = 'product' AND (valid_to IS NULL OR valid_to >= NOW())");
+        $stmt->execute([$code]);
+        $coupon = $stmt->fetch();
+        if ($coupon) {
+            $subtotal = $subtotal * (1 - $coupon['discount_percent'] / 100);
+        }
+    }
+
+    return round($subtotal);
+}
+
+// === XỬ LÝ POST ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'add';
 
-    // ADD
+    // ADD TO CART
     if ($action === 'add') {
         $pid = (int)($_POST['product_id'] ?? 0);
-        $qty = max(1,(int)($_POST['quantity'] ?? 1));
+        $qty = max(1, (int)($_POST['quantity'] ?? 1));
         $size = $_POST['size'] ?? null;
-        $coupon_code = trim($_POST['coupon_code'] ?? ''); // Lấy coupon code từ form
 
-        // If a coupon code is submitted with the add-to-cart action, store it in the session
+        // Lưu mã giảm giá sản phẩm
+        $coupon_code = trim($_POST['coupon_code'] ?? '');
         if (!empty($coupon_code)) {
             $_SESSION['coupon_code'] = $coupon_code;
+        }
+
+        // Lưu mã giảm phí vận chuyển
+        $shipping_coupon = trim($_POST['validated_shipping_coupon_code'] ?? '');
+        if (!empty($shipping_coupon)) {
+            $_SESSION['shipping_coupon'] = $shipping_coupon;
+            $_SESSION['shipping_discount'] = (float)($_POST['shipping_discount_amount'] ?? 0);
+        } else {
+            unset($_SESSION['shipping_coupon'], $_SESSION['shipping_discount']);
         }
 
         if (is_logged_in()) {
             $db = get_db();
             $uid = current_user_id();
             try {
-                // find or create cart
                 $st = $db->prepare('SELECT id FROM carts WHERE user_id = ? LIMIT 1');
                 $st->execute([$uid]);
                 $cartId = $st->fetchColumn();
                 if (!$cartId) {
-                    $ins = $db->prepare('INSERT INTO carts (user_id, session_id) VALUES (?,?)');
-                    $ins->execute([$uid, null]);
+                    $ins = $db->prepare('INSERT INTO carts (user_id) VALUES (?)');
+                    $ins->execute([$uid]);
                     $cartId = $db->lastInsertId();
                 }
-                // upsert item
-                $ci = $db->prepare('SELECT id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ? AND (size = ? OR (size IS NULL AND ? IS NULL)) LIMIT 1');
+
+                $ci = $db->prepare('SELECT id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ? AND (size = ? OR (size IS NULL AND ? IS NULL))');
                 $ci->execute([$cartId, $pid, $size, $size]);
                 $row = $ci->fetch();
                 if ($row) {
-                    $newQty = (int)$row['quantity'] + $qty;
+                    $newQty = $row['quantity'] + $qty;
                     $up = $db->prepare('UPDATE cart_items SET quantity = ? WHERE id = ?');
                     $up->execute([$newQty, $row['id']]);
-                    $itemSubtotal = 0;
                 } else {
                     $pstmt = $db->prepare('SELECT price FROM products WHERE id = ?');
                     $pstmt->execute([$pid]);
                     $price = $pstmt->fetchColumn() ?: 0;
                     $ins = $db->prepare('INSERT INTO cart_items (cart_id, product_id, size, quantity, price) VALUES (?,?,?,?,?)');
                     $ins->execute([$cartId, $pid, $size, $qty, $price]);
-                    $itemSubtotal = $price * $qty;
                 }
-                // compute totals
-                $countSt = $db->prepare('SELECT COALESCE(SUM(quantity),0) FROM cart_items WHERE cart_id = ?');
-                $countSt->execute([$cartId]);
-                $count = (int)$countSt->fetchColumn();
-                $totalSt = $db->prepare('SELECT COALESCE(SUM(quantity * price),0) FROM cart_items WHERE cart_id = ?');
-                $totalSt->execute([$cartId]);
-                $total = (float)$totalSt->fetchColumn();
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-                    json_res(['success'=>true,'count'=>$count,'item_subtotal'=>$itemSubtotal,'total'=>$total]);
-                }
+
+                $count = $db->query("SELECT COALESCE(SUM(quantity),0) FROM cart_items WHERE cart_id = $cartId")->fetchColumn();
+                $total = calculate_cart_total($db, $uid);
+
+                if (is_ajax()) json_res(['success' => true, 'count' => $count, 'total' => $total]);
                 header('Location: cart.php'); exit;
-            } catch (Exception $e) {
-                // fallback to session
-            }
+            } catch (Exception $e) { }
         }
 
-        // session fallback
-        $sessionKey = $pid . '|' . ($size ?? '');
-        if (!isset($_SESSION['cart'][$sessionKey])) {
-            $_SESSION['cart'][$sessionKey] = ['product_id'=>$pid,'quantity'=>$qty,'size'=>$size];
+        // Session fallback
+        $key = $pid . '|' . ($size ?? '');
+        if (!isset($_SESSION['cart'][$key])) {
+            $_SESSION['cart'][$key] = ['product_in' => $pid, 'quantity' => $qty, 'size' => $size];
         } else {
-            $_SESSION['cart'][$sessionKey]['quantity'] = (int)$_SESSION['cart'][$sessionKey]['quantity'] + $qty;
+            $_SESSION['cart'][$key]['quantity'] += $qty;
         }
-        $count = 0; foreach ($_SESSION['cart'] as $it) { $count += (int)$it['quantity']; }
-        $total = session_cart_total();
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-            json_res(['success'=>true,'count'=>$count,'item_subtotal'=>0,'total'=>$total]);
-        }
+
+        $count = array_sum(array_column($_SESSION['cart'], 'quantity'));
+        $total = calculate_cart_total();
+
+        if (is_ajax()) json_res(['success' => true, 'count' => $count, 'total' => $total]);
         header('Location: cart.php'); exit;
     }
 
     // UPDATE
     if ($action === 'update') {
-        $newQty = max(1,(int)($_POST['quantity'] ?? 1));
+        $newQty = max(1, (int)($_POST['quantity'] ?? 1));
         if (is_logged_in()) {
             $db = get_db();
-            $cartItemId = (int)($_POST['cart_item_id'] ?? 0);
-            try {
-                // update
-                $up = $db->prepare('UPDATE cart_items SET quantity = ? WHERE id = ?');
-                $up->execute([$newQty, $cartItemId]);
-                // item subtotal and total
-                $itSt = $db->prepare('SELECT ci.quantity, ci.price FROM cart_items ci WHERE ci.id = ? LIMIT 1');
-                $itSt->execute([$cartItemId]);
-                $itRow = $itSt->fetch();
-                $itemSubtotal = $itRow ? ((int)$itRow['quantity'] * (float)$itRow['price']) : 0;
-                $uid = current_user_id();
-                $totalSt = $db->prepare('SELECT COALESCE(SUM(ci.quantity * ci.price),0) FROM carts c JOIN cart_items ci ON c.id = ci.cart_id WHERE c.user_id = ?');
-                $totalSt->execute([$uid]);
-                $total = (float)$totalSt->fetchColumn();
-                json_res(['success'=>true,'count'=>null,'item_subtotal'=>$itemSubtotal,'total'=>$total]);
-            } catch (Exception $e) { json_res(['success'=>false,'error'=>'Could not update']); }
-        } else {
-            $sessionKey = $_POST['session_key'] ?? null;
-            if ($sessionKey && isset($_SESSION['cart'][$sessionKey])) {
-                $_SESSION['cart'][$sessionKey]['quantity'] = $newQty;
-            } else {
-                $pid = (int)($_POST['product_id'] ?? 0);
-                foreach ($_SESSION['cart'] as $k => $it) {
-                    if ((int)$it['product_id'] === $pid) { $_SESSION['cart'][$k]['quantity'] = $newQty; $sessionKey = $k; break; }
+            $id = (int)($_POST['cart_item_id'] ?? 0);
+            $up = $db->prepare('UPDATE cart_items SET quantity = ? WHERE id = ?');
+            $up->execute([$newQty, $id]);
+            $total = calculate_cart_total($db, current_user_id());
+            $stmt = $db->prepare('SELECT price FROM cart_items WHERE id = ?');
+            $stmt->execute([$id]);
+            $row = $stmt->fetch();
+            $subtotal = $row ? $row['price'] * $newQty : 0;
+
+            // Áp dụng giảm giá cho subtotal
+            if (!empty($_SESSION['coupon_code'])) {
+                $code = strtoupper($_SESSION['coupon_code']);
+                $cstmt = $db->prepare("SELECT discount_percent FROM coupons WHERE UPPER(code) = ? AND discount_type = 'product' AND (valid_to IS NULL OR valid_to >= NOW())");
+                $cstmt->execute([$code]);
+                $coupon = $cstmt->fetch();
+                if ($coupon) {
+                    $subtotal = $subtotal * (1 - $coupon['discount_percent'] / 100);
                 }
             }
-            // compute item subtotal
+            $subtotal = round($subtotal);
+
+            json_res(['success' => true, 'item_subtotal' => $subtotal, 'total' => $total]);
+        } else {
+            $key = $_POST['session_key'] ?? null;
+            if ($key && isset($_SESSION['cart'][$key])) {
+                $_SESSION['cart'][$key]['quantity'] = $newQty;
+            }
+            $total = calculate_cart_total();
             $db = get_db();
-            $item = $_SESSION['cart'][$sessionKey];
-            $p = $db->prepare('SELECT price FROM products WHERE id = ?'); $p->execute([(int)$item['product_id']]);
-            $price = (float)($p->fetchColumn() ?: 0);
-            $itemSubtotal = $price * (int)$item['quantity'];
-            $total = session_cart_total();
-            json_res(['success'=>true,'count'=>null,'item_subtotal'=>$itemSubtotal,'total'=>$total]);
+            $item = $_SESSION['cart'][$key];
+            $p = $db->prepare('SELECT price FROM products WHERE id = ?');
+            $p->execute([(int)$item['product_id']]);
+            $price = $p->fetchColumn() ?: 0;
+            $subtotal = $price * $newQty;
+
+            // Áp dụng mã giảm
+            if (!empty($_SESSION['coupon_code'])) {
+                $code = strtoupper($_SESSION['coupon_code']);
+                $cstmt = $db->prepare("SELECT discount_percent FROM coupons WHERE UPPER(code) = ? AND discount_type = 'product' AND (valid_to IS NULL OR valid_to >= NOW())");
+                $cstmt->execute([$code]);
+                $coupon = $cstmt->fetch();
+                if ($coupon) {
+                    $subtotal = $subtotal * (1 - $coupon['discount_percent'] / 100);
+                }
+            }
+            $subtotal = round($subtotal);
+
+            json_res(['success' => true, 'item_subtotal' => $subtotal, 'total' => $total]);
         }
     }
 
@@ -141,210 +186,237 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'remove') {
         if (is_logged_in()) {
             $db = get_db();
-            $cartItemId = (int)($_POST['cart_item_id'] ?? 0);
-            try {
-                $del = $db->prepare('DELETE FROM cart_items WHERE id = ?');
-                $del->execute([$cartItemId]);
-                $uid = current_user_id();
-                $totalSt = $db->prepare('SELECT COALESCE(SUM(ci.quantity * ci.price),0) FROM carts c JOIN cart_items ci ON c.id = ci.cart_id WHERE c.user_id = ?');
-                $totalSt->execute([$uid]);
-                $total = (float)$totalSt->fetchColumn();
-                $countSt = $db->prepare('SELECT COALESCE(SUM(ci.quantity),0) FROM carts c JOIN cart_items ci ON c.id = ci.cart_id WHERE c.user_id = ?');
-                $countSt->execute([$uid]);
-                $count = (int)$countSt->fetchColumn();
-                json_res(['success'=>true,'count'=>$count,'item_subtotal'=>0,'total'=>$total]);
-            } catch (Exception $e) { json_res(['success'=>false,'error'=>'Could not remove']); }
+            $id = (int)($_POST['cart_item_id'] ?? 0);
+            $db->prepare('DELETE FROM cart_items WHERE id = ?')->execute([$id]);
+            $total = calculate_cart_total($db, current_user_id());
+            $count = $db->query("SELECT COALESCE(SUM(quantity),0) FROM cart_items ci JOIN carts c ON c.id = ci.cart_id WHERE c.user_id = " . current_user_id())->fetchColumn();
+            json_res(['success' => true, 'count' => $count, 'total' => $total]);
         } else {
-            $sessionKey = $_POST['session_key'] ?? null;
-            if ($sessionKey && isset($_SESSION['cart'][$sessionKey])) unset($_SESSION['cart'][$sessionKey]);
-            else {
-                $pid = (int)($_POST['product_id'] ?? 0);
-                foreach ($_SESSION['cart'] as $k => $it) { if ((int)$it['product_id'] === $pid) { unset($_SESSION['cart'][$k]); break; } }
-            }
-            $count = 0; foreach ($_SESSION['cart'] as $it) { $count += (int)$it['quantity']; }
-            $total = session_cart_total();
-            json_res(['success'=>true,'count'=>$count,'item_subtotal'=>0,'total'=>$total]);
+            $key = $_POST['session_key'] ?? null;
+            if ($key) unset($_SESSION['cart'][$key]);
+            $total = calculate_cart_total();
+            $count = array_sum(array_column($_SESSION['cart'], 'quantity'));
+            json_res(['success' => true, 'count' => $count, 'total' => $total]);
         }
     }
 
-    json_res(['success'=>false,'error'=>'Unknown action']);
+    json_res(['success' => false, 'error' => 'Unknown action']);
 }
 
-// Render cart page
+// === LOAD GIỎ HÀNG ===
 require_once __DIR__ . '/includes/header.php';
 $db = get_db();
+$items = [];
+
 if (is_logged_in()) {
     $uid = current_user_id();
-    $st = $db->prepare('SELECT c.id as cart_id FROM carts c WHERE c.user_id = ? LIMIT 1');
+    $st = $db->prepare('SELECT c.id FROM carts c WHERE c.user_id = ?');
     $st->execute([$uid]);
     $cartId = $st->fetchColumn();
     if ($cartId) {
-        $itemsSt = $db->prepare('SELECT ci.id, ci.product_id, ci.size, ci.quantity, ci.price, p.name FROM cart_items ci JOIN products p ON p.id = ci.product_id WHERE ci.cart_id = ?');
-        $itemsSt->execute([$cartId]);
-        $items = $itemsSt->fetchAll();
-    } else {
-        $items = [];
+        $stmt = $db->prepare('SELECT ci.id, ci.product_id, ci.size, ci.quantity, ci.price, p.name FROM cart_items ci JOIN products p ON p.id = ci.product_id WHERE ci.cart_id = ?');
+        $stmt->execute([$cartId]);
+        $items = $stmt->fetchAll();
     }
 } else {
-    // session items keyed by session_key
-    $items = [];
     foreach ($_SESSION['cart'] ?? [] as $k => $it) {
         $p = $db->prepare('SELECT name, price FROM products WHERE id = ?');
         $p->execute([(int)$it['product_id']]);
         $row = $p->fetch();
         if ($row) {
-            $items[] = ['session_key'=>$k,'product_id'=>$it['product_id'],'size'=>$it['size'] ?? null,'quantity'=>$it['quantity'],'price'=>$row['price'],'name'=>$row['name']];
+            $items[] = [
+                'session_key' => $k,
+                'product_id' => $it['product_id'],
+                'size' => $it['size'] ?? null,
+                'quantity' => $it['quantity'],
+                'price' => $row['price'],
+                'name' => $row['name']
+            ];
         }
     }
 }
 
-// compute total
-$total = 0.0;
-foreach ($items as $it) { $total += ((float)$it['price']) * ((int)$it['quantity']); }
-?>
-<h2>Your Cart</h2>
+// Tính tổng đã giảm (dùng chung hàm)
+$final_total = calculate_cart_total($db, is_logged_in() ? current_user_id() : null);
 
-<?php
-// Load main images for cart items
+// Load ảnh
 $imagesByProduct = [];
 if (!empty($items)) {
-    try {
-        $productIds = array_column($items, 'product_id');
-        $placeholders = implode(',', array_fill(0, count($productIds), '?'));
-        $stmt = $db->prepare("SELECT product_id, url FROM product_images WHERE product_id IN ($placeholders) AND is_main = 1");
-        $stmt->execute($productIds);
-        $imagesByProduct = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-    } catch (Exception $e) {
-        // ignore
-    }
+    $ids = array_column($items, 'product_id');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $stmt = $db->prepare("SELECT product_id, url FROM product_images WHERE product_id IN ($placeholders) AND is_main = 1");
+    $stmt->execute($ids);
+    $imagesByProduct = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 }
 ?>
 
+<h2>Giỏ hàng của bạn</h2>
+
+<!-- HIỂN THỊ MÃ ĐÃ ÁP DỤNG (chỉ khi có sản phẩm) -->
+<div id="coupon-alerts">
+    <?php if (!empty($_SESSION['coupon_code']) && !empty($items)): ?>
+        <div class="alert alert-success">
+            Đang áp dụng mã giảm giá: <strong><?php echo htmlspecialchars($_SESSION['coupon_code']); ?></strong>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['shipping_coupon']) && !empty($items)): ?>
+        <div class="alert alert-info">
+            Đang áp dụng mã giảm phí vận chuyển: <strong><?php echo htmlspecialchars($_SESSION['shipping_coupon']); ?></strong>
+            <?php if (!empty($_SESSION['shipping_discount'])): ?>
+                (Giảm <?php echo number_format($_SESSION['shipping_discount'], 0); ?>đ)
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+</div>
+
 <?php if (empty($items)): ?>
-    <p>Your cart is empty.</p>
+    <p>Giỏ hàng trống.</p>
 <?php else: ?>
     <div class="cart-layout">
         <div class="cart-items-list">
             <div class="cart-header">
-                <div class="cart-header-product">Product</div>
-                <div class="cart-header-quantity">Quantity</div>
-                <div class="cart-header-subtotal">Subtotal</div>
+                <div class="cart-header-product">Sản phẩm</div>
+                <div class="cart-header-quantity">Số lượng</div>
+                <div class="cart-header-subtotal">Thành tiền</div>
                 <div class="cart-header-remove"></div>
             </div>
-            <?php foreach ($items as $it): ?>
-                <?php
-                $item_id_attr = is_logged_in() ? 'data-cart-item-id="' . (int)$it['id'] . '"' : 'data-session-key="' . htmlspecialchars($it['session_key']) . '"';
-                $img_url = $imagesByProduct[$it['product_id']] ?? 'assets/images/product-placeholder.png';
-                ?>
-                <div class="cart-item" <?php echo $item_id_attr; ?>>
+            <?php foreach ($items as $it):
+                $attr = is_logged_in() ? 'data-cart-item-id="' . $it['id'] . '"' : 'data-session-key="' . htmlspecialchars($it['session_key']) . '"';
+                $img = $imagesByProduct[$it['product_id']] ?? 'assets/images/product-placeholder.png';
+                $item_price = $it['price'];
+                $item_subtotal = $item_price * $it['quantity'];
+
+                // Áp dụng mã giảm cho từng item
+                if (!empty($_SESSION['coupon_code'])) {
+                    $code = strtoupper($_SESSION['coupon_code']);
+                    $stmt = $db->prepare("SELECT discount_percent FROM coupons WHERE UPPER(code) = ? AND discount_type = 'product' AND (valid_to IS NULL OR valid_to >= NOW())");
+                    $stmt->execute([$code]);
+                    $coupon = $stmt->fetch();
+                    if ($coupon) {
+                        $item_subtotal = $item_subtotal * (1 - $coupon['discount_percent'] / 100);
+                    }
+                }
+                $item_subtotal = round($item_subtotal);
+            ?>
+                <div class="cart-item" <?php echo $attr; ?>>
                     <div class="cart-item-product">
-                        <img src="<?php echo htmlspecialchars($img_url); ?>" alt="<?php echo htmlspecialchars($it['name']); ?>" class="cart-item-image">
+                        <img src="<?php echo htmlspecialchars($img); ?>" alt="" class="cart-item-image">
                         <div class="cart-item-info">
                             <a href="product.php?id=<?php echo $it['product_id']; ?>" class="cart-item-name"><?php echo htmlspecialchars($it['name']); ?></a>
-                            <?php if (!empty($it['size'])): ?>
-                                <p class="cart-item-meta">Size: <?php echo htmlspecialchars($it['size']); ?></p>
-                            <?php endif; ?>
-                            <p class="cart-item-meta cart-item-price-mobile">Price: <?php echo number_format($it['price'], 0); ?>₫</p>
+                            <?php if (!empty($it['size'])): ?><p class="cart-item-meta">Size: <?php echo htmlspecialchars($it['size']); ?></p><?php endif; ?>
+                            <p class="cart-item-meta cart-item-price-mobile">Giá: <?php echo number_format($item_price, 0); ?>đ</p>
                         </div>
                     </div>
                     <div class="cart-item-quantity">
-                        <form class="ajax-cart-update" method="post" action="cart.php">
+                        <form class="ajax-cart-update" method="post">
                             <input type="hidden" name="action" value="update">
                             <?php if (is_logged_in()): ?>
-                                <input type="hidden" name="cart_item_id" value="<?php echo (int)$it['id']; ?>">
+                                <input type="hidden" name="cart_item_id" value="<?php echo $it['id']; ?>">
                             <?php else: ?>
                                 <input type="hidden" name="session_key" value="<?php echo htmlspecialchars($it['session_key']); ?>">
                             <?php endif; ?>
                             <div class="quantity-input">
-                                <button type="button" class="qty-btn minus" aria-label="Decrease quantity">-</button>
-                                <input type="number" name="quantity" value="<?php echo (int)$it['quantity']; ?>" min="1" readonly>
-                                <button type="button" class="qty-btn plus" aria-label="Increase quantity">+</button>
+                                <button type="button" class="qty-btn minus">−</button>
+                                <input type="number" name="quantity" value="<?php echo $it['quantity']; ?>" min="1" readonly>
+                                <button type="button" class="qty-btn plus">+</button>
                             </div>
                         </form>
                     </div>
                     <div class="cart-item-subtotal">
-                        <span><?php echo number_format($it['price'] * $it['quantity'], 0); ?></span>₫
+                        <span><?php echo number_format($item_subtotal, 0); ?></span>đ
                     </div>
                     <div class="cart-item-remove">
-                        <form class="ajax-cart-remove" method="post" action="cart.php">
+                        <form class="ajax-cart-remove" method="post">
                             <input type="hidden" name="action" value="remove">
                             <?php if (is_logged_in()): ?>
-                                <input type="hidden" name="cart_item_id" value="<?php echo (int)$it['id']; ?>">
+                                <input type="hidden" name="cart_item_id" value="<?php echo $it['id']; ?>">
                             <?php else: ?>
                                 <input type="hidden" name="session_key" value="<?php echo htmlspecialchars($it['session_key']); ?>">
                             <?php endif; ?>
-                            <button type="submit" class="btn-remove-icon" title="Xóa sản phẩm">🗑️</button>
+                            <button type="submit" class="btn-remove-icon" title="Xóa sản phẩm">Xóa</button>
                         </form>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
+
         <aside class="cart-summary">
-            <h3>Order Summary</h3>
+            <h3>Tóm tắt đơn hàng</h3>
             <div class="summary-row">
-                <span>Subtotal</span>
-                <strong id="cart-total"><?php echo number_format($total, 0); ?>₫</strong>
+                <span>Tạm tính</span>
+                <strong id="cart-total"><?php echo number_format($final_total, 0); ?>đ</strong>
             </div>
-            <p>Shipping & taxes calculated at checkout.</p>
-            <a class="btn checkout-btn" href="checkout.php">Proceed to checkout</a>
+            <p>Phí vận chuyển sẽ được tính tại bước thanh toán.</p>
+            <a class="btn checkout-btn" href="checkout.php">Tiến hành thanh toán</a>
         </aside>
     </div>
 <?php endif; ?>
+
 <script>
-document.querySelectorAll('.cart-item').forEach(item=>{
-    const input = item.querySelector('input[type=number]');
-    const subtotalEl = item.querySelector('.cart-item-subtotal span');
+document.addEventListener('DOMContentLoaded', () => {
+    const alertsContainer = document.getElementById('coupon-alerts');
     const cartTotalEl = document.getElementById('cart-total');
 
-    // Tăng / giảm
-    item.querySelector('.qty-btn.plus').addEventListener('click', ()=>{
-        let qty = parseInt(input.value)+1;
-        updateCartItem(item, qty, input, subtotalEl, cartTotalEl);
-    });
-    item.querySelector('.qty-btn.minus').addEventListener('click', ()=>{
-        let qty = Math.max(1, parseInt(input.value)-1);
-        updateCartItem(item, qty, input, subtotalEl, cartTotalEl);
+    // Hàm cập nhật tổng tiền
+    const updateTotal = (total) => {
+        cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
+    };
+
+    // Hàm xóa thông báo khi giỏ trống
+    const clearAlertsIfEmpty = () => {
+        const items = document.querySelectorAll('.cart-item');
+        if (items.length === 0) {
+            alertsContainer.innerHTML = '';
+        }
+    };
+
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const input = item.querySelector('input[name="quantity"]');
+        const subtotalEl = item.querySelector('.cart-item-subtotal span');
+        const plus = item.querySelector('.qty-btn.plus');
+        const minus = item.querySelector('.qty-btn.minus');
+        const removeBtn = item.querySelector('.btn-remove-icon');
+
+        plus.addEventListener('click', () => update(parseInt(input.value) + 1));
+        minus.addEventListener('click', () => update(Math.max(1, parseInt(input.value) - 1)));
+        removeBtn.addEventListener('click', e => { e.preventDefault(); remove(); });
+
+        function update(qty) {
+            input.value = qty;
+            const form = item.querySelector('.ajax-cart-update');
+            const data = new FormData(form);
+            data.append('quantity', qty);
+
+            fetch('cart.php', { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        subtotalEl.textContent = new Intl.NumberFormat('vi-VN').format(res.item_subtotal);
+                        updateTotal(res.total);
+                        clearAlertsIfEmpty();
+                    }
+                });
+        }
+
+        function remove() {
+            const form = item.querySelector('.ajax-cart-remove');
+            const data = new FormData(form);
+            fetch('cart.php', { method: 'POST', body: data })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        item.remove();
+                        updateTotal(res.total);
+                        clearAlertsIfEmpty();
+                    }
+                });
+        }
     });
 
-    // Xóa
-    item.querySelector('.btn-remove-icon').addEventListener('click', (e)=>{
-        e.preventDefault(); // Ngăn form submit ngay lập tức
-        removeCartItem(item, cartTotalEl);
-    });
+    // Xóa alert nếu giỏ trống lúc load
+    clearAlertsIfEmpty();
 });
-
-function updateCartItem(item, qty, inputEl, subtotalEl, cartTotalEl){
-    inputEl.value = qty;
-    let formData = new FormData();
-    formData.append('action','update');
-    formData.append('quantity', qty);
-    if(item.dataset.cartItemId) formData.append('cart_item_id', item.dataset.cartItemId);
-    else if(item.dataset.sessionKey) formData.append('session_key', item.dataset.sessionKey);
-
-    fetch('cart.php',{method:'POST', body: formData})
-    .then(r=>r.json()).then(data=>{
-        if(data.success){
-            subtotalEl.textContent = new Intl.NumberFormat('vi-VN').format(data.item_subtotal);
-            cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(data.total) + '₫';
-        }
-    });
-}
-
-function removeCartItem(item, cartTotalEl){
-    let formData = new FormData();
-    formData.append('action','remove');
-    if(item.dataset.cartItemId) formData.append('cart_item_id', item.dataset.cartItemId);
-    else if(item.dataset.sessionKey) formData.append('session_key', item.dataset.sessionKey);
-
-    fetch('cart.php',{method:'POST', body: formData})
-    .then(r=>r.json()).then(data=>{
-        if(data.success){
-            item.remove();
-            cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(data.total) + '₫';
-        }
-    });
-}
 </script>
 
-<?php require_once __DIR__ . '/includes/footer.php';
- 
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

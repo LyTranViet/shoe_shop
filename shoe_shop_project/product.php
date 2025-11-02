@@ -74,7 +74,7 @@ try {
 $inWishlist = false;
 if (is_logged_in()) {
     try {
-        $w = $db->prepare('SELECT    1 FROM wishlists WHERE user_id = ? AND product_id = ?');
+        $w = $db->prepare('SELECT 1 FROM wishlists WHERE user_id = ? AND product_id = ?');
         $w->execute([current_user_id(), $id]);
         $inWishlist = (bool)$w->fetch();
     } catch (Exception $e) { }
@@ -84,11 +84,10 @@ if (is_logged_in()) {
 $vouchers = [];
 try {
     $vouchers = $db->query("SELECT code, discount_percent, discount_type FROM coupons WHERE (valid_to IS NULL OR valid_to >= NOW()) AND (valid_from IS NULL OR valid_from <= NOW()) ORDER BY discount_percent DESC")->fetchAll();
-} catch (Exception $e) {
-    // ignore if table doesn't exist
-}
+} catch (Exception $e) { }
+
 // Lọc vouchers theo discount_type
-$productVouchers = array_filter($vouchers, function($v) { return $v['discount_type'] === 'product'; });
+$productVouchers = array_filter($vouchers, fn($v) => $v['discount_type'] === 'product');
 $shippingVouchers = [];
 try {
     $shippingVouchers = $db->query("
@@ -98,15 +97,15 @@ try {
         AND (expire_date IS NULL OR expire_date >= CURDATE()) 
         ORDER BY VALUE DESC
     ")->fetchAll();
-} catch (Exception $e) {}
-// Suggested products (same category)
+} catch (Exception $e) { }
+
+// Suggested products
 $suggested = [];
 try {
     $st2 = $db->prepare('SELECT p.* FROM products p WHERE p.category_id = ? AND p.id != ? LIMIT 7');
     $st2->execute([$prod['category_id'], $id]);
     $suggested = $st2->fetchAll();
-    // load images for suggested
-    $sids = array_map(function($p){return $p['id'];}, $suggested);
+    $sids = array_column($suggested, 'id');
     $imagesBy = [];
     if (!empty($sids)) {
         $place = implode(',', array_fill(0, count($sids), '?'));
@@ -120,12 +119,14 @@ try {
 
 $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
 ?>
+
 <script>
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', function() {
 
-    // === CODE GỐC GIỮ NGUYÊN PHẦN TRÊN === //
+    // === Hàm format VND ===
+    const formatVND = (amount) => Math.round(amount).toLocaleString('vi-VN') + ' đ';
 
-    // Voucher copy logic (giữ nguyên)
+    // === Voucher Copy Logic ===
     document.querySelectorAll('.voucher-code').forEach(button => {
         button.addEventListener('click', function() {
             const code = this.dataset.code;
@@ -137,100 +138,150 @@ document.addEventListener('DOMContentLoaded', function(){
                     this.textContent = originalText;
                     this.disabled = false;
                 }, 2000);
-            }).catch(err => {
-                alert('Không thể sao chép mã. Vui lòng thử lại.');
-                console.error('Copy failed', err);
+            }).catch(() => {
+                alert('Không thể sao chép. Vui lòng thử lại.');
             });
         });
     });
 
-    // === XỬ LÝ CHO MÃ GIẢM GIÁ SẢN PHẨM ===
+    // === Paste & Validate Buttons ===
     const pasteBtn = document.getElementById('paste-and-validate-btn');
     if (pasteBtn) pasteBtn.addEventListener('click', () => handlePasteAndValidate('product'));
 
-    // === XỬ LÝ CHO MÃ GIẢM PHÍ VẬN CHUYỂN ===
     const pasteShippingBtn = document.getElementById('paste-and-validate-shipping-btn');
     if (pasteShippingBtn) pasteShippingBtn.addEventListener('click', () => handlePasteAndValidate('shipping'));
 
-  async function handlePasteAndValidate(type) {
-    const isShipping = type === 'shipping';
-    const couponInput = document.getElementById(isShipping ? 'coupon-code-shipping' : 'coupon-code-product');
-    const resultDiv = document.querySelector(isShipping ? '#shipping-coupon-result' : '.product-actions-form .coupon-result');
-    const priceEl = document.querySelector('.price-container .price');
-    const originalPriceEl = document.querySelector('.price-container .price-original');
-    const originalPrice = parseFloat(priceEl.dataset.originalPrice || priceEl.textContent.replace(/[^0-9.]/g,'') || 0);
+    // === Xử lý dán & validate mã ===
+    async function handlePasteAndValidate(type) {
+        const isShipping = type === 'shipping';
+        const couponInput = document.getElementById(isShipping ? 'coupon-code-shipping' : 'coupon-code-product');
+        const resultDiv = document.querySelector(isShipping ? '#shipping-coupon-result' : '.product-actions-form .coupon-result');
+        const priceEl = document.querySelector('.price-container .price');
+        const originalPriceEl = document.querySelector('.price-container .price-original');
+        const originalPrice = parseFloat(priceEl.dataset.originalPrice) || 0;
 
-    resultDiv.textContent = '';
-    resultDiv.className = 'coupon-result';
+        resultDiv.textContent = '';
+        resultDiv.className = 'coupon-result';
 
-    try {
-        const code = await navigator.clipboard.readText();
-        couponInput.value = code;
+        try {
+            const code = (await navigator.clipboard.readText()).trim();
+            couponInput.value = code;
 
-        if (!code) {
-            resultDiv.textContent = 'Clipboard rỗng.';
+            if (!code) {
+                resultDiv.textContent = 'Clipboard rỗng.';
+                resultDiv.classList.add('error');
+                return;
+            }
+
+            const url = isShipping ? 'validate_shipping_coupon.php' : 'validate_coupon.php';
+            const formData = new FormData();
+            formData.append('code', code);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                if (isShipping) {
+                    resultDiv.innerHTML = data.message || 'Mã hợp lệ!';
+                    resultDiv.classList.add('success');
+                    const coupon = data.coupon || {};
+                    document.getElementById('validated_shipping_coupon_code').value = coupon.code || code;
+                    document.getElementById('shipping_discount_amount').value = coupon.value || 0;
+                } else {
+                    const discountPercent = parseFloat(data.discount_percent) || 0;
+                    const newPrice = originalPrice * (1 - discountPercent / 100);
+
+                    resultDiv.innerHTML = `Áp dụng thành công! Giảm <strong>${discountPercent}%</strong>`;
+                    resultDiv.classList.add('success');
+
+                    originalPriceEl.textContent = formatVND(originalPrice);
+                    originalPriceEl.style.display = 'block';
+                    priceEl.textContent = formatVND(newPrice);
+                }
+            } else {
+                resultDiv.textContent = data.message || 'Mã không hợp lệ.';
+                resultDiv.classList.add('error');
+                if (!isShipping) {
+                    originalPriceEl.style.display = 'none';
+                    priceEl.textContent = formatVND(originalPrice);
+                }
+            }
+        } catch (err) {
+            console.error('Coupon error:', err);
+            resultDiv.textContent = 'Lỗi kết nối. Vui lòng thử lại.';
             resultDiv.classList.add('error');
-            return;
+            if (!isShipping) {
+                originalPriceEl.style.display = 'none';
+                priceEl.textContent = formatVND(originalPrice);
+            }
         }
+    }
+
+    // === Gõ tay + Enter ===
+    document.getElementById('coupon-code-product')?.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleManualValidate('product');
+        }
+    });
+
+    async function handleManualValidate(type) {
+        const isShipping = type === 'shipping';
+        const input = document.getElementById(isShipping ? 'coupon-code-shipping' : 'coupon-code-product');
+        const code = input.value.trim();
+        if (!code) return;
 
         const url = isShipping ? 'validate_shipping_coupon.php' : 'validate_coupon.php';
         const formData = new FormData();
         formData.append('code', code);
 
-        const response = await fetch(url, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
-        const text = await response.text();
-
-        // Debug: nếu cần, in raw text lên console
-        console.log('Raw response from', url, text);
-
-        let data;
         try {
-            data = JSON.parse(text);
-        } catch (e) {
-            // Nếu server trả HTML/warning, show nội dung cho dev
-            resultDiv.textContent = '✗ Lỗi máy chủ (response không phải JSON). Kiểm tra console network.';
-            resultDiv.classList.add('error');
-            console.error('Invalid JSON response:', text);
-            return;
-        }
+            const response = await fetch(url, { method: 'POST', body: formData });
+            const data = await response.json();
+            const resultDiv = document.querySelector(isShipping ? '#shipping-coupon-result' : '.product-actions-form .coupon-result');
+            const priceEl = document.querySelector('.price-container .price');
+            const originalPriceEl = document.querySelector('.price-container .price-original');
+            const originalPrice = parseFloat(priceEl.dataset.originalPrice) || 0;
 
-        if (data.success) {
-            const discountPercent = data.discount_percent || 0;
-            if (isShipping) {
-                resultDiv.textContent = `✓ Mã hợp lệ! Giảm ${discountPercent}% phí vận chuyển.`;
-                resultDiv.classList.add('success');
-                // Lưu mã đã validate vào input ẩn để gửi lên server khi add-to-cart
-                document.getElementById('validated_shipping_coupon_code').value = couponInput.value;
-                document.getElementById('shipping_discount_amount').value = discountPercent;
+            resultDiv.textContent = '';
+            resultDiv.className = 'coupon-result';
+
+            if (data.success) {
+                if (isShipping) {
+                    resultDiv.innerHTML = data.message || 'Mã hợp lệ!';
+                    resultDiv.classList.add('success');
+                    const coupon = data.coupon || {};
+                    document.getElementById('validated_shipping_coupon_code').value = coupon.code || code;
+                    document.getElementById('shipping_discount_amount').value = coupon.value || 0;
+                } else {
+                    const discountPercent = parseFloat(data.discount_percent) || 0;
+                    const newPrice = originalPrice * (1 - discountPercent / 100);
+                    resultDiv.innerHTML = `Áp dụng thành công! Giảm <strong>${discountPercent}%</strong>`;
+                    resultDiv.classList.add('success');
+                    originalPriceEl.textContent = formatVND(originalPrice);
+                    originalPriceEl.style.display = 'block';
+                    priceEl.textContent = formatVND(newPrice);
+                }
             } else {
-                const newPrice = originalPrice * (1 - discountPercent / 100);
-                resultDiv.textContent = `✓ Áp dụng thành công! Giảm ${discountPercent}%.`;
-                resultDiv.classList.add('success');
-                originalPriceEl.textContent = '$' + originalPrice.toFixed(2);
-                originalPriceEl.style.display = 'block';
-                priceEl.textContent = '$' + newPrice.toFixed(2);
+                resultDiv.textContent = data.message || 'Mã không hợp lệ.';
+                resultDiv.classList.add('error');
+                if (!isShipping) {
+                    originalPriceEl.style.display = 'none';
+                    priceEl.textContent = formatVND(originalPrice);
+                }
             }
-        } else {
-            resultDiv.textContent = `✗ ${data.message || 'Mã không hợp lệ.'}`;
+        } catch (err) {
+            console.error(err);
+            resultDiv.textContent = 'Lỗi hệ thống.';
             resultDiv.classList.add('error');
-            if (!isShipping) {
-                originalPriceEl.style.display = 'none';
-                priceEl.textContent = '$' + originalPrice.toFixed(2);
-            }
-        }
-    } catch (err) {
-        console.error('Fetch error:', err);
-        resultDiv.textContent = `✗ Lỗi máy chủ: ${err.message}`;
-        resultDiv.classList.add('error');
-        if (!isShipping) {
-            originalPriceEl.style.display = 'none';
-            priceEl.textContent = '$' + originalPrice.toFixed(2);
         }
     }
-}
 
-});
-
+}); // DOMContentLoaded
 </script>
 
 <div class="product-page-container">
@@ -245,12 +296,12 @@ document.addEventListener('DOMContentLoaded', function(){
                 <button class="thumb-nav prev" aria-label="Previous thumbnails">‹</button>
                 <div class="thumbs">
                 <?php foreach ($images as $img):
-                        $url = $img['url'];
-                        $isVideo = preg_match('/\.(mp4|webm|ogg)$/i', $url);
+                    $url = $img['url'];
+                    $isVideo = preg_match('/\.(mp4|webm|ogg)$/i', $url);
                 ?>
                     <div class="thumb" data-type="<?php echo $isVideo ? 'video' : 'image'; ?>" data-src="<?php echo htmlspecialchars($url); ?>">
                         <img src="<?php echo htmlspecialchars($url); ?>" alt="<?php echo htmlspecialchars($prod['name']); ?>">
-                        <?php if ($isVideo): ?><span class="play">▶</span><?php endif; ?>
+                        <?php if ($isVideo): ?><span class="play">Play</span><?php endif; ?>
                     </div>
                 <?php endforeach; ?>
                 </div>
@@ -261,12 +312,14 @@ document.addEventListener('DOMContentLoaded', function(){
 
         <div class="details">
             <h1><?php echo htmlspecialchars($prod['name']); ?></h1>
-            <p class="meta">Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> | Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a></p>
+            <p class="meta">
+                Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> |
+                Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a>
+            </p>
             <div class="price-container">
                 <p class="price" data-original-price="<?php echo $prod['price']; ?>">
-                    <?php echo number_format($prod['price'], 0); ?> VND
+                    <?php echo number_format($prod['price'], 0); ?> đ
                 </p>
-<p class="price-original" style="display: none;"></p>
                 <p class="price-original" style="display: none;"></p>
             </div>
 
@@ -284,14 +337,13 @@ document.addEventListener('DOMContentLoaded', function(){
                             $first_available_checked = false;
                             foreach ($sizes as $sz):
                                 $is_disabled = (int)$sz['stock'] <= 0;
-                                $is_checked = false;
-                                if (!$is_disabled && !$first_available_checked) {
-                                    $is_checked = true;
-                                    $first_available_checked = true;
-                                }
+                                $is_checked = !$is_disabled && !$first_available_checked;
+                                if ($is_checked) $first_available_checked = true;
                             ?>
-                                <input type="radio" name="size" value="<?php echo htmlspecialchars($sz['size']); ?>" id="size-<?php echo htmlspecialchars($sz['size']); ?>" <?php if ($is_checked) echo 'checked'; ?> <?php if ($is_disabled) echo 'disabled'; ?> data-stock="<?php echo (int)$sz['stock']; ?>">
-                                <label for="size-<?php echo htmlspecialchars($sz['size']); ?>" class="size-box" title="<?php if ($is_disabled) echo 'Hết hàng'; ?>"><?php echo htmlspecialchars($sz['size']); ?></label>
+                                <input type="radio" name="size" value="<?php echo htmlspecialchars($sz['size']); ?>" id="size-<?php echo htmlspecialchars($sz['size']); ?>" <?php echo $is_checked ? 'checked' : ''; ?> <?php echo $is_disabled ? 'disabled' : ''; ?> data-stock="<?php echo (int)$sz['stock']; ?>">
+                                <label for="size-<?php echo htmlspecialchars($sz['size']); ?>" class="size-box" title="<?php echo $is_disabled ? 'Hết hàng' : ''; ?>">
+                                    <?php echo htmlspecialchars($sz['size']); ?>
+                                </label>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -313,15 +365,15 @@ document.addEventListener('DOMContentLoaded', function(){
                     </div>
                     <div class="form-group coupon-group">
                         <label for="coupon-code-shipping">Mã giảm phí vận chuyển</label>
-                    <div class="input-with-button">
-                        <input type="text" id="coupon-code-shipping" name="shipping_coupon_input" placeholder="Dán mã vào đây" value="<?php echo htmlspecialchars($sessionShippingCoupon ?? ''); ?>">
-                        <button type="button" id="paste-and-validate-shipping-btn" class="btn small">Dán & Kiểm tra</button>
-                    </div>
-                    <div class="coupon-result" id="shipping-coupon-result">
-                        <?php if (!empty($shippingCouponMessage)) echo $shippingCouponMessage; ?>
-                    </div>
-                    <input type="hidden" id="validated_shipping_coupon_code" name="validated_shipping_coupon_code" value="">
-                    <input type="hidden" id="shipping_discount_amount" name="shipping_discount_amount" value="0">
+                        <div class="input-with-button">
+                            <input type="text" id="coupon-code-shipping" name="shipping_coupon_input" placeholder="Dán mã vào đây" value="<?php echo htmlspecialchars($sessionShippingCoupon ?? ''); ?>">
+                            <button type="button" id="paste-and-validate-shipping-btn" class="btn small">Dán & Kiểm tra</button>
+                        </div>
+                        <div class="coupon-result" id="shipping-coupon-result">
+                            <?php if (!empty($shippingCouponMessage)) echo $shippingCouponMessage; ?>
+                        </div>
+                        <input type="hidden" id="validated_shipping_coupon_code" name="validated_shipping_coupon_code" value="">
+                        <input type="hidden" id="shipping_discount_amount" name="shipping_discount_amount" value="0">
                     </div>
                     <div class="form-group full-width">
                         <button class="btn">Add to cart</button>
@@ -337,41 +389,43 @@ document.addEventListener('DOMContentLoaded', function(){
         </div>
     </div>
 
+    <!-- Mô tả -->
     <div class="product-section description-section">
-        <div class="section-header-styled">
-            <h3>Mô tả sản phẩm</h3>
-        </div>
+        <div class="section-header-styled"><h3>Mô tả sản phẩm</h3></div>
         <div class="desc-content"><?php echo nl2br(htmlspecialchars($prod['description'])); ?></div>
     </div>
 
+    <!-- Voucher sản phẩm -->
     <?php if (!empty($productVouchers)): ?>
-<div class="product-section vouchers-section">
-    <h3>✨ Voucher Giảm Giá Sản Phẩm</h3>
-    <div class="vouchers-list">
-        <?php foreach ($productVouchers as $v): ?>
-        <div class="voucher-item">
-            <div class="voucher-info">Giảm <?php echo (int)$v['discount_percent']; ?>% giá sản phẩm</div>
-            <button class="voucher-code" data-code="<?php echo htmlspecialchars($v['code']); ?>">Copy</button>
+    <div class="product-section vouchers-section">
+        <h3>Voucher Giảm Giá Sản Phẩm</h3>
+        <div class="vouchers-list">
+            <?php foreach ($productVouchers as $v): ?>
+            <div class="voucher-item">
+                <div class="voucher-info">Giảm <?php echo (int)$v['discount_percent']; ?>% giá sản phẩm</div>
+                <button class="voucher-code" data-code="<?php echo htmlspecialchars($v['code']); ?>">Copy</button>
+            </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
     </div>
-</div>
-<?php endif; ?>
+    <?php endif; ?>
 
-<?php if (!empty($shippingVouchers)): ?>
-<div class="product-section vouchers-section">
-    <h3>🚚 Voucher Giảm Phí Vận Chuyển</h3>
-    <div class="vouchers-list">
-        <?php foreach ($shippingVouchers as $v): ?>
-        <div class="voucher-item">
-            <div class="voucher-info">Giảm <?php echo (int)$v['discount_percent']; ?>% phí ship</div>
-            <button class="voucher-code" data-code="<?php echo htmlspecialchars($v['code']); ?>">Copy</button>
+    <!-- Voucher vận chuyển -->
+    <?php if (!empty($shippingVouchers)): ?>
+    <div class="product-section vouchers-section">
+        <h3>Voucher Giảm Phí Vận Chuyển</h3>
+        <div class="vouchers-list">
+            <?php foreach ($shippingVouchers as $v): ?>
+            <div class="voucher-item">
+                <div class="voucher-info">Giảm <?php echo (int)$v['discount_percent']; ?>% phí ship</div>
+                <button class="voucher-code" data-code="<?php echo htmlspecialchars($v['code']); ?>">Copy</button>
+            </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
     </div>
-</div>
-<?php endif; ?>
+    <?php endif; ?>
 
+    <!-- Reviews -->
     <div class="product-section reviews-section">
         <h3>Reviews</h3>
         <?php if (empty($reviews)): ?>
@@ -380,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function(){
             <div class="review">
                 <div class="review-header">
                     <strong><?php echo htmlspecialchars($rev['user_name'] ?? 'Guest'); ?></strong>
-                    <span class="review-rating">Rating: <?php echo str_repeat('★', (int)$rev['rating']) . str_repeat('☆', 5 - (int)$rev['rating']); ?></span>
+                    <span class="review-rating"><?php echo str_repeat('★', $rev['rating']) . str_repeat('☆', 5 - $rev['rating']); ?></span>
                 </div>
                 <p class="review-comment"><?php echo nl2br(htmlspecialchars($rev['comment'])); ?></p>
                 <small class="review-date"><?php echo date('d M Y', strtotime($rev['created_at'])); ?></small>
@@ -396,7 +450,6 @@ document.addEventListener('DOMContentLoaded', function(){
                     <input type="hidden" name="action" value="add_review">
                     <div class="form-group">
                         <label>Rating</label>
-                        <!-- JS-powered star rating -->
                         <div class="star-rating-js">
                             <span class="star" data-value="1">☆</span>
                             <span class="star" data-value="2">☆</span>
@@ -418,6 +471,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <?php endif; ?>
     </div>
 
+    <!-- Suggested Products -->
     <?php if (!empty($suggested)): ?>
     <div class="product-section suggested-products">
         <h3>Suggested products</h3>
@@ -429,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         <div class="swiper-slide product">
                             <div class="thumb"><a href="product.php?id=<?php echo $s['id']; ?>"><img src="<?php echo htmlspecialchars($simg); ?>" alt="<?php echo htmlspecialchars($s['name']); ?>"></a></div>
                             <h4><a href="product.php?id=<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></a></h4>
-                            <p class="price">$<?php echo number_format($s['price'],2); ?></p>
+                            <p class="price"><?php echo number_format($s['price'], 0); ?> đ</p>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -441,117 +495,47 @@ document.addEventListener('DOMContentLoaded', function(){
     <?php endif; ?>
 </div>
 
-<!-- Thêm thư viện Swiper JS -->
+<!-- Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-<!-- Khởi tạo Swiper cho các carousel sản phẩm -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Lặp qua mỗi product-carousel-wrapper để khởi tạo Swiper riêng
-    document.querySelectorAll('.product-carousel-wrapper').forEach(function(wrapper) {
-        const swiper = new Swiper(wrapper.querySelector('.swiper.product-carousel'), {
-            // Số lượng slide hiển thị
-            slidesPerView: 2, // Mặc định cho màn hình nhỏ nhất
-            spaceBetween: 20, // Khoảng cách giữa các slide
-
-            // Kích hoạt các nút điều hướng
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-carousel-wrapper').forEach(wrapper => {
+        new Swiper(wrapper.querySelector('.swiper.product-carousel'), {
+            slidesPerView: 2,
+            spaceBetween: 20,
             navigation: {
                 nextEl: wrapper.querySelector('.swiper-button-next'),
                 prevEl: wrapper.querySelector('.swiper-button-prev'),
             },
-
-            // Responsive breakpoints
             breakpoints: {
-                768: { slidesPerView: 3, spaceBetween: 20 }, // Màn hình máy tính bảng
-                992: { slidesPerView: 4, spaceBetween: 20 }, // Màn hình máy tính nhỏ
+                768: { slidesPerView: 3 },
+                992: { slidesPerView: 4 }
             }
         });
     });
 });
 </script>
 
-<?php require_once __DIR__ . '/includes/footer.php';
-?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
+
 <style>
-/* --- Voucher & Coupon Styles --- */
-.vouchers-list {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-.voucher-item {
-    display: flex;
-    align-items: center;
-    background: #e9f5ff;
-    border: 1px dashed #007bff;
-    border-radius: 8px;
-    overflow: hidden;
-}
-.voucher-info {
-    padding: 8px 12px;
-    font-weight: 500;
-    color: #0056b3;
-}
-.voucher-code {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s;
-}
-.voucher-code:hover {
-    background: #0056b3;
-}
-.voucher-code:disabled {
-    background: #28a745; /* Green for 'Copied' */
-    cursor: default;
-}
+.vouchers-list { display: flex; gap: 15px; flex-wrap: wrap; }
+.voucher-item { display: flex; align-items: center; background: #e9f5ff; border: 1px dashed #007bff; border-radius: 8px; overflow: hidden; }
+.voucher-info { padding: 8px 12px; font-weight: 500; color: #0056b3; }
+.voucher-code { background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+.voucher-code:hover { background: #0056b3; }
+.voucher-code:disabled { background: #28a745; cursor: default; }
 
-/* Coupon Input Group */
-.input-with-button {
-    display: flex;
-    margin-top: 5px;
-}
-.input-with-button input {
-    flex-grow: 1;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
-}
-.input-with-button button {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    white-space: nowrap; /* Prevent text wrapping */
-}
+.input-with-button { display: flex; margin-top: 5px; }
+.input-with-button input { flex-grow: 1; border-radius: 0; border-right: none; }
+.input-with-button button { border-radius: 0; white-space: nowrap; }
 
-/* Price Display */
-.price-container .price {
-    font-size: 1.8em; /* Make current price bigger */
-}
-.price-container .price-original {
-    text-decoration: line-through;
-    color: #999;
-    font-size: 1.1em;
-    margin-top: -10px;
-}
+.price-container .price { font-size: 1.8em; }
+.price-container .price-original { text-decoration: line-through; color: #999; font-size: 1.1em; margin-top: -10px; }
 
-/* Coupon result message */
-.coupon-result {
-    margin-top: 8px;
-    font-weight: 500;
-    font-size: 0.9em;
-}
+.coupon-result { margin-top: 8px; font-weight: 500; font-size: 0.9em; }
 .coupon-result.success { color: #28a745; }
 .coupon-result.error { color: #dc3545; }
 
-/* Size message style */
-.size-message {
-    margin-top: 8px;
-    font-size: 0.9em;
-    color: #dc3545; /* Red color for error/warning */
-    font-weight: 500;
-    height: 1em; /* Reserve space to prevent layout shift */
-}
+.price-container .price, .price-container .price-original { transition: all 0.3s ease; }
 </style>
