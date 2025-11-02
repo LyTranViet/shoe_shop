@@ -263,7 +263,10 @@ document.addEventListener('DOMContentLoaded', function(){
             <h1><?php echo htmlspecialchars($prod['name']); ?></h1>
             <p class="meta">Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> | Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a></p>
             <div class="price-container">
-                <p class="price" data-original-price="<?php echo $prod['price']; ?>">$<?php echo number_format($prod['price'], 2); ?></p>
+                <p class="price" data-original-price="<?php echo $prod['price']; ?>">
+                    <?php echo number_format($prod['price'], 0); ?> VND
+                </p>
+<p class="price-original" style="display: none;"></p>
                 <p class="price-original" style="display: none;"></p>
             </div>
 
