@@ -54,8 +54,8 @@ $brands = $db->query("SELECT id, name FROM brands ORDER BY name")->fetchAll();
     </div>
 
     <div class="form-group">
-        <label>Price ($)</label>
-        <input type="number" name="price" step="0.01" value="<?php echo htmlspecialchars($product['price'] ?? ''); ?>" required>
+        <label>Price (₫)</label>
+        <input type="number" name="price" step="1" value="<?php echo htmlspecialchars($product['price'] ?? ''); ?>" required>
     </div>
 
     <div class="form-group">

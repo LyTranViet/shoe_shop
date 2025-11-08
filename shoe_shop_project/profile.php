@@ -92,4 +92,60 @@ require_once __DIR__ . '/includes/header.php';
     </form>
 </div>
 
+<style>
+    .profile-page {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    .profile-page h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+    .profile-form {
+        background: var(--bg-white);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border);
+    }
+    .profile-form h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-top: 20px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+    .profile-form .form-group {
+        margin-bottom: 20px;
+    }
+    .profile-form label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-body);
+    }
+    .profile-form input[type="text"],
+    .profile-form input[type="email"],
+    .profile-form input[type="tel"],
+    .profile-form input[type="password"] {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-light);
+        font-size: 1rem;
+        transition: box-shadow .2s, border-color .2s;
+    }
+    .profile-form input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+</style>
+
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -129,10 +129,10 @@ try {
 <style>
     .sidebar {
         background: #fff;
-        padding: 28px 20px 22px 20px;
+        padding: 24px;
         border-radius: 14px;
-        border: 1.5px solid #e2e8f0;
-        box-shadow: 0 4px 18px #cbd5e122;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
         min-width: 220px;
         font-size: 1.04em;
         margin-top: 8px;
@@ -140,7 +140,7 @@ try {
     .sidebar h3 {
         font-size: 1.18em;
         font-weight: 700;
-        color: #0ea5ff;
+        color: var(--primary);
         margin-bottom: 18px;
         letter-spacing: 0.2px;
         display: flex;
@@ -149,7 +149,7 @@ try {
     }
     .grid { align-items: stretch; } /* Đảm bảo các thẻ sản phẩm trong lưới có cùng chiều cao */
     .sidebar h3::before { content: '\1F50D'; font-size: 1.1em; }
-    .sidebar .filter-title { font-weight: 600; margin-bottom: 8px; color: #2563eb; display: block; }
+    .sidebar .filter-title { font-weight: 600; margin-bottom: 8px; color: var(--accent); display: block; }
     .sidebar .filter-list { border: none; border-radius: 0; background: none; max-height: 160px; overflow-y: auto; }
     .sidebar .filter-list li { padding: 4px 0; }
     .sidebar .filter-list li label { gap: 7px; }
@@ -160,38 +160,38 @@ try {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 24px;
-        border-bottom: 1.5px solid #e2e8f0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
         padding-bottom: 10px;
     }
     .products-header h2 {
         font-size: 1.5em;
         font-weight: 800;
-        color: #0ea5ff;
+        color: var(--primary);
         letter-spacing: -1px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
     .products-header h2::before { content: '\1F6CD'; font-size: 1.1em; }
-    .sort-form label { font-weight: 600; color: #2563eb; }
+    .sort-form label { font-weight: 600; color: var(--accent); }
     .sort-form select {
         border-radius: 6px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border);
         padding: 7px 12px;
         font-size: 1em;
         margin-left: 6px;
-        background: #f8fafc;
-        color: #2563eb;
+        background: var(--bg-light);
+        color: var(--accent);
     }
     .grid { gap: 28px; }
     .product {
-        background: #fff;
-        border: 1.5px solid #e2e8f0;
+        background: var(--bg-white);
+        border: 1px solid var(--border);
         border-radius: 12px;
         text-align: center;
         padding: 18px 12px 16px 12px;
-        box-shadow: 0 4px 18px #cbd5e122;
+        box-shadow: var(--shadow-sm);
         transition: box-shadow 0.2s, transform 0.2s;
         height: 100%;
         display: flex;
@@ -199,9 +199,9 @@ try {
         justify-content: space-between;
         position: relative;
     }
-    .product:hover { box-shadow: 0 8px 28px #0ea5ff22; transform: translateY(-6px) scale(1.03); }
+    .product:hover { box-shadow: var(--shadow-md); transform: translateY(-6px); }
     .product .thumb { margin-bottom: 14px; }
-    .product .thumb img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px #bae6fd33; }
+    .product .thumb img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(186, 230, 253, 0.2); }
     .product .product-main {
         display: flex;
         flex-direction: column;
@@ -209,11 +209,11 @@ try {
     }
     .product h4 { font-size: 1.13em; margin: 8px 0 6px 0; font-weight: 700; color: #2563eb; flex-grow: 1; /* Cho phép tên sản phẩm co giãn để đẩy các phần tử khác xuống */ }
     .product p { font-size: 1.08em; color: #0ea5ff; margin: 0 0 8px 0; font-weight: 700; }
-    .product-actions { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+    .product-actions { display: flex; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
     .product-actions .btn { font-size: 0.9em; padding: 8px 12px; border-radius: 7px; }
-    .product-actions .btn-choose-size { background: linear-gradient(90deg,#0ea5ff 60%,#2563eb 100%); color: #fff; }
-    .product-actions .btn-wishlist { background: #f1f5f9; color: #0ea5ff; border: 1px solid #bae6fd; }
-    .product-actions .btn-wishlist:hover { background: #0ea5ff; color: #fff; }
+    .product-actions .btn-choose-size { background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%); color: #fff; }
+    .product-actions .btn-wishlist { background: var(--bg-gray); color: var(--primary); border: 1px solid var(--primary-light); }
+    .product-actions .btn-wishlist:hover { background: var(--primary); color: #fff; }
 
     .product-sizes {
         display: none; /* Ẩn mặc định */
@@ -222,21 +222,21 @@ try {
         justify-content: center;
         margin-top: 12px;
         padding-top: 12px;
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid var(--bg-gray);
     }
     .product-sizes.active { display: flex; } /* Hiện khi có class active */
     .product-sizes .btn-size {
         font-size: 0.85em;
         padding: 6px 10px;
-        background: #e2e8f0;
+        background: var(--border);
     }
     .product-sizes .btn-size:hover {
-        background: #0ea5ff; /* Màu nền xanh khi hover */
+        background: var(--primary); /* Màu nền xanh khi hover */
         color: #fff; /* Chữ màu trắng khi hover */
     }
-            .pagination { display: flex; gap: 18px; justify-content: center; margin: 60px 0 0 0; }
+    .pagination { display: flex; gap: 10px; justify-content: center; margin: 40px 0 0 0; }
     .pagination .btn { border-radius: 7px; font-size: 1em; padding: 8px 16px; }
-    .pagination .btn.current { background: #0ea5ff; color: #fff; font-weight: 700; }
+    .pagination .btn.current { background: var(--primary); color: #fff; font-weight: 700; }
     @media (max-width: 900px) {
         .layout { grid-template-columns: 1fr; }
         .sidebar { margin-bottom: 24px; }
@@ -251,7 +251,7 @@ try {
     .out-of-stock-badge {
         position: absolute;
         top: 10px;
-        left: 10px;
+        left: 10px; 
         background: rgba(239, 68, 68, 0.9);
         color: white;
         padding: 4px 8px;

@@ -121,8 +121,8 @@ try {
 <style>
     .hero-banner {
     position: relative;
-    height: 450px;
-    background: linear-gradient(45deg, var(--text-dark), #2c3e50);
+    height: 400px;
+    background: linear-gradient(45deg, var(--text-dark), var(--accent));
     overflow: hidden;
     border-radius: 0; /* Xóa bo góc */
     margin-bottom: 3rem;
@@ -156,7 +156,7 @@ try {
     .banner-cta {
         display: inline-block;
         padding: 1rem 2rem;
-        background: var(--accent);
+        background: var(--primary);
         color: white;
         text-decoration: none;
         border-radius: 30px;
@@ -164,7 +164,7 @@ try {
         transition: transform 0.3s, background 0.3s;
     }
     .banner-cta:hover {
-        background: var(--accent-hover);
+        background: var(--primary-dark);
         transform: translateY(-2px);
     }
     .features-section {
@@ -183,7 +183,7 @@ try {
         text-align: center;
         padding: 2rem;
         background: var(--bg-white);
-        border-radius: 12px;
+        border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         transition: transform 0.3s;
     }
@@ -193,7 +193,7 @@ try {
     .feature-icon {
         font-size: 2.5rem;
         margin-bottom: 1rem;
-        color: var(--accent);
+        color: var(--primary);
     }
     .feature-title {
         font-size: 1.2rem;
@@ -202,7 +202,7 @@ try {
         font-weight: 600;
     }
     .feature-desc {
-        color: #6c757d;
+        color: var(--text-body);
         font-size: 0.95rem;
         line-height: 1.5;
     }
@@ -266,7 +266,7 @@ try {
     .slider-nav.next { right: 20px; }
     .slider-nav:hover {
         background: white;
-        transform: scale(1.1);
+        transform: translateY(-50%) scale(1.1);
     }
     .slide.active {
         opacity: 1;
@@ -383,7 +383,7 @@ try {
         .product-card {
             background: var(--bg-white);
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
             border: 1px solid var(--border);
             transition: transform 0.3s;
@@ -419,7 +419,7 @@ try {
             text-decoration: none;
         }
         .product-name:hover {
-            color: var(--accent);
+            color: var(--primary);
         }
         .product-price {
             color: var(--text-dark);
@@ -439,16 +439,16 @@ try {
             border-radius: 7px; 
         }
         .product-actions .ajax-add-cart .btn {
-            background: linear-gradient(90deg,#0ea5ff 60%,#2563eb 100%);
+            background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
             color: #fff;
         }
         .product-actions .ajax-wishlist .btn {
-            background: #f1f5f9; 
-            color: #0ea5ff; 
-            border: 1px solid #bae6fd; 
+            background: var(--bg-gray); 
+            color: var(--primary); 
+            border: 1px solid var(--primary-light); 
         }
         .product-actions .ajax-wishlist .btn:hover {
-            background: #0ea5ff; 
+            background: var(--primary); 
             color: #fff; 
         }
         .section-header {
@@ -479,7 +479,7 @@ try {
             transition: all 0.2s;
         }
         .view-more-link:hover {
-            background: #e9ecef;
+            background: var(--border);
             transform: translateX(5px);
         }
         /* Styles for size selection, copied from category.php */
@@ -489,15 +489,15 @@ try {
             gap: 8px;
             justify-content: center;
             margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #f1f5f9;
+            padding-top: 12px; 
+            border-top: 1px solid var(--bg-gray);
         }
         .product-sizes.active { display: flex; } /* Hiện khi có class active */
         .product-sizes .btn-size {
-            font-size: 0.85em; padding: 6px 10px; background: #e2e8f0;
+            font-size: 0.85em; padding: 6px 10px; background: var(--border);
         }
         .product-sizes .btn-size:hover {
-            background: #0ea5ff; color: #fff;
+            background: var(--primary); color: #fff;
         }
     </style>
     <style>
@@ -505,7 +505,7 @@ try {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(220, 53, 69, 0.95); /* Badge color from suggestion */
+            background: rgba(220, 53, 69, 0.95); /* var(--danger) with opacity */
             color: white;
             padding: 4px 8px;
             font-size: 0.8em;
@@ -519,7 +519,7 @@ try {
         .product-carousel-wrapper .product {
             background: var(--bg-white);
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
             border: 1px solid var(--border);
             transition: transform 0.3s, box-shadow 0.3s;
@@ -530,14 +530,14 @@ try {
 
         .product-carousel-wrapper .product:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            box-shadow: var(--shadow-md);
         }
 
         .product-carousel-wrapper .product .thumb {
             position: relative;
             padding-top: 100%;
             overflow: hidden;
-            background: #f8f9fa;
+            background: var(--bg-light);
         }
 
         .product-carousel-wrapper .product .thumb img {
@@ -576,7 +576,7 @@ try {
 
         .product-carousel-wrapper .product .price {
             padding: 0 15px;
-            color: var(--accent);
+            color: var(--primary);
             font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 10px;
@@ -602,17 +602,17 @@ try {
 
         .product-carousel-wrapper .product .product-actions button.btn:first-child {
             flex: 1;
-            background: linear-gradient(90deg, #0ea5ff 60%, #2563eb 100%);
+            background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
             color: #fff;
         }
 
         .product-carousel-wrapper .product .product-actions button.btn:first-child:hover:not(:disabled) {
-            background: linear-gradient(90deg, #0c8ad8 60%, #1d4ed8 100%);
+            background: linear-gradient(90deg, var(--primary-dark) 60%, var(--accent-hover) 100%);
             transform: translateY(-2px);
         }
 
         .product-carousel-wrapper .product .product-actions button.btn:disabled {
-            background: #e9ecef;
+            background: var(--bg-gray);
             color: #6c757d;
             cursor: not-allowed;
         }
@@ -638,12 +638,12 @@ try {
         <style>
             /* CSS được sao chép từ category.php để đồng bộ giao diện */
             .product {
-                background: #fff;
-                border: 1.5px solid #e2e8f0;
+                background: var(--bg-white);
+                border: 1.5px solid var(--border);
                 border-radius: 12px;
                 text-align: center;
                 padding: 18px 12px 16px 12px;
-                box-shadow: 0 4px 18px #cbd5e122;
+                box-shadow: 0 4px 18px rgba(203, 213, 225, 0.13);
                 transition: box-shadow 0.2s, transform 0.2s;
                 height: 100%;
                 display: flex;
@@ -651,18 +651,18 @@ try {
                 justify-content: space-between;
                 position: relative;
             }
-            .product:hover { box-shadow: 0 8px 28px #0ea5ff22; transform: translateY(-6px) scale(1.03); }
+            .product:hover { box-shadow: 0 8px 28px rgba(14, 165, 255, 0.13); transform: translateY(-6px) scale(1.03); }
             .product .thumb { margin-bottom: 14px; }
-            .product .thumb img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px #bae6fd33; }
+            .product .thumb img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(186, 230, 253, 0.2); }
             .product .product-main {
                 display: flex;
                 flex-direction: column;
                 flex-grow: 1; /* Cho phép phần này co giãn */
             }
-            .product h3, .product h4 { font-size: 1.13em; margin: 8px 0 6px 0; font-weight: 700; color: #2563eb; flex-grow: 1; /* Cho phép tên sản phẩm co giãn để đẩy các phần tử khác xuống */ }
-            .product p.price { font-size: 1.08em; color: #0ea5ff; margin: 0 0 8px 0; font-weight: 700; }
-            .product-actions .btn-wishlist { background: #f1f5f9; color: #0ea5ff; border: 1px solid #bae6fd; }
-            .product-actions .btn-wishlist:hover { background: #0ea5ff; color: #fff; }
+            .product h3, .product h4 { font-size: 1.13em; margin: 8px 0 6px 0; font-weight: 700; color: var(--accent); flex-grow: 1; /* Cho phép tên sản phẩm co giãn để đẩy các phần tử khác xuống */ }
+            .product p.price { font-size: 1.08em; color: var(--primary); margin: 0 0 8px 0; font-weight: 700; }
+            .product-actions .btn-wishlist { background: var(--bg-gray); color: var(--primary); border: 1px solid var(--primary-light); }
+            .product-actions .btn-wishlist:hover { background: var(--primary); color: #fff; }
         </style>
 
         <div class="section-header">
@@ -834,7 +834,7 @@ try {
     .testimonial-card {
         background: var(--bg-white);
         padding: 2rem;
-        border-radius: 12px;
+        border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .testimonial-text {
@@ -853,7 +853,7 @@ try {
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background: #e9ecef;
+        background: var(--bg-gray);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -871,7 +871,7 @@ try {
     }
     .newsletter-section {
         padding: 4rem 0;
-        background: linear-gradient(45deg, var(--text-dark), #2c3e50);
+        background: linear-gradient(45deg, var(--text-dark), var(--accent));
         color: white;
         text-align: center;
     }
@@ -903,7 +903,7 @@ try {
     }
     .newsletter-button {
         padding: 1rem 2rem;
-        background: var(--accent);
+        background: var(--primary);
         color: white;
         border: none;
         border-radius: 30px;
@@ -912,7 +912,7 @@ try {
         transition: background 0.3s, transform 0.3s;
     }
     .newsletter-button:hover {
-        background: var(--accent-hover);
+        background: var(--primary-dark);
     }
     @media (max-width: 992px) {
         .testimonials-grid {

@@ -513,7 +513,7 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
                             <span
                                 class="summary-item-size"><?php if (!empty($it['size'])) echo 'Size: ' . htmlspecialchars($it['size']); ?></span>
                         </div>
-                        <div class="summary-item-price">$<?php echo number_format($it['price'] * $it['quantity'], 2); ?></div>
+                        <div class="summary-item-price"><?php echo number_format($it['price'] * $it['quantity'], 0); ?>₫</div>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -1219,7 +1219,7 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
 
                     $("#ghtk-fee-text").html('<strong>' + feeVND.toLocaleString('vi-VN') + ' ₫</strong>');
                     $("#ghtk-fee-detail").text(
-                        '($' + feeUSD.toFixed(2) + ' USD) - Dự kiến: ' + (res.delivery || res.fee
+                        '(' + feeUSD.toFixed(2) + ' USD) - Dự kiến: ' + (res.delivery || res.fee
                             ?.delivery || '--')
                     );
 

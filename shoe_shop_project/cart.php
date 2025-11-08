@@ -323,7 +323,7 @@ if (!empty($items)) {
                             <?php endif; ?>
                             <div class="quantity-input">
                                 <button type="button" class="qty-btn minus">−</button>
-                                <input type="number" name="quantity" value="<?php echo $it['quantity']; ?>" min="1" readonly>
+                                <input type="number" name="quantity" value="<?php echo $it['quantity']; ?>" min="1">
                                 <button type="button" class="qty-btn plus">+</button>
                             </div>
                         </form>
@@ -365,69 +365,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartTotalEl = document.getElementById('cart-total');
 
     // Hàm cập nhật tổng tiền
-    const updateTotal = (total) => {
+    function updateTotal(total) {
         cartTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
-    };
+    }
 
     // Hàm xóa thông báo khi giỏ trống
-    const clearAlertsIfEmpty = () => {
+    function clearAlertsIfEmpty() {
         const items = document.querySelectorAll('.cart-item');
         if (items.length === 0) {
             alertsContainer.innerHTML = '';
         }
-    };
+    }
 
     // Hàm xóa tất cả thông báo lỗi tồn kho
-    const clearAllStockErrors = () => {
+    function clearAllStockErrors() {
         document.querySelectorAll('.cart-item').forEach(item => {
             item.classList.remove('error-stock');
             const errorDiv = item.querySelector('.cart-item-stock-error');
             if (errorDiv) errorDiv.style.display = 'none';
         });
-    };
+    }
 
-    document.querySelectorAll('.cart-item').forEach(item => {
-        const input = item.querySelector('input[name="quantity"]');
-        const subtotalEl = item.querySelector('.cart-item-subtotal span');
-        const plus = item.querySelector('.qty-btn.plus');
-        const minus = item.querySelector('.qty-btn.minus');
-        const removeBtn = item.querySelector('.btn-remove-icon');
+    // Sử dụng event delegation để quản lý tất cả các sự kiện trong giỏ hàng
+    document.querySelector('.cart-items-list')?.addEventListener('click', function(event) {
+        const target = event.target;
+        const cartItem = target.closest('.cart-item');
+        if (!cartItem) return;
 
-        plus.addEventListener('click', () => update(parseInt(input.value) + 1));
-        minus.addEventListener('click', () => update(Math.max(1, parseInt(input.value) - 1)));
-        removeBtn.addEventListener('click', e => { e.preventDefault(); remove(); });
+        const input = cartItem.querySelector('input[name="quantity"]');
+        let currentQty = parseInt(input.value);
 
-        function update(qty) {
-            input.value = qty;
-            const form = item.querySelector('.ajax-cart-update');
-            const data = new FormData(form);
-            data.append('quantity', qty);
-
-            fetch('cart.php', { method: 'POST', body: data })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.success) {
-                        subtotalEl.textContent = new Intl.NumberFormat('vi-VN').format(res.item_subtotal);
-                        updateTotal(res.total);
-                        clearAlertsIfEmpty();
-                    }
-                });
-        }
-
-        function remove() {
-            const form = item.querySelector('.ajax-cart-remove');
-            const data = new FormData(form);
-            fetch('cart.php', { method: 'POST', body: data })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.success) {
-                        item.remove();
-                        updateTotal(res.total);
-                        clearAlertsIfEmpty();
-                    }
-                });
+        if (target.classList.contains('qty-btn.plus')) {
+            update(cartItem, currentQty + 1);
+        } else if (target.classList.contains('qty-btn.minus')) {
+            update(cartItem, Math.max(1, currentQty - 1));
+        } else if (target.classList.contains('btn-remove-icon')) {
+            event.preventDefault();
+            remove(cartItem);
         }
     });
+
+    // Xử lý khi người dùng tự gõ số lượng
+    document.querySelectorAll('.cart-item input[name="quantity"]').forEach(input => {
+        let updateTimeout;
+        function handleManualInput() {
+            clearTimeout(updateTimeout);
+            const newQty = parseInt(input.value);
+            if (newQty >= 1) {
+                updateTimeout = setTimeout(() => update(input.closest('.cart-item'), newQty), 500);
+            }
+        }
+        input.addEventListener('input', handleManualInput);
+    });
+
+    function update(cartItem, newQty) {
+        const input = cartItem.querySelector('input[name="quantity"]');
+        const subtotalEl = cartItem.querySelector('.cart-item-subtotal span');
+        input.value = newQty;
+
+        const form = cartItem.querySelector('.ajax-cart-update');
+        const data = new FormData(form);
+        data.set('quantity', newQty); // Dùng set để ghi đè giá trị
+
+        fetch('cart.php', { method: 'POST', body: data })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    subtotalEl.textContent = new Intl.NumberFormat('vi-VN').format(res.item_subtotal);
+                    updateTotal(res.total);
+                }
+            });
+    }
+
+    function remove(cartItem) {
+        const form = cartItem.querySelector('.ajax-cart-remove');
+        const data = new FormData(form);
+        fetch('cart.php', { method: 'POST', body: data })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    cartItem.remove();
+                    updateTotal(res.total);
+                    clearAlertsIfEmpty();
+                }
+            });
+    }
 
     // Xử lý nút "Tiến hành thanh toán"
     if (checkoutBtn) {
@@ -490,4 +512,17 @@ document.addEventListener('DOMContentLoaded', () => {
     border-radius: 8px;
     background-color: #fff5f5;
 }
+</style>
+
+<style>
+    /* Ẩn các nút mũi tên (spinners) khỏi ô nhập số lượng */
+    .quantity-input input[type=number]::-webkit-inner-spin-button,
+    .quantity-input input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .quantity-input input[type=number] {
+        -moz-appearance: textfield; /* Dành cho Firefox */
+    }
 </style>

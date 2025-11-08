@@ -107,13 +107,13 @@ require_once __DIR__ . '/includes/header.php';
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+  justify-content: center; 
+  background: var(--bg-gray);
 }
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 18px;
   padding: 38px 32px 32px 32px;
   box-shadow: 0 8px 32px rgba(15,23,42,0.13);
@@ -132,7 +132,7 @@ require_once __DIR__ . '/includes/header.php';
 .auth-head h2 {
   margin: 0 0 2px 0;
   font-size: 2rem;
-  color: #0f1724;
+  color: var(--text-dark);
   font-weight: 800;
   letter-spacing: -1px;
   display: flex;
@@ -146,7 +146,7 @@ require_once __DIR__ . '/includes/header.php';
 }
 .auth-sub {
   margin: 0 0 0 2px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 1rem;
   font-weight: 500;
 }
@@ -155,32 +155,32 @@ require_once __DIR__ . '/includes/header.php';
 .input {
   width: 100%;
   padding: 13px 15px;
-  border-radius: 10px;
-  border: 1.5px solid #e6eefb;
-  background: #f8fafc;
+  border-radius: 10px; 
+  border: 1.5px solid var(--border);
+  background: var(--bg-light);
   font-size: 16px;
   box-sizing: border-box;
   transition: box-shadow .13s, border-color .13s;
 }
 .input:focus {
   outline: none;
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 2px #bae6fd;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
 }
 .row-inline { display: flex; gap: 10px; align-items: center; }
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 20px; 
   border-radius: 10px;
-  background: linear-gradient(90deg,#0ea5ff 60%,#2563eb 100%);
+  background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
   color: #fff;
   border: 0;
   cursor: pointer;
   font-weight: 700;
   font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(14,165,233,0.07);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.07);
   transition: background 0.18s;
 }
 .btn.secondary {
@@ -197,12 +197,12 @@ require_once __DIR__ . '/includes/header.php';
 }
 .captcha-pill {
   padding: 11px 16px;
-  background: linear-gradient(90deg,#f1f5f9 60%,#e0e7ef 100%);
-  border: 1.5px solid #e6eefb;
+  background: linear-gradient(90deg, var(--bg-gray) 60%, var(--border) 100%);
+  border: 1.5px solid var(--border);
   border-radius: 10px;
   font-weight: 800;
-  color: #0f1724;
-  font-size: 1.1rem;
+  color: var(--text-dark);
+  font-size: 1.1rem; 
   letter-spacing: 1px;
   min-width: 70px;
   text-align: center;
@@ -215,14 +215,14 @@ require_once __DIR__ . '/includes/header.php';
   justify-content: center;
   padding: 8px 10px;
   border-radius: 10px;
-  border: 0;
-  background: #f1f5f9;
-  color: #2563eb;
+  border: 0; 
+  background: var(--bg-gray);
+  color: var(--accent);
   font-size: 1.2em;
   cursor: pointer;
   transition: background 0.15s;
 }
-.captcha-refresh:hover { background: #e0e7ef; color: #0ea5ff; }
+.captcha-refresh:hover { background: var(--border); color: var(--primary); }
 .alert {
   padding: 13px 16px;
   border-radius: 9px;
@@ -234,26 +234,26 @@ require_once __DIR__ . '/includes/header.php';
   font-weight: 600;
 }
 .alert.error {
-  background: #fff1f2;
-  color: #b91c1c;
-  border: 1.5px solid #fecaca;
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+  border: 1.5px solid rgba(220, 53, 69, 0.2);
 }
 .alert.error::before {
   content: '\26A0';
   font-size: 1.3em;
 }
 .alert.success {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1.5px solid #bbf7d0;
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+  border: 1.5px solid rgba(40, 167, 69, 0.2);
 }
 .alert.success::before {
   content: '\2714';
   font-size: 1.2em;
 }
 .helper {
-  font-size: 13.5px;
-  color: #64748b;
+  font-size: 13.5px; 
+  color: var(--text-muted);
   margin-top: 2px;
 }
 .show-pass {
@@ -325,7 +325,7 @@ require_once __DIR__ . '/includes/header.php';
       <div class="form-actions">
         <button class="btn" type="submit">Đăng nhập</button>
         <a class="btn secondary small" href="<?php echo BASE_URL; ?>register.php">Tạo tài khoản</a>
-      </div>
+      </div> 
       <div class="auth-divider"><span>hoặc</span></div>
       <div class="helper" style="text-align:center;">Tiếp tục với tư cách khách — <a href="<?php echo BASE_URL; ?>index.php">Vào cửa hàng</a></div>
     </form>

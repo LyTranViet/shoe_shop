@@ -141,7 +141,11 @@ try {
 // Suggested products
 $suggested = [];
 try {
-    $st2 = $db->prepare('SELECT p.* FROM products p WHERE p.category_id = ? AND p.id != ? LIMIT 7');
+    $st2 = $db->prepare('
+        SELECT p.*, 
+               (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock
+        FROM products p 
+        WHERE p.category_id = ? AND p.id != ? LIMIT 7');
     $st2->execute([$prod['category_id'], $id]);
     $suggested = $st2->fetchAll();
     $sids = array_column($suggested, 'id');
@@ -155,6 +159,18 @@ try {
         }
     }
 } catch (Exception $e) { }
+
+// Load sizes for suggested products
+$suggested_sizes = [];
+if (!empty($sids)) {
+    try {
+        $st_sizes = $db->prepare("SELECT product_id, size, stock FROM product_sizes WHERE product_id IN ($place) AND stock > 0 ORDER BY size ASC");
+        $st_sizes->execute($sids);
+        foreach ($st_sizes->fetchAll(PDO::FETCH_ASSOC) as $s) {
+            $suggested_sizes[$s['product_id']][] = $s['size'];
+        }
+    } catch (Exception $e) { /* ignore */ }
+}
 
 $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
 ?>
@@ -423,6 +439,76 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Cập nhật lần đầu khi tải trang
     updateStockDisplay();
+
+    // Hàm xử lý thêm vào giỏ hàng
+    function addToCart(productId, size) {
+        const formData = new FormData();
+        formData.append('action', 'add');
+        formData.append('product_id', productId);
+        formData.append('quantity', 1);
+        formData.append('size', size);
+
+        fetch('cart.php', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = 'cart.php';
+            } else {
+                alert('Có lỗi xảy ra, không thể thêm vào giỏ hàng.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Lỗi kết nối, vui lòng thử lại.');
+        });
+    }
+
+    // Gắn sự kiện cho các nút "Thêm vào giỏ hàng" trong phần sản phẩm gợi ý
+    document.querySelectorAll('.suggested-products .btn-choose-size').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation();
+            const productCard = this.closest('.product');
+            if (!productCard) return;
+
+            const sizesContainer = productCard.querySelector('.product-sizes');
+            if (!sizesContainer) return;
+
+            const isCurrentlyActive = sizesContainer.classList.contains('active');
+
+            // Đóng tất cả các size container khác đang mở
+            document.querySelectorAll('.product-sizes.active').forEach(container => {
+                container.classList.remove('active');
+            });
+
+            // Nếu container này chưa active, thì mở nó ra
+            if (!isCurrentlyActive) {
+                sizesContainer.classList.add('active');
+            }
+        });
+    });
+
+    // Gắn sự kiện cho các nút size trong phần sản phẩm gợi ý
+    document.querySelectorAll('.suggested-products .btn-size').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+            addToCart(this.dataset.productId, this.dataset.size);
+        });
+    });
+
+    // Đóng size container khi click ra ngoài
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.suggested-products .product')) {
+            document.querySelectorAll('.suggested-products .product-sizes.active').forEach(container => {
+                container.classList.remove('active');
+            });
+        }
+    });
 });
 </script>
 
@@ -462,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Vùng hiển thị tồn kho -->
             <div class="stock-display-container">
                 <p id="stock-message" class="stock-message" style="display: none; color: red; font-weight: 500;"></p>
-            </div>
+            </div> 
             <div class="price-container">
                 <p class="price" data-original-price="<?php echo $prod['price']; ?>">
                     <?php echo number_format($prod['price'], 0); ?> đ
@@ -471,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             <?php if ($is_out_of_stock): ?>
-                <div class="alert-error" style="text-align: center; padding: 15px; margin-top: 20px;">
+                <div class="alert-error" style="text-align: center; padding: 15px; margin-top: 20px; background-color: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-light);">
                     Sản phẩm này hiện đã hết hàng.
                 </div>
             <?php else: ?>
@@ -498,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label>Quantity</label>
                         <div class="quantity-input">
                             <button type="button" class="qty-btn minus" aria-label="Decrease quantity">-</button>
-                            <input type="number" name="quantity" value="1" min="1" readonly>
+                            <input type="number" name="quantity" value="1" min="1">
                             <button type="button" class="qty-btn plus" aria-label="Increase quantity">+</button>
                         </div>
                     </div>
@@ -547,7 +633,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="product-section vouchers-section">
         <h3>Voucher Giảm Giá Sản Phẩm</h3>
         <div class="vouchers-list">
-            <?php foreach ($productVouchers as $v): ?>
+            <?php foreach ($productVouchers as $v): ?> 
             <div class="voucher-item">
                 <div class="voucher-info">Giảm <?php echo (int)$v['discount_percent']; ?>% giá sản phẩm</div>
                 <button class="voucher-code" data-code="<?php echo htmlspecialchars($v['code']); ?>">Copy</button>
@@ -562,7 +648,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="product-section vouchers-section">
         <h3>Voucher Giảm Phí Vận Chuyển</h3>
         <div class="vouchers-list">
-            <?php foreach ($shippingVouchers as $v): ?>
+            <?php foreach ($shippingVouchers as $v): ?> 
             <div class="voucher-item">
                 <div class="voucher-info">Giảm <?php echo (int)$v['discount_percent']; ?>% phí ship</div>
                 <button class="voucher-code" data-code="<?php echo htmlspecialchars($v['code']); ?>">Copy</button>
@@ -576,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="product-section reviews-section">
         <h3>Reviews</h3>
         <?php if (empty($reviews)): ?>
-            <p>No reviews yet.</p>
+            <p>Chưa có đánh giá nào.</p>
         <?php else: foreach ($reviews as $rev): 
             $can_edit = is_logged_in() && $rev['user_id'] === current_user_id();
         ?>
@@ -634,14 +720,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <?php if (is_logged_in()): ?>
             <div class="add-review-form">
                 <h4>Write a review</h4>
-                <?php if ($m = flash_get('error')): ?><p style="color:red"><?php echo $m; ?></p><?php endif; ?>
+                <?php if ($m = flash_get('error')): ?><p style="color:var(--danger);"><?php echo $m; ?></p><?php endif; ?>
                 <?php 
                 // Lấy thông báo thành công
                 $success_message = flash_get('success');
                 // Chỉ hiển thị nếu đó không phải là thông báo đăng nhập mặc định
                 if ($success_message && $success_message !== 'Đăng nhập thành công!'): 
                 ?>
-                    <p style="color:green"><?php echo htmlspecialchars($success_message); ?></p>
+                    <p style="color:var(--success);"><?php echo htmlspecialchars($success_message); ?></p>
                 <?php endif; ?>
                 <form method="post" action="product.php?id=<?php echo $id; ?>">
                     <input type="hidden" name="action" value="add_review">
@@ -664,23 +750,175 @@ document.addEventListener('DOMContentLoaded', function() {
                 </form>
             </div>
         <?php else: ?>
-            <p><a href="login.php">Login</a> to write a review.</p>
+            <p><a href="login.php" style="color: var(--primary);">Đăng nhập</a> để viết đánh giá.</p>
         <?php endif; ?>
     </div>
 
     <!-- Suggested Products -->
+    <style>
+    /* CSS được sao chép từ category.php để đồng bộ giao diện */
+    .suggested-products .product {
+        background: var(--bg-white);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        text-align: center;
+        padding: 18px 12px 16px 12px;
+        box-shadow: 0 4px 18px rgba(203, 213, 225, 0.13);
+        transition: box-shadow 0.2s, transform 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+    }
+    .suggested-products .product:hover { 
+        box-shadow: 0 8px 28px rgba(14, 165, 255, 0.13); 
+        transform: translateY(-6px) scale(1.03); 
+    }
+    .suggested-products .product .thumb { 
+        margin-bottom: 14px; 
+        position: relative;
+    }
+    .suggested-products .product .thumb img { 
+        max-width: 100%; 
+        height: 180px; 
+        object-fit: cover; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 8px rgba(186, 230, 253, 0.2); 
+    }
+    .suggested-products .product .product-main {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .suggested-products .product h3 { 
+        font-size: 1.13em; 
+        margin: 8px 0 6px 0; 
+        font-weight: 700; 
+        color: var(--text-dark); 
+        flex-grow: 1;
+    }
+    .suggested-products .product p.price { 
+        font-size: 1.08em; 
+        color: var(--primary-dark); 
+        margin: 0 0 8px 0; 
+        font-weight: 700; 
+    }
+    .suggested-products .product-actions { 
+        display: flex; 
+        justify-content: center; 
+        gap: 8px; 
+        margin-top: auto; 
+        padding-top: 10px; 
+    }
+    .suggested-products .product-actions .btn { 
+        font-size: 0.9em; 
+        padding: 8px 12px; 
+        border-radius: 7px; 
+    }
+    .suggested-products .product-actions .btn-choose-size { 
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%); 
+        color: #fff; 
+    }
+    .suggested-products .product-actions .btn-wishlist { 
+        background: var(--bg-light); 
+        color: var(--primary); 
+        border: 1px solid var(--primary-light); 
+    }
+    .suggested-products .product-actions .btn-wishlist:hover { 
+        background: var(--primary); 
+        color: #fff; 
+    }
+    
+    /* CSS cho Swiper container */
+    .suggested-products .product-carousel-wrapper .swiper {
+        overflow: hidden;
+    }
+
+    .suggested-products .product-carousel-wrapper .swiper-slide {
+        width: auto !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* CSS cho nhãn hết hàng */
+    .suggested-products .out-of-stock-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(220, 53, 69, 0.95); /* var(--danger) với độ mờ */
+        color: white;
+        padding: 4px 8px;
+        font-size: 0.8em;
+        font-weight: bold;
+        border-radius: 4px;
+        z-index: 1;
+    }
+
+    /* CSS cho product-sizes - THÊM PHẦN NÀY */
+    .suggested-products .product-sizes {
+        display: none;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--bg-gray);
+    }
+    .suggested-products .product-sizes.active { 
+        display: flex; 
+    }
+    .suggested-products .product-sizes .btn-size {
+        font-size: 0.85em; 
+        padding: 6px 10px; 
+        background: var(--primary-light);
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: var(--primary-dark);
+    }
+    .suggested-products .product-sizes .btn-size:hover {
+        background: var(--primary); 
+        color: #fff;
+    }
+</style>
     <?php if (!empty($suggested)): ?>
     <div class="product-section suggested-products">
-        <h3>Suggested products</h3>
+        <div class="section-header">
+            <h2>Sản phẩm gợi ý</h2>
+            <p>Có thể bạn cũng sẽ thích những sản phẩm này</p>
+        </div>
         <div class="product-carousel-wrapper">
             <div class="swiper product-carousel">
                 <div class="swiper-wrapper">
                     <?php foreach ($suggested as $s): ?>
-                        <?php $simg = $imagesBy[$s['id']] ?? 'assets/images/product-placeholder.png'; ?>
                         <div class="swiper-slide product">
-                            <div class="thumb"><a href="product.php?id=<?php echo $s['id']; ?>"><img src="<?php echo htmlspecialchars($simg); ?>" alt="<?php echo htmlspecialchars($s['name']); ?>"></a></div>
-                            <h4><a href="product.php?id=<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></a></h4>
-                            <p class="price"><?php echo number_format($s['price'], 0); ?> đ</p>
+                            <div class="product-main">
+                                <div class="thumb">
+                                    <?php if (isset($s['total_stock']) && $s['total_stock'] <= 0): ?>
+                                        <div class="out-of-stock-badge">Hết hàng</div>
+                                    <?php endif; ?>
+                                    <?php $simg = $imagesBy[$s['id']] ?? 'assets/images/product-placeholder.png'; ?>
+                                    <a href="product.php?id=<?php echo $s['id']; ?>"><img src="<?php echo htmlspecialchars($simg); ?>" alt="<?php echo htmlspecialchars($s['name']); ?>"></a>
+                                </div>
+                                <h3><a href="product.php?id=<?php echo $s['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($s['name']); ?></a></h3>
+                                <p class="price"><?php echo number_format($s['price'], 0); ?>₫</p>
+                                <div class="product-actions">
+                                    <?php if (isset($s['total_stock']) && $s['total_stock'] > 0 && !empty($suggested_sizes[$s['id']])): ?>
+                                        <button type="button" class="btn btn-choose-size" data-product-id="<?php echo $s['id']; ?>">Thêm vào giỏ hàng</button>
+                                    <?php else: ?>
+                                        <button class="btn" disabled>Thêm vào giỏ hàng</button>
+                                    <?php endif; ?>
+                                    <form class="ajax-wishlist" method="post" action="wishlist.php">
+                                        <input type="hidden" name="product_id" value="<?php echo $s['id']; ?>">
+                                        <button class="btn btn-wishlist" type="submit">❤</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="product-sizes" id="sizes-for-<?php echo $s['id']; ?>">
+                                <?php if (!empty($suggested_sizes[$s['id']])): foreach ($suggested_sizes[$s['id']] as $size): ?>
+                                    <button class="btn btn-size" data-product-id="<?php echo $s['id']; ?>" data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button>
+                                <?php endforeach; endif; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -697,16 +935,25 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.product-carousel-wrapper').forEach(wrapper => {
-        new Swiper(wrapper.querySelector('.swiper.product-carousel'), {
-            slidesPerView: 2,
+        const swiperEl = wrapper.querySelector('.swiper.product-carousel');
+        if (!swiperEl) return;
+
+        new Swiper(swiperEl, {
+            slidesPerView: 5,
+            slidesPerGroup: 1,
             spaceBetween: 20,
+            loop: false,
+            watchOverflow: true,
             navigation: {
                 nextEl: wrapper.querySelector('.swiper-button-next'),
                 prevEl: wrapper.querySelector('.swiper-button-prev'),
             },
             breakpoints: {
+                0: { slidesPerView: 2 },
+                576: { slidesPerView: 3 },
                 768: { slidesPerView: 3 },
-                992: { slidesPerView: 4 }
+                992: { slidesPerView: 4 },
+                1200: { slidesPerView: 5 }
             }
         });
     });
@@ -735,40 +982,177 @@ document.addEventListener('DOMContentLoaded', function() {
         border: none; /* Xóa viền */
         cursor: pointer;
         padding: 5px;
-        font-size: 16px; /* Có thể điều chỉnh kích thước icon */
-        color: #6c757d; /* Màu mặc định cho icon */
+        font-size: 16px;
+        color: var(--text-muted);
         transition: color 0.2s ease-in-out; /* Hiệu ứng chuyển màu mượt mà */
     }
 
     .review-actions .btn-edit-review:hover {
-        color: #007bff; /* Màu xanh khi di chuột vào icon sửa */
+        color: var(--primary);
     }
 
     .review-actions .btn-delete-review:hover {
-        color: #dc3545; /* Màu đỏ khi di chuột vào icon xóa */
+        color: var(--danger);
     }
 </style>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<style>
+    /* Ẩn form sửa review mặc định */
+    .review .review-edit-form { display: none; }
+    /* Khi review có class 'editing', hiện form sửa và ẩn nội dung review */
+    .review.editing .review-edit-form { display: block; margin-top: 15px; }
+    .review.editing .review-header, .review.editing .review-comment, .review.editing .review-date, .review.editing .review-actions { display: none; }
+</style>
 
 <style>
-.vouchers-list { display: flex; gap: 15px; flex-wrap: wrap; }
-.voucher-item { display: flex; align-items: center; background: #e9f5ff; border: 1px dashed #007bff; border-radius: 8px; overflow: hidden; }
-.voucher-info { padding: 8px 12px; font-weight: 500; color: #0056b3; }
-.voucher-code { background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
-.voucher-code:hover { background: #0056b3; }
-.voucher-code:disabled { background: #28a745; cursor: default; }
-
-.input-with-button { display: flex; margin-top: 5px; }
-.input-with-button input { flex-grow: 1; border-radius: 0; border-right: none; }
-.input-with-button button { border-radius: 0; white-space: nowrap; }
-
-.price-container .price { font-size: 1.8em; }
-.price-container .price-original { text-decoration: line-through; color: #999; font-size: 1.1em; margin-top: -10px; }
-
-.coupon-result { margin-top: 8px; font-weight: 500; font-size: 0.9em; }
-.coupon-result.success { color: #28a745; }
-.coupon-result.error { color: #dc3545; }
-
-.price-container .price, .price-container .price-original { transition: all 0.3s ease; }
+    .review-content-wrapper {
+        display: flex;
+        justify-content: space-between; /* Đẩy nội dung và nút hành động ra hai bên */
+        align-items: flex-start; /* Căn các mục theo đầu dòng */
+    }
 </style>
+<style>
+    /* CSS cho nút Sửa và Xóa review */
+    .review-actions .btn-edit-review,
+    .review-actions .btn-delete-review {
+        background: none; /* Xóa màu nền */
+        border: none; /* Xóa viền */
+        cursor: pointer;
+        padding: 5px;
+        font-size: 16px;
+        color: var(--text-muted);
+        transition: color 0.2s ease-in-out; /* Hiệu ứng chuyển màu mượt mà */
+    }
+
+    .review-actions .btn-edit-review:hover {
+        color: var(--primary);
+    }
+
+    .review-actions .btn-delete-review:hover {
+        color: var(--danger);
+    }
+</style>
+
+<style>
+    /* CSS để input và button nằm chung 1 hàng */
+    .input-with-button {
+        display: flex;
+        gap: 8px;
+        align-items: stretch; /* Đảm bảo cả input và button có cùng chiều cao */
+    }
+
+    .input-with-button input[type="text"] {
+        flex: 1; /* Input chiếm phần còn lại của container */
+        min-width: 0; /* Cho phép input co lại khi cần */
+    }
+
+    .input-with-button .btn {
+        white-space: nowrap; /* Không cho text trong button xuống dòng */
+        flex-shrink: 0; /* Không cho button bị co lại */
+    }
+
+    /* Responsive cho màn hình nhỏ (nếu cần) */
+    @media (max-width: 576px) {
+        .input-with-button { flex-direction: column; }
+        .input-with-button .btn { width: 100%; }
+    }
+</style>
+
+<style>
+    /* CSS cập nhật màu cho các nút và liên kết trong trang product */
+
+    /* Nút Add to cart chính */
+    .product-actions-form .btn,
+    .product-actions-form button.btn[type="submit"] {
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%) !important;
+        color: #fff !important;
+        border: none !important;
+    }
+
+    .product-actions-form .btn:hover {
+        background: linear-gradient(90deg, var(--primary-dark) 60%, var(--accent-hover) 100%) !important;
+    }
+
+    /* Nút Dán & Kiểm tra */
+    #paste-and-validate-btn,
+    #paste-and-validate-shipping-btn {
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%) !important;
+        color: #fff !important;
+        border: none;
+    }
+
+    #paste-and-validate-btn:hover,
+    #paste-and-validate-shipping-btn:hover {
+        background: linear-gradient(90deg, var(--primary-dark) 60%, var(--accent-hover) 100%) !important;
+    }
+
+    /* Nút Copy voucher */
+    .voucher-code {
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%) !important;
+        color: #fff !important;
+        border: none;
+    }
+
+    .voucher-code:hover {
+        background: linear-gradient(90deg, var(--primary-dark) 60%, var(--accent-hover) 100%) !important;
+    }
+
+    /* Nút Thêm vào giỏ hàng trong phần sản phẩm gợi ý */
+    .suggested-products .btn-choose-size {
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%) !important;
+        color: #fff !important;
+    }
+
+    .suggested-products .btn-choose-size:hover {
+        background: linear-gradient(90deg, var(--primary-dark) 60%, var(--accent-hover) 100%) !important;
+    }
+
+    /* Nút size trong sản phẩm gợi ý */
+    .suggested-products .btn-size:hover {
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%) !important;
+        color: #fff !important;
+    }
+
+    /* Các liên kết màu xanh (Brand, Category) */
+    .meta a {
+        color: var(--primary) !important;
+    }
+
+    .meta a:hover {
+        color: var(--primary-dark) !important;
+        text-decoration: underline;
+    }
+
+    /* Nút Submit review, Lưu, Sửa */
+    .add-review-form button.btn[type="submit"],
+    .review-edit-form button.btn[type="submit"] {
+        background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%) !important;
+        color: #fff !important;
+    }
+
+    .add-review-form button.btn[type="submit"]:hover,
+    .review-edit-form button.btn[type="submit"]:hover {
+        background: linear-gradient(90deg, var(--primary-dark) 60%, var(--accent-hover) 100%) !important;
+    }
+
+    .review-actions .btn-edit-review:hover {
+        color: var(--primary) !important;
+    }
+</style>
+
+<style>
+    /* Ẩn các nút mũi tên (spinners) khỏi ô nhập số lượng */
+    .quantity-input input[type=number]::-webkit-inner-spin-button,
+    .quantity-input input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .quantity-input input[type=number] {
+        -moz-appearance: textfield; /* Dành cho Firefox */
+    }
+
+
+</style>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

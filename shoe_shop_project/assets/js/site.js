@@ -231,8 +231,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     if (typeof j.total !== 'undefined') {
                         var totalEl = document.getElementById('cart-total');
-                        // The total in cart summary might have a $ sign
-                        if (totalEl) totalEl.textContent = '$' + parseFloat(j.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        // Cập nhật tổng tiền với định dạng VND
+                        if (totalEl) totalEl.textContent = parseFloat(j.total).toLocaleString('vi-VN') + '₫';
                     }
                     if (j.reload) location.reload();
                 }
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var cartLink = document.getElementById('cart-link'); 
                     if (cartLink && typeof j.count !== 'undefined') cartLink.textContent = 'Cart (' + (j.count || 0) + ')';
                     if (typeof j.total !== 'undefined') { 
-                        var totalEl = document.getElementById('cart-total'); if (totalEl) totalEl.textContent = '$' + parseFloat(j.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
+                        var totalEl = document.getElementById('cart-total'); if (totalEl) totalEl.textContent = parseFloat(j.total).toLocaleString('vi-VN') + '₫';
                     }
                     // remove the item element from DOM
                     var el = form.closest('.cart-item'); if (el) el.remove();

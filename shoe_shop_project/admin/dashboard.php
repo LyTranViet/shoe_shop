@@ -125,7 +125,7 @@ $recent = $stmt->fetchAll();
     <section class="stats-grid">
         <div class="stat-card gradient-blue">
             <div class="stat-icon">💰</div>
-            <div><h4>Revenue</h4><p>$<?= number_format($periodRevenue, 2) ?></p></div>
+            <div><h4>Revenue</h4><p><?= number_format($periodRevenue, 0) ?>₫</p></div>
         </div>
         <div class="stat-card gradient-green">
             <div class="stat-icon">🛒</div>
@@ -161,7 +161,7 @@ $recent = $stmt->fetchAll();
                         <tr>
                             <td>#<?= $r['id'] ?></td>
                             <td><?= htmlspecialchars($r['customer'] ?? 'Guest') ?></td>
-                            <td>$<?= number_format($r['total_amount'], 2) ?></td>
+                            <td><?= number_format($r['total_amount'], 0) ?>₫</td>
                             <td><?= date('d M Y', strtotime($r['created_at'])) ?></td>
                             <td><span class="status <?= strtolower(str_replace(' ', '-', $r['status'] ?? '')) ?>">
                                 <?= htmlspecialchars(ucfirst($r['status'] ?? 'N/A')) ?>
