@@ -498,7 +498,7 @@ try {
         }
         .product-sizes .btn-size:hover {
             background: #0ea5ff; color: #fff;
-        }s
+        }
     </style>
     <style>
         .out-of-stock-badge {

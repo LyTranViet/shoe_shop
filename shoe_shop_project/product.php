@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // Chỉ sửa review nếu nó thuộc về người dùng hiện tại
         $stmt = $db->prepare("UPDATE product_reviews SET rating = ?, comment = ? WHERE id = ? AND user_id = ?");
         $stmt->execute([$rating, $comment, $review_id, current_user_id()]);
-        flash_set('success', 'Đã cập nhật đánh giá của bạn.');
+        // flash_set('success', 'Đã cập nhật đánh giá của bạn.');
     }
     header('Location: product.php?id=' . $id);
     exit;
