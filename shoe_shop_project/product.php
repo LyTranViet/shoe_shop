@@ -283,6 +283,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
 }); // DOMContentLoaded
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sizeOptionsContainer = document.querySelector('.size-options-boxes');
+    const stockDisplaySpan = document.getElementById('size-stock-display');
+    const stockMessageP = document.getElementById('stock-message');
+
+    // Hàm cập nhật hiển thị tồn kho
+    function updateStockDisplay() {
+        const selectedRadio = document.querySelector('input[name="size"]:checked');
+        if (selectedRadio) {
+            const stock = selectedRadio.dataset.stock;
+            if (stockDisplaySpan) {
+                stockDisplaySpan.textContent = `${stock} `;
+            }
+            // Ẩn thông báo lỗi nếu có
+            if (stockMessageP) {
+                stockMessageP.style.display = 'none';
+            }
+        } else if (stockDisplaySpan) {
+            // Nếu không có size nào được chọn (trường hợp tất cả đều hết hàng)
+            stockDisplaySpan.textContent = 'Hết hàng';
+        }
+    }
+
+    // Lắng nghe sự kiện khi người dùng chọn size
+    if (sizeOptionsContainer) {
+        sizeOptionsContainer.addEventListener('change', function(event) {
+            if (event.target.name === 'size') {
+                updateStockDisplay();
+            }
+        });
+
+        // Xử lý khi click vào label của size đã hết hàng
+        sizeOptionsContainer.addEventListener('click', function(event) {
+            const label = event.target.closest('label');
+            if (label) {
+                const radioId = label.getAttribute('for');
+                const radio = document.getElementById(radioId);
+                if (radio && radio.disabled) {
+                    if (stockMessageP) {
+                        stockMessageP.textContent = `Size ${radio.value} đã hết hàng. Vui lòng chọn size khác.`;
+                        stockMessageP.style.display = 'block';
+                    }
+                }
+            }
+        });
+    }
+
+    // Cập nhật lần đầu khi tải trang
+    updateStockDisplay();
+});
+</script>
 
 <div class="product-page-container">
     <div class="product-detail">
@@ -313,9 +365,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="details">
             <h1><?php echo htmlspecialchars($prod['name']); ?></h1>
             <p class="meta">
-                Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> |
-                Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a>
+                Brand: <a href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a> | 
+                Category: <a href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a> | 
+                <span class="stock-display">Tồn kho: <span id="size-stock-display">--</span></span>
             </p>
+            <!-- Vùng hiển thị tồn kho -->
+            <div class="stock-display-container">
+                <p id="stock-message" class="stock-message" style="display: none; color: red; font-weight: 500;"></p>
+            </div>
             <div class="price-container">
                 <p class="price" data-original-price="<?php echo $prod['price']; ?>">
                     <?php echo number_format($prod['price'], 0); ?> đ
@@ -445,7 +502,14 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="add-review-form">
                 <h4>Write a review</h4>
                 <?php if ($m = flash_get('error')): ?><p style="color:red"><?php echo $m; ?></p><?php endif; ?>
-                <?php if ($m = flash_get('success')): ?><p style="color:green"><?php echo $m; ?></p><?php endif; ?>
+                <?php 
+                // Lấy thông báo thành công
+                $success_message = flash_get('success');
+                // Chỉ hiển thị nếu đó không phải là thông báo đăng nhập mặc định
+                if ($success_message && $success_message !== 'Đăng nhập thành công!'): 
+                ?>
+                    <p style="color:green"><?php echo htmlspecialchars($success_message); ?></p>
+                <?php endif; ?>
                 <form method="post" action="product.php?id=<?php echo $id; ?>">
                     <input type="hidden" name="action" value="add_review">
                     <div class="form-group">

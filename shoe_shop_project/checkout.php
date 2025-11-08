@@ -4,6 +4,7 @@ ob_start();
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
 
+require_once __DIR__ . '/includes/init.php'; // Nạp init.php để có BASE_URL và các hàm
 // Lấy order_success, ưu tiên GET
 $serverOrderSuccess = $_GET['order_success'] ?? ($_SESSION['order_success'] ?? null);
 
@@ -34,8 +35,9 @@ $vnp_ReturnUrl = 'http://localhost/shoe_shop/shoe_shop_project/vnpay_return.php'
 
 // require login for checkout
 if (!is_logged_in()) {
-    flash_set('info', 'Please login to checkout');
-    header('Location: /login.php');
+    $_SESSION['return_to'] = BASE_URL . 'checkout.php'; // Lưu lại trang checkout để quay lại sau khi đăng nhập
+    flash_set('info', 'Vui lòng đăng nhập để tiến hành thanh toán.');
+    header('Location: ' . BASE_URL . 'login.php'); 
     exit;
 }
 

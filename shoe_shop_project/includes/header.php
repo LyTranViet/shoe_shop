@@ -1,21 +1,19 @@
 <?php
 ob_start();
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/init.php'; // Nạp init.php trước để có BASE_URL và các hàm khác
 
 // --- Access Control ---
 // Chỉ SuperAdmin mới có thể truy cập cả trang người dùng và trang quản trị.
 // Admin và Staff sẽ bị chuyển hướng về trang quản trị nếu cố gắng truy cập trang người dùng.
-if (is_logged_in() && !is_superadmin() && (is_admin() || is_staff())) {
+if (is_logged_in() && (is_admin() || is_staff()) && !is_superadmin()) {
     // Chuyển hướng về trang quản trị
     header('Location: ' . rtrim(BASE_URL, '/') . '/admin/');
     exit;
 }
 
 // Define BASE_URL if it's not already defined (e.g., by init.php)
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '/shoe_shop/shoe_shop_project/');
-}
+// Đã được định nghĩa trong init.php, không cần định nghĩa lại.
 
 // Database connection
 $db = get_db();

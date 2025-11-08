@@ -84,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif (isset($_SESSION['return_to'])) {
                 $return_url = $_SESSION['return_to'];
                 unset($_SESSION['return_to']); // Xóa session sau khi sử dụng
+                // Không cần flash_set('success') khi chuyển hướng lại, để tránh thông báo thừa
                 header('Location: ' . $return_url);
             } else {
                 // SuperAdmin và Customer sẽ được chuyển đến trang chủ

@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Session fallback
         $key = $pid . '|' . ($size ?? '');
         if (!isset($_SESSION['cart'][$key])) {
-            $_SESSION['cart'][$key] = ['product_in' => $pid, 'quantity' => $qty, 'size' => $size];
+            $_SESSION['cart'][$key] = ['product_id' => $pid, 'quantity' => $qty, 'size' => $size];
         } else {
             $_SESSION['cart'][$key]['quantity'] += $qty;
         }
