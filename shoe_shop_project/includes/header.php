@@ -67,6 +67,7 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
     
     <script>window.siteBasePath = '<?php echo $basePath; ?>';</script>
     <script src="assets/js/chat.js" defer></script>
+    <script src="assets/js/site.js" defer></script>
 
     <style>
         :root {
@@ -340,11 +341,10 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                     <div class="dropdown-menu">
                         <a href="<?php echo BASE_URL; ?>profile.php">👤 Hồ sơ</a>
                         <a href="<?php echo BASE_URL; ?>order_history.php">📦 Đơn hàng</a>
-                        <a href="<?php echo BASE_URL; ?>wishlist.php">❤️ Yêu thích</a>
-                        <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'superadmin' || $_SESSION['user_role'] === 'staff'): ?>
-<a href="<?php echo BASE_URL; ?>admin/index.php" style="color:#0d6efd;font-weight:600;">
-    ⚙️ Quản trị
-</a>                            </a>
+                        <?php if (is_superadmin()): ?>
+                            <a href="<?php echo BASE_URL; ?>admin/index.php" style="color:#0d6efd;font-weight:600;">
+                                ⚙️ Quản trị
+                            </a>
                         <?php endif; ?>
                         <a href="<?php echo BASE_URL; ?>logout.php" style="color:#dc3545;font-weight:600;">🚪 Đăng xuất</a>
                     </div>

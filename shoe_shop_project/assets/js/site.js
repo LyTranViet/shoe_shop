@@ -152,17 +152,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (!j) return;
                 if (j.success) {
-                    // update cart count in header
-                    var cartLink = document.getElementById('cart-link');
-                    if (cartLink) {
-                        cartLink.textContent = 'Cart (' + (j.count || 0) + ')';
-                    }
-                    // show success message
-                    var status = form.querySelector('.add-cart-status');
-                    if (status) {
-                        status.textContent = 'Added!';
-                        setTimeout(function () { status.textContent = ''; }, 2000);
-                    }
+                    // Chuyển hướng đến trang giỏ hàng sau khi thêm thành công
+                    window.location.href = (window.siteBasePath || '') + '/cart.php';
                 } else if (j.login_required) {
                     window.location = j.redirect || 'login.php';
                 } else if (j.error) {
@@ -202,12 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 if (j.success) {
-                    var btn = form.querySelector('button');
-                    if (btn) { btn.textContent = '❤'; }
-                    // optional: temporary message
-                    var msg = document.createElement('span'); msg.textContent = ' Added to wishlist';
-                    form.appendChild(msg);
-                    setTimeout(function () { msg.remove(); }, 2000);
+                    // Chuyển hướng đến trang yêu thích sau khi thêm thành công
+                    window.location.href = (window.siteBasePath || '') + '/wishlist.php';
                 } else if (j.error) {
                     console.warn('Wishlist error', j.error);
                 }

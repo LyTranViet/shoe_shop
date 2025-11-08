@@ -4,8 +4,9 @@ require_once __DIR__ . '/includes/functions.php';
 
 // Kiểm tra AJAX
 function is_ajax() {
-    return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    // Kiểm tra header cũ (jQuery) hoặc header mới (fetch API)
+    return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+           (!empty($_SERVER['HTTP_ACCEPT']) && strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json') !== false);
 }
 
 // Trả JSON
@@ -308,6 +309,10 @@ if (!empty($items)) {
                             <p class="cart-item-meta cart-item-price-mobile">Giá: <?php echo number_format($item_price, 0); ?>đ</p>
                         </div>
                     </div>
+                    <!-- Vùng hiển thị lỗi tồn kho -->
+                    <div class="cart-item-stock-error" style="display: none; color: red; font-weight: 500; grid-column: 1 / -1; padding: 5px 15px; text-align: right;">
+                    </div>
+
                     <div class="cart-item-quantity">
                         <form class="ajax-cart-update" method="post">
                             <input type="hidden" name="action" value="update">
@@ -348,7 +353,7 @@ if (!empty($items)) {
                 <strong id="cart-total"><?php echo number_format($final_total, 0); ?>đ</strong>
             </div>
             <p>Phí vận chuyển sẽ được tính tại bước thanh toán.</p>
-            <a class="btn checkout-btn" href="checkout.php">Tiến hành thanh toán</a>
+            <button id="proceed-to-checkout-btn" class="btn checkout-btn">Tiến hành thanh toán</button>
         </aside>
     </div>
 <?php endif; ?>
@@ -356,6 +361,7 @@ if (!empty($items)) {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const alertsContainer = document.getElementById('coupon-alerts');
+    const checkoutBtn = document.getElementById('proceed-to-checkout-btn');
     const cartTotalEl = document.getElementById('cart-total');
 
     // Hàm cập nhật tổng tiền
@@ -369,6 +375,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (items.length === 0) {
             alertsContainer.innerHTML = '';
         }
+    };
+
+    // Hàm xóa tất cả thông báo lỗi tồn kho
+    const clearAllStockErrors = () => {
+        document.querySelectorAll('.cart-item').forEach(item => {
+            item.classList.remove('error-stock');
+            const errorDiv = item.querySelector('.cart-item-stock-error');
+            if (errorDiv) errorDiv.style.display = 'none';
+        });
     };
 
     document.querySelectorAll('.cart-item').forEach(item => {
@@ -414,9 +429,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Xử lý nút "Tiến hành thanh toán"
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            clearAllStockErrors(); // Xóa lỗi cũ trước khi kiểm tra
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Đang kiểm tra...';
+
+            fetch('validate_cart_stock.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Nếu không có lỗi, chuyển đến trang checkout
+                        window.location.href = 'checkout.php';
+                    } else {
+                        // Nếu có lỗi, hiển thị thông báo
+                        let alertMessage = 'Một số sản phẩm trong giỏ hàng không đủ số lượng. Vui lòng kiểm tra lại.';
+                        if (data.errors && data.errors.length > 0) {
+                            const firstError = data.errors[0];
+                            alertMessage = `Sản phẩm "${firstError.name}" (Size: ${firstError.size}) chỉ còn ${firstError.available_stock} sản phẩm. Vui lòng cập nhật lại số lượng.`;
+                        }
+                        alert(alertMessage);
+
+                        data.errors.forEach(error => {
+                            const itemId = error.id ? `[data-cart-item-id="${error.id}"]` : `[data-session-key="${error.session_key}"]`;
+                            const problematicItem = document.querySelector(`.cart-item${itemId}`);
+                            if (problematicItem) {
+                                problematicItem.classList.add('error-stock');
+                                const errorDiv = problematicItem.querySelector('.cart-item-stock-error');
+                                if (errorDiv) {
+                                    // Dòng này đã được xóa theo yêu cầu để không hiển thị text lỗi bên dưới sản phẩm
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Validation Error:', err);
+                    alert('Đã xảy ra lỗi khi kiểm tra giỏ hàng. Vui lòng thử lại.');
+                })
+                .finally(() => {
+                    // Bật lại nút sau khi xử lý xong
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Tiến hành thanh toán';
+                });
+        });
+    }
+
     // Xóa alert nếu giỏ trống lúc load
     clearAlertsIfEmpty();
 });
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
+
+<style>
+.cart-item.error-stock {
+    border: 2px solid red;
+    border-radius: 8px;
+    background-color: #fff5f5;
+}
+</style>
