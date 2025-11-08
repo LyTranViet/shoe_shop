@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 01, 2025 lúc 05:45 AM
+-- Thời gian đã tạo: Th10 08, 2025 lúc 02:52 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -90,7 +90,9 @@ INSERT INTO `carts` (`id`, `user_id`, `session_id`, `created_at`, `updated_at`) 
 (4, 10, NULL, '2025-10-16 14:04:24', '2025-10-16 14:04:24'),
 (5, 6, NULL, '2025-10-23 00:17:24', '2025-10-23 00:17:24'),
 (6, 14, NULL, '2025-10-30 10:29:06', '2025-10-30 10:29:06'),
-(7, 16, NULL, '2025-10-31 23:20:15', '2025-10-31 23:20:15');
+(7, 16, NULL, '2025-10-31 23:20:15', '2025-10-31 23:20:15'),
+(8, 20, NULL, '2025-11-05 18:32:46', '2025-11-05 18:32:46'),
+(9, 21, NULL, '2025-11-05 20:09:02', '2025-11-05 20:09:02');
 
 -- --------------------------------------------------------
 
@@ -114,7 +116,8 @@ CREATE TABLE `cart_items` (
 INSERT INTO `cart_items` (`id`, `cart_id`, `product_id`, `size`, `quantity`, `price`) VALUES
 (1, 1, 1, '40', 1, 2500000.00),
 (14, 3, 8, NULL, 1, 2200000.00),
-(27, 5, 3, '30', 1, 1200000.00);
+(27, 5, 3, '30', 1, 1200000.00),
+(165, 7, 5, NULL, 1, 3000000.00);
 
 -- --------------------------------------------------------
 
@@ -238,7 +241,39 @@ INSERT INTO `export_receipt` (`id`, `receipt_code`, `export_date`, `export_type`
 (45, 'PX-ORD63', '2025-11-01 09:58:04', 'Bán hàng', 16, 2741001.00, 'Tự động tạo cho đơn hàng #63', 'Đang xử lý', 63),
 (46, 'PX-ORD64', '2025-11-01 10:02:30', 'Bán hàng', 14, 41001.00, 'Tự động tạo cho đơn hàng #64', 'Đang xử lý', 64),
 (47, 'PX-ORD65', '2025-11-01 11:22:39', 'Bán hàng', 14, 6001640.04, 'Tự động tạo cho đơn hàng #65', 'Đang xử lý', 65),
-(48, 'PX-ORD66', '2025-11-01 11:27:36', 'Bán hàng', 14, 3001360.00, 'Tự động tạo cho đơn hàng #66', 'Đang xử lý', 66);
+(48, 'PX-ORD66', '2025-11-01 11:27:36', 'Bán hàng', 14, 3001360.00, 'Tự động tạo cho đơn hàng #66', 'Đang xử lý', 66),
+(49, 'PX-ORD67', '2025-11-05 18:33:28', 'Bán hàng', 20, 3006000.00, 'Tự động tạo cho đơn hàng #67', 'Đang xử lý', 67),
+(50, 'PX-ORD68', '2025-11-05 19:09:09', 'Bán hàng', 20, 9506000.00, 'Tự động tạo cho đơn hàng #68', 'Đang xử lý', 68),
+(51, 'PX-ORD69', '2025-11-05 19:24:52', 'Bán hàng', 20, 3005000.00, 'Tự động tạo cho đơn hàng #69', 'Đang xử lý', 69),
+(52, 'PX-ORD72', '2025-11-05 19:30:36', 'Bán hàng', 20, 3005000.00, 'Tự động tạo cho đơn hàng #72', 'Đang xử lý', 72),
+(53, 'PX-ORD74', '2025-11-05 19:38:09', 'Bán hàng', 20, 3505000.00, 'Tự động tạo cho đơn hàng #74', 'Đang xử lý', 74),
+(54, 'PX-ORD81', '2025-11-05 19:59:08', 'Bán hàng', 20, 3006000.00, 'Tự động tạo cho đơn hàng #81', 'Đang xử lý', 81),
+(55, 'PX-ORD83', '2025-11-05 20:10:28', 'Bán hàng', 21, 3505000.00, 'Tự động tạo cho đơn hàng #83', 'Đang xử lý', 83),
+(56, 'PX-ORD85', '2025-11-05 20:16:10', 'Bán hàng', 21, 3006000.00, 'Tự động tạo cho đơn hàng #85', 'Đang xử lý', 85),
+(57, 'PX-ORD86', '2025-11-05 20:16:33', 'Bán hàng', 21, 2805000.00, 'Tự động tạo cho đơn hàng #86', 'Đang xử lý', 86),
+(58, 'PX-ORD98', '2025-11-05 21:30:24', 'Bán hàng', 21, 1605000.00, 'Tự động tạo cho đơn hàng #98', 'Đang xử lý', 98),
+(59, 'PX-ORD107', '2025-11-05 22:07:30', 'Bán hàng', 21, 4505000.00, 'Tự động tạo cho đơn hàng #107', 'Đang xử lý', 107),
+(60, 'PX-ORD108', '2025-11-05 22:13:10', 'Bán hàng', 21, 1205000.00, 'Tự động tạo cho đơn hàng #108', 'Đang xử lý', 108),
+(61, 'PX-ORD111', '2025-11-05 22:30:07', 'Bán hàng', 21, 4105000.00, 'Tự động tạo cho đơn hàng #111', 'Đang xử lý', 111),
+(62, 'PX-ORD113', '2025-11-05 22:39:44', 'Bán hàng', 21, 5605000.00, 'Tự động tạo cho đơn hàng #113', 'Đang xử lý', 113),
+(63, 'PX-ORD116', '2025-11-06 10:18:46', 'Bán hàng', 21, 8405000.00, 'Tự động tạo cho đơn hàng #116', 'Đang xử lý', 116),
+(64, 'PX-ORD119', '2025-11-06 10:27:42', 'Bán hàng', 21, 1205000.00, 'Tự động tạo cho đơn hàng #119', 'Đang xử lý', 119),
+(65, 'PX-ORD121', '2025-11-06 10:31:09', 'Bán hàng', 21, 3605000.00, 'Tự động tạo cho đơn hàng #121', 'Đang xử lý', 121),
+(66, 'PX-ORD124', '2025-11-06 10:36:59', 'Bán hàng', 21, 1405000.00, 'Tự động tạo cho đơn hàng #124', 'Đang xử lý', 124),
+(67, 'PX-ORD127', '2025-11-06 10:52:38', 'Bán hàng', 21, 4405000.00, 'Tự động tạo cho đơn hàng #127', 'Đang xử lý', 127),
+(68, 'PX-ORD129', '2025-11-06 10:54:18', 'Bán hàng', 21, 3505000.00, 'Tự động tạo cho đơn hàng #129', 'Đang xử lý', 129),
+(69, 'PX-ORD131', '2025-11-06 11:01:52', 'Bán hàng', 21, 5605000.00, 'Tự động tạo cho đơn hàng #131', 'Đang xử lý', 131),
+(70, 'PX-ORD142', '2025-11-06 12:02:24', 'Bán hàng', 21, 2805000.00, 'Tự động tạo cho đơn hàng #142', 'Đang xử lý', 142),
+(71, 'PX-ORD158', '2025-11-06 12:58:41', 'Bán hàng', 21, 3505000.00, 'Tự động tạo cho đơn hàng #158', 'Đang xử lý', 158),
+(72, 'PX-ORD161', '2025-11-06 22:48:46', 'Bán hàng', 16, 6006000.00, 'Tự động tạo cho đơn hàng #161', 'Đang xử lý', 161),
+(73, 'PX-ORD163', '2025-11-07 00:15:16', 'Bán hàng', 16, 2805000.00, 'Tự động tạo cho đơn hàng #163', 'Đang xử lý', 163),
+(74, 'PX-ORD168', '2025-11-07 01:38:32', 'Bán hàng', 16, 1505000.00, 'Tự động tạo cho đơn hàng #168', 'Đang xử lý', 168),
+(75, 'PX-ORD169', '2025-11-07 19:02:27', 'Bán hàng', 16, 6005000.00, 'Tự động tạo cho đơn hàng #169', 'Đang xử lý', 169),
+(76, 'PX-ORD173', '2025-11-07 20:11:38', 'Bán hàng', 16, 3005000.00, 'Tự động tạo cho đơn hàng #173', 'Đang xử lý', 173),
+(77, 'PX-ORD174', '2025-11-07 21:47:54', 'Bán hàng', 16, 3005000.00, 'Tự động tạo cho đơn hàng #174', 'Đang xử lý', 174),
+(78, 'PX-ORD178', '2025-11-07 23:49:39', 'Bán hàng', 16, 6005000.00, 'Tự động tạo cho đơn hàng #178', 'Đang xử lý', 178),
+(79, 'PX-ORD181', '2025-11-08 00:04:33', 'Bán hàng', 16, 3005000.00, 'Tự động tạo cho đơn hàng #181', 'Đang xử lý', 181),
+(80, 'PX-ORD185', '2025-11-08 00:08:20', 'Bán hàng', 16, 3005000.00, 'Tự động tạo cho đơn hàng #185', 'Đang xử lý', 185);
 
 -- --------------------------------------------------------
 
@@ -414,74 +449,196 @@ CREATE TABLE `orders` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `shipping_discount_amount` decimal(10,2) DEFAULT 0.00,
-  `shipping_coupon_code` varchar(50) DEFAULT NULL
+  `shipping_coupon_code` varchar(50) DEFAULT NULL,
+  `vnpay_trans_no` varchar(50) DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
+  `paypal_order_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `total_amount`, `discount_amount`, `coupon_code`, `shipping_fee`, `shipping_carrier`, `shipping_address`, `status_id`, `coupon_id`, `payment_method`, `phone`, `created_at`, `updated_at`, `shipping_discount_amount`, `shipping_coupon_code`) VALUES
-(1, 2, 2500000.00, 0.00, NULL, 0, NULL, '123 Đường ABC, HCM', 4, NULL, 'COD', NULL, '2025-10-11 08:50:12', '2025-10-12 08:49:05', 0.00, NULL),
-(2, 4, 15400000.00, 0.00, NULL, 0, NULL, '26', 3, NULL, 'CARD', NULL, '2025-10-12 08:42:59', '2025-10-12 08:56:47', 0.00, NULL),
-(3, 4, 4600000.00, 0.00, NULL, 0, NULL, 'ho chi minh', 1, NULL, 'COD', NULL, '2025-10-12 12:07:16', '2025-10-12 12:07:16', 0.00, NULL),
-(4, 4, 2300000.00, 0.00, NULL, 0, NULL, 'ho chi minh', 1, NULL, 'CARD', NULL, '2025-10-12 12:35:28', '2025-10-12 12:35:28', 0.00, NULL),
-(5, 4, 2300000.00, 0.00, NULL, 0, NULL, 'hồ chí mình', 2, NULL, 'COD', NULL, '2025-10-12 13:55:06', '2025-10-12 14:04:16', 0.00, NULL),
-(6, 4, 2380000.00, 0.00, NULL, 0, NULL, 'hồ chí minh', 1, 2, 'COD', NULL, '2025-10-12 15:46:09', '2025-10-12 15:46:09', 0.00, NULL),
-(7, 14, 5300030.00, 0.00, NULL, 0, NULL, '223a/9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-22 22:53:23', '2025-10-22 22:53:23', 0.00, NULL),
-(8, 14, 2100030.00, 0.00, NULL, 0, NULL, '2231 , Xã Sốp Cộp, huyện Sốp Cộp, Sơn La', 1, NULL, 'COD', NULL, '2025-10-22 23:01:08', '2025-10-22 23:01:08', 0.00, NULL),
-(9, 14, 18800030.00, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-23 09:42:46', '2025-10-23 09:42:46', 0.00, NULL),
-(10, 14, 2100030.00, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-23 09:44:26', '2025-10-23 09:44:26', 0.00, NULL),
-(11, 14, 6000030.00, 0.00, NULL, 0, NULL, '223A/9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-29 15:59:44', '2025-10-29 15:59:44', 0.00, NULL),
-(12, 14, 4600001.20, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã Bình Chánh, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 16:51:35', '2025-10-29 16:51:35', 0.00, NULL),
-(13, 14, 2600030.00, 0.00, NULL, 30, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 23:35:16', '2025-10-29 23:35:16', 0.00, NULL),
-(14, 14, 2600030.00, 0.00, NULL, 30, 'GHN', '223A/9 tổ 9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 23:54:46', '2025-10-29 23:54:46', 0.00, NULL),
-(15, 14, 2300001.20, 0.00, NULL, 1, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:18:41', '2025-10-30 00:18:41', 0.00, NULL),
-(16, 14, 1600001.20, 0.00, NULL, 1, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:45:37', '2025-10-30 00:45:37', 0.00, NULL),
-(17, 14, 1600030.00, 0.00, NULL, 30, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:49:13', '2025-10-30 00:49:13', 0.00, NULL),
-(19, 14, 4200030.00, 0.00, NULL, 30, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 09:09:30', '2025-10-30 09:09:30', 0.00, NULL),
-(20, 14, 7330000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:36:04', '2025-10-30 11:36:04', 0.00, NULL),
-(21, 10, 6030000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:49:25', '2025-10-30 11:49:25', 0.00, NULL),
-(22, 10, 18036501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:51:33', '2025-10-30 11:51:33', 0.00, NULL),
-(23, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:53:09', '2025-10-30 11:53:09', 0.00, NULL),
-(24, 14, 2466501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 3, 'COD', NULL, '2025-10-30 13:39:29', '2025-10-30 13:39:29', 0.00, NULL),
-(25, 14, 2730000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 3, 'COD', NULL, '2025-10-30 13:44:51', '2025-10-30 13:44:51', 0.00, NULL),
-(26, 14, 1730000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 6, 'COD', NULL, '2025-10-30 13:49:23', '2025-10-30 13:49:23', 0.00, NULL),
-(27, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:16:01', '2025-10-30 14:16:01', 0.00, NULL),
-(28, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã Bình Chánh, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:23:11', '2025-10-30 14:23:11', 0.00, NULL),
-(29, 14, 3036501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:23:51', '2025-10-30 14:23:51', 0.00, NULL),
-(30, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:56:48', '2025-10-30 14:56:48', 0.00, NULL),
-(31, 14, 1391001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phú Nghĩa, Huyện Lạc Thủy, Hòa Bình', 1, 6, 'COD', NULL, '2025-10-30 15:54:21', '2025-10-30 15:54:21', 0.00, NULL),
-(32, 14, 1931001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Xuân Giao, Huyện Bảo Thắng, Lào Cai', 1, 5, 'COD', NULL, '2025-10-30 15:56:06', '2025-10-30 15:56:06', 0.00, NULL),
-(33, 14, 1745000.00, 0.00, NULL, 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, 6, 'COD', NULL, '2025-10-30 15:57:54', '2025-10-30 15:57:54', 0.00, NULL),
-(34, 14, 1741001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Thị trấn Trần Cao, Huyện Phù Cừ, Hưng Yên', 1, 6, 'COD', NULL, '2025-10-30 16:01:04', '2025-10-30 16:01:04', 0.00, NULL),
-(35, 14, 2475000.00, 0.00, NULL, 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Tả Thàng, Huyện Mường Khương, Lào Cai', 1, 3, 'COD', NULL, '2025-10-30 16:04:07', '2025-10-30 16:04:07', 0.00, NULL),
-(36, 14, 1392000.00, 0.00, NULL, 42000, 'GHTK', 'Địa chỉ chi tiết, Xã Tiền Tiến, Huyện Phù Cừ, Hưng Yên', 1, 6, 'COD', NULL, '2025-10-30 16:05:54', '2025-10-30 16:05:54', 0.00, NULL),
-(37, 14, 3041001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Lạc, Huyện Yên Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:18:49', '2025-10-30 16:18:49', 0.00, NULL),
-(38, 14, 4901001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 3, 'COD', NULL, '2025-10-30 16:35:19', '2025-10-30 16:35:19', 0.00, NULL),
-(39, 14, 2841001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:41:41', '2025-10-30 16:41:41', 0.00, NULL),
-(40, 14, 3441001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phú Nghĩa, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:47:34', '2025-10-30 16:47:34', 0.00, NULL),
-(41, 14, 2742000.00, 0.00, NULL, 42000, 'GHTK', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-10-30 16:53:37', '2025-10-30 16:53:37', 0.00, NULL),
-(42, 14, 2741001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Phú, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:56:01', '2025-10-30 16:56:01', 0.00, NULL),
-(43, 14, 2700030.00, 0.00, NULL, 0, NULL, 'ágsG', 3, NULL, 'COD', NULL, '2025-10-30 16:58:12', '2025-10-30 17:01:20', 0.00, NULL),
-(44, 16, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã Ngũ Phụng, Huyện đảo Phú Quý, Bình Thuận', 1, NULL, 'COD', NULL, '2025-11-01 00:12:09', '2025-11-01 00:12:09', 0.00, NULL),
-(45, 16, 1736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Hải, Huyện Tuy An, Phú Yên', 1, 6, 'COD', NULL, '2025-11-01 00:42:21', '2025-11-01 00:42:21', 0.00, NULL),
-(46, 16, 3821001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 00:53:40', '2025-11-01 00:53:40', 0.00, NULL),
-(47, 16, 2136501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Phú Thứ, Huyện Tây Hòa, Phú Yên', 1, 5, 'COD', NULL, '2025-11-01 00:58:26', '2025-11-01 00:58:26', 0.00, NULL),
-(48, 16, 6841001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Thành Sơn, Huyện Mai Châu, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 01:26:55', '2025-11-01 01:26:55', 0.00, NULL),
-(49, 16, 11795000.00, 5040000.00, 'DISC30', 35000, 'GHTK', 'Địa chỉ chi tiết, Phường Nhơn Hưng, Thị xã An Nhơn, Bình Định', 1, 5, 'COD', NULL, '2025-11-01 01:33:45', '2025-11-01 01:33:45', 0.00, NULL),
-(50, 16, 6036501.00, 6000000.00, 'DISC50', 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Sa Thầy, Huyện Sa Thầy, Kon Tum', 1, 6, 'COD', NULL, '2025-11-01 01:38:46', '2025-11-01 01:38:46', 0.00, NULL),
-(51, 16, 10845000.00, 10800000.00, 'DISC50', 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Thanh Bình, Huyện Mường Khương, Lào Cai', 1, 6, 'COD', NULL, '2025-11-01 01:43:55', '2025-11-01 01:43:55', 0.00, NULL),
-(52, 16, 1386501.00, 1350000.00, 'DISC50', 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Thuận Nam, Huyện Hàm Thuận Nam, Bình Thuận', 1, 6, 'COD', NULL, '2025-11-01 01:49:53', '2025-11-01 01:49:53', 0.00, NULL),
-(53, 16, 1393801.00, 1350000.00, 'DISC50', 43801, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Ia Dom, Huyện Ia H Drai, Kon Tum', 1, 6, 'COD', NULL, '2025-11-01 02:05:37', '2025-11-01 02:05:37', 0.00, NULL),
-(54, 14, 6209201.00, 2640000.00, 'DISC30', 49201, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Tống Trân, Huyện Phù Cừ, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 02:12:11', '2025-11-01 02:12:11', 0.00, NULL),
-(55, 14, 1932000.00, 810000.00, 'DISC30', 42000, 'GHTK', 'Địa chỉ chi tiết, Thị trấn Sa Thầy, Huyện Sa Thầy, Kon Tum', 1, 5, 'COD', NULL, '2025-11-01 02:24:35', '2025-11-01 02:24:35', 0.00, NULL),
-(61, 16, 1799201.00, 1750000.00, 'DISC50', 49201, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 09:52:00', '2025-11-01 09:52:00', 0.00, NULL),
-(62, 16, 3041001.00, 3000000.00, 'DISC50', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phiêng Khoài, Huyện Yên Châu, Sơn La', 1, 6, 'COD', NULL, '2025-11-01 09:54:33', '2025-11-01 09:54:33', 0.00, NULL),
-(63, 16, 2741001.00, 2700000.00, 'DISC50', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phụng Công, Huyện Văn Giang, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 09:58:04', '2025-11-01 09:58:04', 0.00, NULL),
-(64, 14, 41001.00, 5400000.00, 'SHIP100', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, 8, 'COD', NULL, '2025-11-01 10:02:30', '2025-11-01 10:02:30', 0.00, NULL),
-(65, 14, 6001640.04, 6000000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Kim Lập, Huyện Kim Bôi, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 11:22:39', '2025-11-01 11:22:39', 6560.16, 'SHIP80'),
-(66, 14, 3001360.00, 3000000.00, 'DISC50', 1360, 'GHN', 'Địa chỉ chi tiết, Xã Thụy Lôi, Huyện Tiên Lữ, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 11:27:36', '2025-11-01 11:27:36', 5440.00, 'SHIP80');
+INSERT INTO `orders` (`id`, `user_id`, `total_amount`, `discount_amount`, `coupon_code`, `shipping_fee`, `shipping_carrier`, `shipping_address`, `status_id`, `coupon_id`, `payment_method`, `phone`, `created_at`, `updated_at`, `shipping_discount_amount`, `shipping_coupon_code`, `vnpay_trans_no`, `paid_at`, `paypal_order_id`) VALUES
+(1, 2, 2500000.00, 0.00, NULL, 0, NULL, '123 Đường ABC, HCM', 4, NULL, 'COD', NULL, '2025-10-11 08:50:12', '2025-10-12 08:49:05', 0.00, NULL, NULL, NULL, NULL),
+(2, 4, 15400000.00, 0.00, NULL, 0, NULL, '26', 3, NULL, 'CARD', NULL, '2025-10-12 08:42:59', '2025-10-12 08:56:47', 0.00, NULL, NULL, NULL, NULL),
+(3, 4, 4600000.00, 0.00, NULL, 0, NULL, 'ho chi minh', 1, NULL, 'COD', NULL, '2025-10-12 12:07:16', '2025-10-12 12:07:16', 0.00, NULL, NULL, NULL, NULL),
+(4, 4, 2300000.00, 0.00, NULL, 0, NULL, 'ho chi minh', 1, NULL, 'CARD', NULL, '2025-10-12 12:35:28', '2025-10-12 12:35:28', 0.00, NULL, NULL, NULL, NULL),
+(5, 4, 2300000.00, 0.00, NULL, 0, NULL, 'hồ chí mình', 2, NULL, 'COD', NULL, '2025-10-12 13:55:06', '2025-10-12 14:04:16', 0.00, NULL, NULL, NULL, NULL),
+(6, 4, 2380000.00, 0.00, NULL, 0, NULL, 'hồ chí minh', 1, 2, 'COD', NULL, '2025-10-12 15:46:09', '2025-10-12 15:46:09', 0.00, NULL, NULL, NULL, NULL),
+(7, 14, 5300030.00, 0.00, NULL, 0, NULL, '223a/9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-22 22:53:23', '2025-10-22 22:53:23', 0.00, NULL, NULL, NULL, NULL),
+(8, 14, 2100030.00, 0.00, NULL, 0, NULL, '2231 , Xã Sốp Cộp, huyện Sốp Cộp, Sơn La', 1, NULL, 'COD', NULL, '2025-10-22 23:01:08', '2025-10-22 23:01:08', 0.00, NULL, NULL, NULL, NULL),
+(9, 14, 18800030.00, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-23 09:42:46', '2025-10-23 09:42:46', 0.00, NULL, NULL, NULL, NULL),
+(10, 14, 2100030.00, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-23 09:44:26', '2025-10-23 09:44:26', 0.00, NULL, NULL, NULL, NULL),
+(11, 14, 6000030.00, 0.00, NULL, 0, NULL, '223A/9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-29 15:59:44', '2025-10-29 15:59:44', 0.00, NULL, NULL, NULL, NULL),
+(12, 14, 4600001.20, 0.00, NULL, 0, NULL, 'Địa chỉ chi tiết, Xã Bình Chánh, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 16:51:35', '2025-10-29 16:51:35', 0.00, NULL, NULL, NULL, NULL),
+(13, 14, 2600030.00, 0.00, NULL, 30, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 23:35:16', '2025-10-29 23:35:16', 0.00, NULL, NULL, NULL, NULL),
+(14, 14, 2600030.00, 0.00, NULL, 30, 'GHN', '223A/9 tổ 9 ấp 1, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-29 23:54:46', '2025-10-29 23:54:46', 0.00, NULL, NULL, NULL, NULL),
+(15, 14, 2300001.20, 0.00, NULL, 1, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:18:41', '2025-10-30 00:18:41', 0.00, NULL, NULL, NULL, NULL),
+(16, 14, 1600001.20, 0.00, NULL, 1, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:45:37', '2025-10-30 00:45:37', 0.00, NULL, NULL, NULL, NULL),
+(17, 14, 1600030.00, 0.00, NULL, 30, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 00:49:13', '2025-10-30 00:49:13', 0.00, NULL, NULL, NULL, NULL),
+(19, 14, 4200030.00, 0.00, NULL, 30, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', '0961759523', '2025-10-30 09:09:30', '2025-10-30 09:09:30', 0.00, NULL, NULL, NULL, NULL),
+(20, 14, 7330000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:36:04', '2025-10-30 11:36:04', 0.00, NULL, NULL, NULL, NULL),
+(21, 10, 6030000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:49:25', '2025-10-30 11:49:25', 0.00, NULL, NULL, NULL, NULL),
+(22, 10, 18036501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:51:33', '2025-10-30 11:51:33', 0.00, NULL, NULL, NULL, NULL),
+(23, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 11:53:09', '2025-10-30 11:53:09', 0.00, NULL, NULL, NULL, NULL),
+(24, 14, 2466501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 3, 'COD', NULL, '2025-10-30 13:39:29', '2025-10-30 13:39:29', 0.00, NULL, NULL, NULL, NULL),
+(25, 14, 2730000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 3, 'COD', NULL, '2025-10-30 13:44:51', '2025-10-30 13:44:51', 0.00, NULL, NULL, NULL, NULL),
+(26, 14, 1730000.00, 0.00, NULL, 30000, 'GHTK', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, 6, 'COD', NULL, '2025-10-30 13:49:23', '2025-10-30 13:49:23', 0.00, NULL, NULL, NULL, NULL),
+(27, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:16:01', '2025-10-30 14:16:01', 0.00, NULL, NULL, NULL, NULL),
+(28, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã Bình Chánh, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:23:11', '2025-10-30 14:23:11', 0.00, NULL, NULL, NULL, NULL),
+(29, 14, 3036501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:23:51', '2025-10-30 14:23:51', 0.00, NULL, NULL, NULL, NULL),
+(30, 14, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Phú Tây, Huyện Bình Chánh, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-10-30 14:56:48', '2025-10-30 14:56:48', 0.00, NULL, NULL, NULL, NULL),
+(31, 14, 1391001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phú Nghĩa, Huyện Lạc Thủy, Hòa Bình', 1, 6, 'COD', NULL, '2025-10-30 15:54:21', '2025-10-30 15:54:21', 0.00, NULL, NULL, NULL, NULL),
+(32, 14, 1931001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Xuân Giao, Huyện Bảo Thắng, Lào Cai', 1, 5, 'COD', NULL, '2025-10-30 15:56:06', '2025-10-30 15:56:06', 0.00, NULL, NULL, NULL, NULL),
+(33, 14, 1745000.00, 0.00, NULL, 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, 6, 'COD', NULL, '2025-10-30 15:57:54', '2025-10-30 15:57:54', 0.00, NULL, NULL, NULL, NULL),
+(34, 14, 1741001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Thị trấn Trần Cao, Huyện Phù Cừ, Hưng Yên', 1, 6, 'COD', NULL, '2025-10-30 16:01:04', '2025-10-30 16:01:04', 0.00, NULL, NULL, NULL, NULL),
+(35, 14, 2475000.00, 0.00, NULL, 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Tả Thàng, Huyện Mường Khương, Lào Cai', 1, 3, 'COD', NULL, '2025-10-30 16:04:07', '2025-10-30 16:04:07', 0.00, NULL, NULL, NULL, NULL),
+(36, 14, 1392000.00, 0.00, NULL, 42000, 'GHTK', 'Địa chỉ chi tiết, Xã Tiền Tiến, Huyện Phù Cừ, Hưng Yên', 1, 6, 'COD', NULL, '2025-10-30 16:05:54', '2025-10-30 16:05:54', 0.00, NULL, NULL, NULL, NULL),
+(37, 14, 3041001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Lạc, Huyện Yên Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:18:49', '2025-10-30 16:18:49', 0.00, NULL, NULL, NULL, NULL),
+(38, 14, 4901001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 3, 'COD', NULL, '2025-10-30 16:35:19', '2025-10-30 16:35:19', 0.00, NULL, NULL, NULL, NULL),
+(39, 14, 2841001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:41:41', '2025-10-30 16:41:41', 0.00, NULL, NULL, NULL, NULL),
+(40, 14, 3441001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phú Nghĩa, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:47:34', '2025-10-30 16:47:34', 0.00, NULL, NULL, NULL, NULL),
+(41, 14, 2742000.00, 0.00, NULL, 42000, 'GHTK', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-10-30 16:53:37', '2025-10-30 16:53:37', 0.00, NULL, NULL, NULL, NULL),
+(42, 14, 2741001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Phú, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'COD', NULL, '2025-10-30 16:56:01', '2025-10-30 16:56:01', 0.00, NULL, NULL, NULL, NULL),
+(43, 14, 2700030.00, 0.00, NULL, 0, NULL, 'ágsG', 3, NULL, 'COD', NULL, '2025-10-30 16:58:12', '2025-10-30 17:01:20', 0.00, NULL, NULL, NULL, NULL),
+(44, 16, 2736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã Ngũ Phụng, Huyện đảo Phú Quý, Bình Thuận', 1, NULL, 'COD', NULL, '2025-11-01 00:12:09', '2025-11-01 00:12:09', 0.00, NULL, NULL, NULL, NULL),
+(45, 16, 1736501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Xã An Hải, Huyện Tuy An, Phú Yên', 1, 6, 'COD', NULL, '2025-11-01 00:42:21', '2025-11-01 00:42:21', 0.00, NULL, NULL, NULL, NULL),
+(46, 16, 3821001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 00:53:40', '2025-11-01 00:53:40', 0.00, NULL, NULL, NULL, NULL),
+(47, 16, 2136501.00, 0.00, NULL, 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Phú Thứ, Huyện Tây Hòa, Phú Yên', 1, 5, 'COD', NULL, '2025-11-01 00:58:26', '2025-11-01 00:58:26', 0.00, NULL, NULL, NULL, NULL),
+(48, 16, 6841001.00, 0.00, NULL, 41001, 'GHN', 'Địa chỉ chi tiết, Xã Thành Sơn, Huyện Mai Châu, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 01:26:55', '2025-11-01 01:26:55', 0.00, NULL, NULL, NULL, NULL),
+(49, 16, 11795000.00, 5040000.00, 'DISC30', 35000, 'GHTK', 'Địa chỉ chi tiết, Phường Nhơn Hưng, Thị xã An Nhơn, Bình Định', 1, 5, 'COD', NULL, '2025-11-01 01:33:45', '2025-11-01 01:33:45', 0.00, NULL, NULL, NULL, NULL),
+(50, 16, 6036501.00, 6000000.00, 'DISC50', 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Sa Thầy, Huyện Sa Thầy, Kon Tum', 1, 6, 'COD', NULL, '2025-11-01 01:38:46', '2025-11-01 01:38:46', 0.00, NULL, NULL, NULL, NULL),
+(51, 16, 10845000.00, 10800000.00, 'DISC50', 45000, 'GHTK', 'Địa chỉ chi tiết, Xã Thanh Bình, Huyện Mường Khương, Lào Cai', 1, 6, 'COD', NULL, '2025-11-01 01:43:55', '2025-11-01 01:43:55', 0.00, NULL, NULL, NULL, NULL),
+(52, 16, 1386501.00, 1350000.00, 'DISC50', 36501, 'GHN', 'Địa chỉ chi tiết, Thị trấn Thuận Nam, Huyện Hàm Thuận Nam, Bình Thuận', 1, 6, 'COD', NULL, '2025-11-01 01:49:53', '2025-11-01 01:49:53', 0.00, NULL, NULL, NULL, NULL),
+(53, 16, 1393801.00, 1350000.00, 'DISC50', 43801, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Ia Dom, Huyện Ia H Drai, Kon Tum', 1, 6, 'COD', NULL, '2025-11-01 02:05:37', '2025-11-01 02:05:37', 0.00, NULL, NULL, NULL, NULL),
+(54, 14, 6209201.00, 2640000.00, 'DISC30', 49201, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Tống Trân, Huyện Phù Cừ, Hưng Yên', 1, 5, 'COD', NULL, '2025-11-01 02:12:11', '2025-11-01 02:12:11', 0.00, NULL, NULL, NULL, NULL),
+(55, 14, 1932000.00, 810000.00, 'DISC30', 42000, 'GHTK', 'Địa chỉ chi tiết, Thị trấn Sa Thầy, Huyện Sa Thầy, Kon Tum', 1, 5, 'COD', NULL, '2025-11-01 02:24:35', '2025-11-01 02:24:35', 0.00, NULL, NULL, NULL, NULL),
+(61, 16, 1799201.00, 1750000.00, 'DISC50', 49201, 'ShoeShopShip', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 09:52:00', '2025-11-01 09:52:00', 0.00, NULL, NULL, NULL, NULL),
+(62, 16, 3041001.00, 3000000.00, 'DISC50', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phiêng Khoài, Huyện Yên Châu, Sơn La', 1, 6, 'COD', NULL, '2025-11-01 09:54:33', '2025-11-01 09:54:33', 0.00, NULL, NULL, NULL, NULL),
+(63, 16, 2741001.00, 2700000.00, 'DISC50', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Phụng Công, Huyện Văn Giang, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 09:58:04', '2025-11-01 09:58:04', 0.00, NULL, NULL, NULL, NULL),
+(64, 14, 41001.00, 5400000.00, 'SHIP100', 41001, 'GHN', 'Địa chỉ chi tiết, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, 8, 'COD', NULL, '2025-11-01 10:02:30', '2025-11-01 10:02:30', 0.00, NULL, NULL, NULL, NULL),
+(65, 14, 6001640.04, 6000000.00, 'DISC50', 1640, 'GHN', 'Địa chỉ chi tiết, Xã Kim Lập, Huyện Kim Bôi, Hòa Bình', 1, 6, 'COD', NULL, '2025-11-01 11:22:39', '2025-11-01 11:22:39', 6560.16, 'SHIP80', NULL, NULL, NULL),
+(66, 14, 3001360.00, 3000000.00, 'DISC50', 1360, 'GHN', 'Địa chỉ chi tiết, Xã Thụy Lôi, Huyện Tiên Lữ, Hưng Yên', 1, 6, 'COD', NULL, '2025-11-01 11:27:36', '2025-11-01 11:27:36', 5440.00, 'SHIP80', NULL, NULL, NULL),
+(67, 20, 3006000.00, 0.00, '', 6000, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 18:33:28', '2025-11-05 18:33:28', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(68, 20, 9506000.00, 0.00, '', 6000, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 19:09:09', '2025-11-05 19:09:09', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(69, 20, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 19:24:52', '2025-11-05 19:24:52', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(70, 20, 3006000.00, 0.00, '', 6000, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:29:06', '2025-11-05 19:29:06', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(71, 20, 3006000.00, 0.00, '', 6000, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:29:22', '2025-11-05 19:29:22', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(72, 20, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 19:30:36', '2025-11-05 19:30:36', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(73, 20, 3506000.00, 0.00, '', 6000, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:30:55', '2025-11-05 19:30:55', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(74, 20, 3505000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 19:38:09', '2025-11-05 19:38:09', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(75, 20, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:38:25', '2025-11-05 19:38:25', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(76, 20, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, Xã Yên Bồng, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:39:43', '2025-11-05 19:39:43', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(77, 20, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:40:22', '2025-11-05 19:40:22', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(78, 20, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:45:45', '2025-11-05 19:45:45', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(79, 20, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:53:56', '2025-11-05 19:53:56', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(80, 20, 3006000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 19:57:56', '2025-11-05 19:57:56', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(81, 20, 3006000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-11-05 19:59:08', '2025-11-05 19:59:08', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(82, 21, 3506000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:09:54', '2025-11-05 20:09:54', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(83, 21, 3505000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 20:10:28', '2025-11-05 20:10:28', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(84, 21, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:11:56', '2025-11-05 20:11:56', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(85, 21, 3006000.00, 0.00, '', 6000, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-05 20:16:10', '2025-11-05 20:16:10', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(86, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'COD', NULL, '2025-11-05 20:16:33', '2025-11-05 20:16:33', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(87, 21, 1405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:16:59', '2025-11-05 20:16:59', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(88, 21, 1405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tả Phìn, Huyện Tủa Chùa, Điện Biên', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:21:43', '2025-11-05 20:21:43', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(89, 21, 3000000.00, 0.00, '', 0, 'GHTK', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:24:09', '2025-11-05 20:24:09', 0.00, 'SHIP80', NULL, NULL, NULL),
+(90, 21, 5805000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:24:52', '2025-11-05 20:24:52', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(91, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:31:16', '2025-11-05 20:31:16', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(92, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:35:39', '2025-11-05 20:35:39', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(93, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:44:46', '2025-11-05 20:44:46', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(94, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:46:57', '2025-11-05 20:46:57', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(95, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Sin Suối Hồ, Huyện Phong Thổ, Lai Châu', 1, NULL, 'VNPAY', NULL, '2025-11-05 20:50:52', '2025-11-05 20:50:52', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(96, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:22:50', '2025-11-05 21:22:50', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(97, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thanh Bình, Huyện Mường Khương, Lào Cai', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:28:03', '2025-11-05 21:28:03', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(98, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Phú Hựu, Huyện Châu Thành, Đồng Tháp', 1, NULL, 'COD', NULL, '2025-11-05 21:30:24', '2025-11-05 21:30:24', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(99, 21, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Phú Thành, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:31:02', '2025-11-05 21:31:02', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(100, 21, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:33:26', '2025-11-05 21:33:26', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(101, 21, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:35:01', '2025-11-05 21:35:01', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(102, 21, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tả Giàng Phình, Thị xã Sa Pa, Lào Cai', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:38:59', '2025-11-05 21:38:59', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(103, 21, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tống Phan, Huyện Phù Cừ, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:40:35', '2025-11-05 21:40:35', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(104, 21, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thào Chư Phìn, Huyện Si Ma Cai, Lào Cai', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:52:16', '2025-11-05 21:52:16', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(105, 21, 4506000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Yên Hòa, Huyện Đà Bắc, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-05 21:56:26', '2025-11-05 21:56:26', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(106, 21, 4505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh', 1, NULL, 'VNPAY', NULL, '2025-11-05 22:04:20', '2025-11-05 22:04:20', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(107, 21, 4505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thái Niên, Huyện Bảo Thắng, Lào Cai', 1, NULL, 'COD', NULL, '2025-11-05 22:07:30', '2025-11-05 22:07:30', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(108, 21, 1205000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-05 22:13:10', '2025-11-05 22:13:10', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(109, 21, 1305000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tiền Tiến, Huyện Phù Cừ, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-05 22:13:32', '2025-11-05 22:13:32', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(110, 21, 4105000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Pi Toong, Huyện Mường La, Sơn La', 1, NULL, 'VNPAY', NULL, '2025-11-05 22:22:18', '2025-11-05 22:22:18', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(111, 21, 4105000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Yên Bồng, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-11-05 22:30:07', '2025-11-05 22:30:07', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(112, 21, 1505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Tiến, Huyện Văn Giang, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-05 22:32:00', '2025-11-05 22:32:00', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(113, 21, 5605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thanh Bình, Huyện Mường Khương, Lào Cai', 1, NULL, 'COD', NULL, '2025-11-05 22:39:44', '2025-11-05 22:39:44', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(114, 21, 8405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Quang Minh, Huyện Vân Hồ, Sơn La', 1, NULL, 'VNPAY', NULL, '2025-11-05 22:40:17', '2025-11-05 22:40:17', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(115, 21, 8406000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Nhân Mỹ, Huyện Tân Lạc, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-05 22:49:57', '2025-11-05 22:49:57', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(116, 21, 8405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Sín Chéng, Huyện Si Ma Cai, Lào Cai', 1, NULL, 'COD', NULL, '2025-11-06 10:18:46', '2025-11-06 10:18:46', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(117, 21, 2405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tìa Dình, Huyện Điện Biên Đông, Điện Biên', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:19:16', '2025-11-06 10:19:16', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(118, 21, 2405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:27:06', '2025-11-06 10:27:06', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(119, 21, 1205000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thái Niên, Huyện Bảo Thắng, Lào Cai', 1, NULL, 'COD', NULL, '2025-11-06 10:27:42', '2025-11-06 10:27:42', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(120, 21, 3605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Trung Hòa, Huyện Tân Lạc, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:28:12', '2025-11-06 10:28:12', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(121, 21, 3605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-06 10:31:08', '2025-11-06 10:31:08', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(122, 21, 1405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:31:35', '2025-11-06 10:31:35', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(123, 21, 1405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Xuất Hóa, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:32:41', '2025-11-06 10:32:41', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(124, 21, 1405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tả Thàng, Huyện Mường Khương, Lào Cai', 1, NULL, 'COD', NULL, '2025-11-06 10:36:59', '2025-11-06 10:36:59', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(125, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Đồng Tân, Huyện Mai Châu, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:43:42', '2025-11-06 10:43:42', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(126, 21, 1605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tòng Đậu, Huyện Mai Châu, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:51:24', '2025-11-06 10:51:24', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(127, 21, 4405000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Yên Phú, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'COD', NULL, '2025-11-06 10:52:38', '2025-11-06 10:52:38', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(128, 21, 3505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Phường Na Lay, Thị xã Mường Lay, Điện Biên', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:53:08', '2025-11-06 10:53:08', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(129, 21, 3505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Trưng Trắc, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-06 10:54:18', '2025-11-06 10:54:18', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(130, 21, 5605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 10:59:53', '2025-11-06 10:59:53', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(131, 21, 5605000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tiền Tiến, Huyện Phù Cừ, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-06 11:01:52', '2025-11-06 11:01:52', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(132, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Vĩnh Khúc, Huyện Văn Giang, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:12:59', '2025-11-06 11:12:59', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(133, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:19:15', '2025-11-06 11:19:15', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(134, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Sặp Vạt, Huyện Yên Châu, Sơn La', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:24:39', '2025-11-06 11:24:39', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(135, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:32:33', '2025-11-06 11:32:33', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(136, 21, 2806000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Tân Thành, Huyện Mai Châu, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:41:50', '2025-11-06 11:41:50', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(137, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tống Phan, Huyện Phù Cừ, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:48:06', '2025-11-06 11:48:06', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(138, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:54:56', '2025-11-06 11:54:56', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(139, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tả Thàng, Huyện Mường Khương, Lào Cai', 1, NULL, 'VNPAY', NULL, '2025-11-06 11:56:14', '2025-11-06 11:56:14', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(140, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:01:00', '2025-11-06 12:01:00', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(141, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:01:22', '2025-11-06 12:01:22', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(142, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-06 12:02:24', '2025-11-06 12:02:24', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(143, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:05:49', '2025-11-06 12:05:49', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(144, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tam Đa, Huyện Phù Cừ, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:08:47', '2025-11-06 12:08:47', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(145, 21, 2806000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Suối Bàng, Huyện Vân Hồ, Sơn La', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:12:44', '2025-11-06 12:12:44', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(146, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thẩm Dương, Huyện Văn Bàn, Lào Cai', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:18:46', '2025-11-06 12:18:46', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(147, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:31:33', '2025-11-06 12:31:33', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(148, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Thắng Lợi, Huyện Văn Giang, Hưng Yên', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:33:58', '2025-11-06 12:33:58', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(149, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Phiêng Khoài, Huyện Yên Châu, Sơn La', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:35:11', '2025-11-06 12:35:11', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(150, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Xuất Hóa, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:36:13', '2025-11-06 12:36:13', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(151, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:37:11', '2025-11-06 12:37:11', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(152, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Xuân, Huyện Vân Hồ, Sơn La', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:39:22', '2025-11-06 12:39:22', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(153, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:40:46', '2025-11-06 12:40:46', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(154, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-06 12:43:48', '2025-11-06 12:43:48', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(155, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tú Nang, Huyện Yên Châu, Sơn La', 2, NULL, 'VNPAY', NULL, '2025-11-06 12:47:54', '2025-11-06 12:48:32', 20000.00, 'SHIP80', NULL, '2025-11-06 12:48:32', NULL),
+(156, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Quang, Huyện Văn Lâm, Hưng Yên', 2, NULL, 'VNPAY', NULL, '2025-11-06 12:52:42', '2025-11-06 12:53:18', 20000.00, 'SHIP80', NULL, '2025-11-06 12:53:18', NULL),
+(157, 21, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Vũ Lâm, Huyện Lạc Sơn, Hòa Bình', 2, NULL, 'VNPAY', NULL, '2025-11-06 12:54:04', '2025-11-06 12:54:52', 20000.00, 'SHIP80', NULL, '2025-11-06 12:54:52', NULL),
+(158, 21, 3505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'COD', NULL, '2025-11-06 12:58:41', '2025-11-06 12:58:41', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(159, 21, 3006000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 2, NULL, 'VNPAY', NULL, '2025-11-06 12:59:08', '2025-11-06 12:59:38', 24000.00, 'SHIP80', NULL, '2025-11-06 12:59:38', NULL),
+(160, 21, 3906000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Tây Phong, Huyện Cao Phong, Hòa Bình', 2, NULL, 'VNPAY', NULL, '2025-11-06 13:45:22', '2025-11-06 13:46:18', 0.00, '', NULL, '2025-11-06 13:46:18', NULL),
+(161, 16, 6006000.00, 0.00, '', 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Tô Múa, Huyện Vân Hồ, Sơn La', 1, NULL, 'COD', NULL, '2025-11-06 22:48:46', '2025-11-06 22:48:46', 24000.00, 'SHIP80', NULL, NULL, NULL),
+(162, 16, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Xuất Hóa, Huyện Lạc Sơn, Hòa Bình', 2, NULL, 'VNPAY', NULL, '2025-11-07 00:13:38', '2025-11-07 00:14:36', 20000.00, 'SHIP80', NULL, '2025-11-07 00:14:36', NULL),
+(163, 16, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-07 00:15:16', '2025-11-07 00:15:16', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(164, 16, 2805000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Minh Hải, Huyện Văn Lâm, Hưng Yên', 2, NULL, 'VNPAY', NULL, '2025-11-07 00:15:36', '2025-11-07 00:16:04', 20000.00, 'SHIP80', NULL, '2025-11-07 00:16:04', NULL),
+(165, 16, 3006000.00, 0.00, NULL, 6000, 'GHTK', 'Địa chỉ chi tiết, Xã Thanh Nông, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'PAYPAL', '341343423', '2025-11-07 01:24:19', '2025-11-07 01:27:12', 0.00, NULL, NULL, '2025-11-07 01:24:19', '0HK410121G377874J'),
+(166, 16, 1505000.00, 0.00, NULL, 5000, 'GHN', 'Địa chỉ chi tiết, Xã Vĩnh Khúc, Huyện Văn Giang, Hưng Yên', 1, NULL, 'PAYPAL', '4324', '2025-11-07 01:33:17', '2025-11-07 01:33:17', 0.00, NULL, NULL, '2025-11-07 01:33:17', '33N124077F570011R'),
+(167, 16, 3505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'VNPAY', NULL, '2025-11-07 01:37:07', '2025-11-07 01:38:03', 20000.00, 'SHIP80', NULL, '2025-11-07 01:38:03', NULL),
+(168, 16, 1505000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Tân Tiến, Huyện Văn Giang, Hưng Yên', 1, NULL, 'COD', NULL, '2025-11-07 01:38:32', '2025-11-07 01:38:32', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(169, 16, 6005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-07 19:02:27', '2025-11-07 19:02:27', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(170, 16, 2405000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-07 19:02:49', '2025-11-07 19:03:57', 20000.00, 'SHIP80', NULL, '2025-11-07 19:03:57', NULL),
+(171, 16, 6005000.00, 0.00, NULL, 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'PAYPAL', '0768957454', '2025-11-07 19:05:29', '2025-11-07 19:05:29', 0.00, NULL, NULL, '2025-11-07 19:05:29', '2EM37191HT739980M'),
+(172, 16, 12005000.00, 0.00, NULL, 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 5, NULL, 'PAYPAL', '0768957454', '2025-11-07 19:07:47', '2025-11-07 23:39:08', 0.00, NULL, NULL, '2025-11-07 19:07:47', '9KT6757052407745D'),
+(173, 16, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-07 20:11:38', '2025-11-07 20:11:38', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(174, 16, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', NULL, '2025-11-07 21:47:54', '2025-11-07 21:47:54', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(175, 16, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', NULL, '2025-11-07 21:48:10', '2025-11-07 21:48:42', 20000.00, 'SHIP80', NULL, '2025-11-07 21:48:42', NULL),
+(176, 16, 3505000.00, 0.00, NULL, 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'PAYPAL', '0768957454', '2025-11-07 21:50:33', '2025-11-07 21:50:33', 0.00, NULL, NULL, '2025-11-07 21:50:33', '41Y50038FL328632L'),
+(177, 16, 2805000.00, 0.00, NULL, 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'PAYPAL', '0768957454', '2025-11-07 21:52:44', '2025-11-07 21:52:44', 0.00, NULL, NULL, '2025-11-07 21:52:44', '4EH16487RH7468132'),
+(178, 16, 6005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'COD', '0768957454', '2025-11-07 23:49:39', '2025-11-07 23:49:39', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(179, 16, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', '0768957454', '2025-11-07 23:51:26', '2025-11-07 23:51:55', 20000.00, 'SHIP80', NULL, '2025-11-07 23:51:55', NULL),
+(180, 16, 3005000.00, 0.00, NULL, 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'PAYPAL', '0768957454', '2025-11-07 23:52:41', '2025-11-07 23:52:41', 0.00, NULL, NULL, '2025-11-07 23:52:41', '86M35823S1223091M'),
+(181, 16, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Thị Trấn Ba Hàng Đồi, Huyện Lạc Thủy, Hòa Bình', 1, NULL, 'COD', '1425345574', '2025-11-08 00:04:33', '2025-11-08 00:04:33', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(182, 16, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', '0768957454', '2025-11-08 00:06:01', '2025-11-08 00:06:01', 20000.00, 'SHIP80', NULL, NULL, NULL),
+(183, 16, 3000000.00, 0.00, '', 0, 'GHN', '391/36/6 HUYNH TAN PHAT, TAN THUAN DONG Q7 HCM', 1, NULL, 'VNPAY', '0768957454', '2025-11-08 00:06:06', '2025-11-08 00:06:06', 0.00, 'SHIP80', NULL, NULL, NULL),
+(184, 16, 3005000.00, 0.00, '', 5000, 'GHN', '391/36/6 HUYNH TAN PHAT, Xã Yên Nghiệp, Huyện Lạc Sơn, Hòa Bình', 1, NULL, 'VNPAY', '0768957454', '2025-11-08 00:06:29', '2025-11-08 00:06:59', 20000.00, 'SHIP80', NULL, '2025-11-08 00:06:59', NULL),
+(185, 16, 3005000.00, 0.00, '', 5000, 'GHN', 'Địa chỉ chi tiết, Xã Chỉ Đạo, Huyện Văn Lâm, Hưng Yên', 1, NULL, 'COD', '12345678900000', '2025-11-08 00:08:20', '2025-11-08 00:08:20', 20000.00, 'SHIP80', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -562,7 +719,134 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `quantity`, `
 (60, 65, 5, '38', 3, 3000000.00),
 (61, 65, 5, '39', 1, 3000000.00),
 (62, 66, 5, NULL, 1, 3000000.00),
-(63, 66, 5, '38', 1, 3000000.00);
+(63, 66, 5, '38', 1, 3000000.00),
+(64, 67, 5, NULL, 1, 3000000.00),
+(65, 68, 7, NULL, 1, 3500000.00),
+(66, 68, 5, NULL, 2, 3000000.00),
+(67, 69, 5, NULL, 1, 3000000.00),
+(68, 70, 5, NULL, 1, 3000000.00),
+(69, 71, 5, NULL, 1, 3000000.00),
+(70, 72, 5, NULL, 1, 3000000.00),
+(71, 73, 7, NULL, 1, 3500000.00),
+(72, 74, 7, NULL, 1, 3500000.00),
+(73, 75, 5, NULL, 1, 3000000.00),
+(74, 76, 5, NULL, 1, 3000000.00),
+(75, 77, 5, NULL, 1, 3000000.00),
+(76, 78, 5, NULL, 1, 3000000.00),
+(77, 79, 5, NULL, 1, 3000000.00),
+(78, 80, 5, NULL, 1, 3000000.00),
+(79, 81, 5, NULL, 1, 3000000.00),
+(80, 82, 7, NULL, 1, 3500000.00),
+(81, 83, 7, NULL, 1, 3500000.00),
+(82, 84, 5, NULL, 1, 3000000.00),
+(83, 85, 5, NULL, 1, 3000000.00),
+(84, 86, 4, NULL, 1, 2800000.00),
+(85, 87, 19, NULL, 1, 1400000.00),
+(86, 88, 19, NULL, 1, 1400000.00),
+(87, 89, 5, NULL, 1, 3000000.00),
+(88, 90, 5, NULL, 1, 3000000.00),
+(89, 90, 4, NULL, 1, 2800000.00),
+(90, 91, 22, NULL, 1, 1600000.00),
+(91, 92, 22, NULL, 1, 1600000.00),
+(92, 93, 22, NULL, 1, 1600000.00),
+(93, 94, 22, NULL, 1, 1600000.00),
+(94, 95, 22, NULL, 1, 1600000.00),
+(95, 96, 22, NULL, 1, 1600000.00),
+(96, 97, 22, NULL, 1, 1600000.00),
+(97, 98, 22, NULL, 1, 1600000.00),
+(98, 99, 5, NULL, 1, 3000000.00),
+(99, 100, 5, NULL, 1, 3000000.00),
+(100, 101, 5, NULL, 1, 3000000.00),
+(101, 102, 5, NULL, 1, 3000000.00),
+(102, 103, 5, NULL, 1, 3000000.00),
+(103, 104, 5, NULL, 1, 3000000.00),
+(104, 105, 5, NULL, 1, 3000000.00),
+(105, 105, 6, NULL, 1, 1500000.00),
+(106, 106, 5, NULL, 1, 3000000.00),
+(107, 106, 6, NULL, 1, 1500000.00),
+(108, 107, 5, NULL, 1, 3000000.00),
+(109, 107, 6, NULL, 1, 1500000.00),
+(110, 108, 3, NULL, 1, 1200000.00),
+(111, 109, 12, NULL, 1, 1300000.00),
+(112, 110, 12, NULL, 1, 1300000.00),
+(113, 110, 4, NULL, 1, 2800000.00),
+(114, 111, 12, NULL, 1, 1300000.00),
+(115, 111, 4, NULL, 1, 2800000.00),
+(116, 112, 6, NULL, 1, 1500000.00),
+(117, 113, 4, NULL, 2, 2800000.00),
+(118, 114, 4, NULL, 3, 2800000.00),
+(119, 115, 4, NULL, 3, 2800000.00),
+(120, 116, 4, NULL, 3, 2800000.00),
+(121, 117, 3, NULL, 2, 1200000.00),
+(122, 118, 3, NULL, 2, 1200000.00),
+(123, 119, 3, NULL, 1, 1200000.00),
+(124, 120, 3, NULL, 3, 1200000.00),
+(125, 121, 3, NULL, 3, 1200000.00),
+(126, 122, 19, NULL, 1, 1400000.00),
+(127, 123, 19, NULL, 1, 1400000.00),
+(128, 124, 19, NULL, 1, 1400000.00),
+(129, 125, 22, NULL, 1, 1600000.00),
+(130, 126, 22, NULL, 1, 1600000.00),
+(131, 127, 22, NULL, 1, 1600000.00),
+(132, 127, 4, NULL, 1, 2800000.00),
+(133, 128, 7, NULL, 1, 3500000.00),
+(134, 129, 7, NULL, 1, 3500000.00),
+(135, 130, 4, NULL, 2, 2800000.00),
+(136, 131, 4, NULL, 2, 2800000.00),
+(137, 132, 4, NULL, 1, 2800000.00),
+(138, 133, 4, NULL, 1, 2800000.00),
+(139, 134, 4, NULL, 1, 2800000.00),
+(140, 135, 4, NULL, 1, 2800000.00),
+(141, 136, 4, NULL, 1, 2800000.00),
+(142, 137, 4, NULL, 1, 2800000.00),
+(143, 138, 4, NULL, 1, 2800000.00),
+(144, 139, 4, NULL, 1, 2800000.00),
+(145, 140, 4, NULL, 1, 2800000.00),
+(146, 141, 4, NULL, 1, 2800000.00),
+(147, 142, 4, NULL, 1, 2800000.00),
+(148, 143, 4, NULL, 1, 2800000.00),
+(149, 144, 4, NULL, 1, 2800000.00),
+(150, 145, 4, NULL, 1, 2800000.00),
+(151, 146, 4, NULL, 1, 2800000.00),
+(152, 147, 4, NULL, 1, 2800000.00),
+(153, 148, 4, NULL, 1, 2800000.00),
+(154, 149, 4, NULL, 1, 2800000.00),
+(155, 150, 4, NULL, 1, 2800000.00),
+(156, 151, 4, NULL, 1, 2800000.00),
+(157, 152, 4, NULL, 1, 2800000.00),
+(158, 153, 4, NULL, 1, 2800000.00),
+(159, 154, 4, NULL, 1, 2800000.00),
+(160, 155, 4, NULL, 1, 2800000.00),
+(161, 156, 4, NULL, 1, 2800000.00),
+(162, 157, 4, NULL, 1, 2800000.00),
+(163, 158, 7, NULL, 1, 3500000.00),
+(164, 159, 5, NULL, 1, 3000000.00),
+(165, 160, 12, NULL, 3, 1300000.00),
+(166, 161, 5, NULL, 2, 3000000.00),
+(167, 162, 5, NULL, 1, 3000000.00),
+(168, 163, 4, NULL, 1, 2800000.00),
+(169, 164, 4, NULL, 1, 2800000.00),
+(170, 165, 5, NULL, 1, 3000000.00),
+(171, 166, 6, NULL, 1, 1500000.00),
+(172, 167, 7, NULL, 1, 3500000.00),
+(173, 168, 6, NULL, 1, 1500000.00),
+(174, 169, 5, NULL, 2, 3000000.00),
+(175, 170, 3, NULL, 2, 1200000.00),
+(176, 171, 6, NULL, 4, 1500000.00),
+(177, 172, 6, NULL, 8, 1500000.00),
+(178, 173, 5, NULL, 1, 3000000.00),
+(179, 174, 5, NULL, 1, 3000000.00),
+(180, 175, 5, NULL, 1, 3000000.00),
+(181, 176, 7, NULL, 1, 3500000.00),
+(182, 177, 4, NULL, 1, 2800000.00),
+(183, 178, 5, NULL, 2, 3000000.00),
+(184, 179, 5, NULL, 1, 3000000.00),
+(185, 180, 5, NULL, 1, 3000000.00),
+(186, 181, 5, NULL, 1, 3000000.00),
+(187, 182, 5, NULL, 1, 3000000.00),
+(188, 183, 5, NULL, 1, 3000000.00),
+(189, 184, 5, NULL, 1, 3000000.00),
+(190, 185, 5, NULL, 1, 3000000.00);
 
 -- --------------------------------------------------------
 
@@ -920,7 +1204,11 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `created_at`, `
 (10, 'Trần Khánh', 'khanh@gmail.com', '$2y$10$2bdfSKMpXG9kfd0B7E/.7OiL.8ZpOzho4v3myNVJR0qOpMiUlnnJ2', NULL, '2025-10-16 11:48:25', '2025-10-16 11:48:25'),
 (13, 'Trần Văn Khang', 'nguyentranankhang10@gmail.com', '$2y$10$G7oLJcjrc8CpXWJ5T1uZzeldeP60Vgaubb4xapC2/fzVuDvLZ/b8G', NULL, '2025-10-18 08:57:21', '2025-10-18 08:57:21'),
 (14, 'nhan', 'nhanle1219@gmail.com', '$2y$10$/zznUxp7/bvoPQmPedWfi.jLLXsY.08MRfaVRmVBdvvDA5xuVFkhu', NULL, '2025-10-30 10:28:57', '2025-10-30 10:28:57'),
-(16, 'API', 'nhanle1210@gmail.com', '$2y$10$BhUCN0hemfFNhwUfHRdOeeqKrRxsHw8eShihCzb4egvfHTil5HF8W', NULL, '2025-10-31 23:09:50', '2025-10-31 23:09:50');
+(16, 'API', 'nhanle1210@gmail.com', '$2y$10$eI.dWRSrF6wPSiYQNQHFlerxjAiPzvJS9Cack87/HbYx8TNxnYvMi', '123456789', '2025-10-31 23:09:50', '2025-11-08 00:10:20'),
+(17, 'minh', 'leminhphan1@gmail.com', '$2y$10$2CK8ivz.v0vovDVVAdhkeeH0dSZoS9J7DvV8hZ9VrC.8eIfJ9AoH2', NULL, '2025-11-03 22:19:51', '2025-11-03 22:19:51'),
+(19, 'minh', 'leminhphan@gmail.com', '$2y$10$S6ypcMeK1s.MIRcYVkhFf.u8w10Ut5Phw1Ab9MOsbJiZ0vR53BvvO', NULL, '2025-11-05 18:27:31', '2025-11-05 18:27:31'),
+(20, 'minh', 'minh@gmail.com', '$2y$10$CrNVBZNsyoz9L5NCVtwmMut5dZqAzDtp5gYW0n81cCeNkKxtQvPaq', NULL, '2025-11-05 18:32:31', '2025-11-05 18:32:31'),
+(21, 'minhle', 'leminh@gmail.com', '$2y$10$ZG5GZNkaozOcZl1GtNfAk.rml30K6McfgASUTNFYU0uA0ohZUoUXa', NULL, '2025-11-05 20:09:02', '2025-11-05 20:09:02');
 
 -- --------------------------------------------------------
 
@@ -947,7 +1235,11 @@ INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
 (10, 4),
 (13, 2),
 (14, 4),
-(16, 5);
+(16, 5),
+(17, 2),
+(19, 2),
+(20, 2),
+(21, 2);
 
 -- --------------------------------------------------------
 
@@ -1184,13 +1476,13 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT cho bảng `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=166;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -1208,7 +1500,7 @@ ALTER TABLE `coupons`
 -- AUTO_INCREMENT cho bảng `export_receipt`
 --
 ALTER TABLE `export_receipt`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT cho bảng `export_receipt_detail`
@@ -1238,13 +1530,13 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=186;
 
 --
 -- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
 
 --
 -- AUTO_INCREMENT cho bảng `order_status`
@@ -1304,7 +1596,7 @@ ALTER TABLE `supplier`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT cho bảng `wishlists`
