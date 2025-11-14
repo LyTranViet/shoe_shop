@@ -278,13 +278,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('validated_shipping_coupon_code').value = coupon.code || code;
                     document.getElementById('shipping_discount_amount').value = coupon.value || 0;
                 } else {
-                    const discountPercent = parseFloat(data.discount_percent) || 0;
+                    // === FIX: Lấy discount_percent từ bên trong đối tượng data.coupon ===
+                    const couponData = data.coupon || {};
+                    const discountPercent = parseFloat(couponData.discount_percent) || 0;
                     const newPrice = originalPrice * (1 - discountPercent / 100);
                     resultDiv.innerHTML = `Áp dụng thành công! Giảm <strong>${discountPercent}%</strong>`;
                     resultDiv.classList.add('success');
                     originalPriceEl.textContent = formatVND(originalPrice);
                     originalPriceEl.style.display = 'block';
                     priceEl.textContent = formatVND(newPrice);
+
+                    // === FIX: LƯU COUPON VÀO LOCALSTORAGE ===
+                    localStorage.setItem('product_coupon_code', couponData.code);
+                    localStorage.setItem('product_coupon_data', JSON.stringify(couponData));
                 }
             } else {
                 resultDiv.textContent = data.message || 'Mã không hợp lệ.';
@@ -292,6 +298,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!isShipping) {
                     originalPriceEl.style.display = 'none';
                     priceEl.textContent = formatVND(originalPrice);
+                    // === FIX: XÓA COUPON KHỎI LOCALSTORAGE KHI MÃ KHÔNG HỢP LỆ ===
+                    localStorage.removeItem('product_coupon_code');
+                    localStorage.removeItem('product_coupon_data');
                 }
             }
         } catch (err) {
@@ -546,14 +555,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="stock-display">Tồn kho: <span id="size-stock-display">--</span></span>
             </p>
             <!-- Vùng hiển thị tồn kho -->
-            <div class="stock-display-container">
-                <p id="stock-message" class="stock-message" style="display: none; color: red; font-weight: 500;"></p>
-            </div> 
+            <p id="stock-message" class="stock-message" style="display: none; color: red; font-weight: 500; margin-bottom: 1rem;"></p>
+            
             <div class="price-container">
-                <p class="price" data-original-price="<?php echo $prod['price']; ?>">
+                <span class="price" data-original-price="<?php echo $prod['price']; ?>">
                     <?php echo number_format($prod['price'], 0); ?> đ
-                </p>
-                <p class="price-original" style="display: none;"></p>
+                </span>
+                <span class="price-original" style="display: none;"></span>
             </div>
 
             <?php if ($is_out_of_stock): ?>
@@ -589,13 +597,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div class="form-group coupon-group">
-                        <label for="coupon-code-product">Mã giảm giá</label>
-                        <div class="input-with-button">
-                            <input type="text" id="coupon-code-product" name="coupon_code" placeholder="Dán mã vào đây">
-                            <button type="button" id="paste-and-validate-btn" class="btn small">Dán & Kiểm tra</button>
-                        </div>
-                        <div class="coupon-result"></div>
+                    <label for="coupon-code-product">Mã giảm giá</label>
+                    <div class="input-with-button">
+                        <input type="text" id="coupon-code-product" name="coupon_code" placeholder="Dán mã vào đây">
+                        <button type="button" id="paste-and-validate-btn" class="btn small">Dán & Kiểm tra</button>
                     </div>
+                    <div class="coupon-result"></div>
+
+                    <!-- THÊM 2 HIDDEN CHO PRODUCT COUPON -->
+                    <input type="hidden" id="validated_product_coupon_code" name="coupon_code_hidden" value="">
+                    <input type="hidden" id="product_discount_percent" name="product_discount_percent" value="0">
+                </div>
                     <div class="form-group coupon-group">
                         <label for="coupon-code-shipping">Mã giảm phí vận chuyển</label>
                         <div class="input-with-button">
@@ -958,6 +970,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🧾 [DEBUG] Kiểm tra mã giảm phí vận chuyển khi load product.php...");
+
+    try {
+        const stored = localStorage.getItem("shipping_coupon");
+        if (stored) {
+            const coupon = JSON.parse(stored);
+            console.log("✅ Đã tìm thấy mã giảm phí vận chuyển trong localStorage:", coupon);
+
+            // Hiển thị tạm thông tin mã ngay trên trang
+            const infoBox = document.createElement("div");
+            infoBox.style.cssText = `
+                position: fixed; bottom: 10px; right: 10px;
+                background: #f0f9ff; border: 1px solid #0ea5e9;
+                color: #0369a1; padding: 8px 12px;
+                border-radius: 6px; font-size: 14px;
+                z-index: 9999;
+            `;
+            infoBox.innerHTML = `🚚 Mã vận chuyển: <b>${coupon.code}</b><br>Giảm: ${coupon.discount_type} (${coupon.discount_value})`;
+            document.body.appendChild(infoBox);
+
+            setTimeout(() => infoBox.remove(), 6000);
+        } else {
+            console.warn("⚠️ Không tìm thấy mã giảm phí vận chuyển trong localStorage.");
+        }
+    } catch (err) {
+        console.error("❌ Lỗi khi đọc shipping_coupon từ localStorage:", err);
+    }
+});
+</script>
+
 </script>
 <style>
     /* Ẩn form sửa review mặc định */
@@ -1033,6 +1077,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 </style>
 
+<style>
+    /* CSS cho giá gốc và giá mới */
+    .price-container {
+        display: flex; /* Sử dụng flexbox */
+        flex-direction: column; /* Xếp các phần tử theo chiều dọc */
+        align-items: flex-start; /* Căn các phần tử về bên trái */
+        gap: 4px; /* Khoảng cách nhỏ giữa giá mới và giá gốc */
+    }
+    .price-original {
+        font-size: 1.1rem; /* Cỡ chữ nhỏ hơn giá mới */
+        color: var(--text-muted);
+        text-decoration: line-through;
+        font-weight: 500;
+    }
+    .price {
+        font-size: 1.5rem; /* Cỡ chữ lớn hơn cho giá mới */
+        font-weight: 700;
+        color: var(--primary);
+    }
+</style>
 <style>
     /* CSS để input và button nằm chung 1 hàng */
     .input-with-button {

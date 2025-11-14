@@ -1,4 +1,5 @@
 <?php
+
 ob_start();
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/init.php'; // Nạp init.php trước để có BASE_URL và các hàm khác
@@ -64,7 +65,10 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <link rel="stylesheet" href="assets/css/site.css">
     <link rel="stylesheet" href="assets/css/chat.css">
-    
+    <!-- FIX jQuery: Load từ CDN ổn định, version 3.6.0 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <!-- Nếu CDN fail, fallback local (tải jquery-3.6.0.min.js về thư mục js/) -->
+    <script>window.jQuery || document.write('<script src="js/jquery-3.6.0.min.js"><\/script>')</script>
     <script>window.siteBasePath = '<?php echo $basePath; ?>';</script>
     <script src="assets/js/chat.js" defer></script>
     <script src="assets/js/site.js" defer></script>
@@ -317,6 +321,8 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             border: none;
         }
     </style>
+
+    
 </head>
 
 <body>
