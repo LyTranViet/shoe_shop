@@ -393,8 +393,8 @@ $is_superadmin = is_superadmin();
 $is_admin = is_admin();
 $is_staff = is_staff();
 
-$superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet','chat'];
-$admin_pages      = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet','chat'];
+$superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet','live_chat'];
+$admin_pages      = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet','live_chat'];
 $staff_pages      = ['orders', 'customers', 'products'];
 
 if ($is_superadmin) {
@@ -480,7 +480,7 @@ if (!in_array($page, $allowed_pages, true)) {
                     <a href="index.php?page=contacts" class="<?= ($page === 'contacts') ? 'active' : '' ?>">
                         <i class="fi fi-rr-inbox"></i> Liên hệ khách hàng
                     </a>
-                    <a href="index.php?page=chat" class="<?= ($page === 'chat') ? 'active' : '' ?>">
+                    <a href="index.php?page=live_chat" class="<?= ($page === 'live_chat') ? 'active' : '' ?>">
                         <i class="fi fi-rr-comment-alt"></i> Hỗ trợ Chat
                     </a>
                      <a href="index.php?page=send_single_mailjet" class="<?= ($page === 'send_single_mailjet') ? 'active' : '' ?>">
@@ -626,3 +626,60 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<!-- Box chat mini bên trái -->
+<a href="<?php echo BASE_URL; ?>admin/live_chat.php" class="floating-chat-box">
+    <div class="chat-icon">💬</div>
+    <span class="chat-text">Hỗ trợ khách hàng</span>
+    <span id="chat-notify" class="chat-notify">0</span>
+</a>
+
+<style>
+/* Box chat mini */
+.floating-chat-box {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    background: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: 600;
+    z-index: 9999;
+    transition: all 0.2s ease;
+}
+
+.floating-chat-box:hover {
+    transform: scale(1.05);
+    background: #0056d2;
+}
+
+.chat-icon {
+    font-size: 20px;
+}
+
+.chat-text {
+    font-size: 15px;
+}
+
+.chat-notify {
+    background: red;
+    color: white;
+    font-size: 12px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    padding: 2px;
+    font-weight: 700;
+    display: none;
+}
+</style>
+
