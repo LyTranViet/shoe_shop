@@ -12,64 +12,64 @@ if (!is_logged_in()) {
 $db = get_db();
 $userId = current_user_id();
 
-// Handle profile update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_profile') {
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $password_confirm = $_POST['password_confirm'] ?? '';
-
-    $errors = [];
-    if (empty($name)) $errors[] = 'Name is required.';
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'A valid email is required.';
-
-    // Check if email is already taken by another user
-    $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
-    $stmt->execute([$email, $userId]);
-    if ($stmt->fetch()) {
-        $errors[] = 'This email address is already in use.';
-    }
-
-    // Password update logic
-    $password_sql_part = '';
-    $password_params = [];
-    if (!empty($password)) {
-        if ($password !== $password_confirm) {
-            $errors[] = 'Passwords do not match.';
-        } elseif (strlen($password) < 6) {
-            $errors[] = 'Password must be at least 6 characters long.';
-        } else {
-            $password_sql_part = ', password = ?';
-            $password_params[] = password_hash($password, PASSWORD_DEFAULT);
-        }
-    }
-
-    if (empty($errors)) {
-        try {
-            $sql = "UPDATE users SET name = ?, email = ?, phone = ? {$password_sql_part} WHERE id = ?";
-            $params = array_merge([$name, $email, $phone], $password_params, [$userId]);
-            $stmt = $db->prepare($sql);
-            $stmt->execute($params);
-            flash_set('success', 'Your profile has been updated successfully.');
-        } catch (Exception $e) {
-            flash_set('error', 'Could not update your profile. Please try again.');
-        }
-    } else {
-        foreach ($errors as $error) {
-            flash_set('error', $error);
-        }
-    }
-    header('Location: profile.php');
-    exit;
-}
-
 // Handle address actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
     $errors = [];
 
-    if ($action === 'add_address' || $action === 'edit_address') {
+    // Handle profile update
+    if ($action === 'update_profile') {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+        if (empty($name)) $errors[] = 'Họ và tên là bắt buộc.';
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email không hợp lệ.';
+
+        // Check if email is already taken by another user
+        $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
+        $stmt->execute([$email, $userId]);
+        if ($stmt->fetch()) {
+            $errors[] = 'Địa chỉ email này đã được sử dụng.';
+        }
+
+        if (empty($errors)) {
+            try {
+                $sql = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$name, $email, $phone, $userId]);
+                flash_set('success', 'Thông tin cá nhân đã được cập nhật.');
+            } catch (Exception $e) {
+                flash_set('error', 'Không thể cập nhật thông tin. Vui lòng thử lại.');
+            }
+        }
+    }
+    // Handle password update
+    elseif ($action === 'update_password') {
+        $password = $_POST['password'] ?? '';
+        $password_confirm = $_POST['password_confirm'] ?? '';
+
+        if (empty($password)) {
+            $errors[] = 'Vui lòng nhập mật khẩu mới.';
+        } elseif ($password !== $password_confirm) {
+            $errors[] = 'Mật khẩu xác nhận không khớp.';
+        } elseif (strlen($password) < 6) {
+            $errors[] = 'Mật khẩu phải có ít nhất 6 ký tự.';
+        }
+
+        if (empty($errors)) {
+            try {
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $db->prepare("UPDATE users SET password = ? WHERE id = ?");
+                $stmt->execute([$hashed_password, $userId]);
+                flash_set('success', 'Mật khẩu đã được thay đổi thành công.');
+            } catch (Exception $e) {
+                flash_set('error', 'Không thể thay đổi mật khẩu. Vui lòng thử lại.');
+            }
+        }
+    }
+    // Handle address actions
+    elseif ($action === 'add_address' || $action === 'edit_address') {
         $address = trim($_POST['address'] ?? '');
         $city = trim($_POST['city'] ?? '');
         $district = trim($_POST['district'] ?? '');
@@ -87,15 +87,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         // Hệ thống BẮT BUỘC phải dựa vào mã GHN mới do Javascript lấy từ API.
         // =========================================================================
         
-        if (empty($address)) $errors[] = 'Address is required.';
-        if (empty($city)) $errors[] = 'City is required.';
-        if (empty($district)) $errors[] = 'District is required.';
-        if (empty($ward)) $errors[] = 'Ward is required.';
-        if (empty($phone)) $errors[] = 'Phone is required.';
+        if (empty($address)) $errors[] = 'Địa chỉ cụ thể là bắt buộc.';
+        if (empty($city)) $errors[] = 'Tỉnh/Thành phố là bắt buộc.';
+        if (empty($district)) $errors[] = 'Quận/Huyện là bắt buộc.';
+        if (empty($ward)) $errors[] = 'Phường/Xã là bắt buộc.';
+        if (empty($phone)) $errors[] = 'Số điện thoại là bắt buộc.';
         
         // Validation cuối cùng: Cần có District ID và Ward Code để tính phí vận chuyển
         if ($ghn_district_id === 0 || empty($ghn_ward_code)) {
-             $errors[] = 'Missing location ID for shipping calculation. Please select a valid Ward/District.';
+             $errors[] = 'Thiếu mã định danh vị trí. Vui lòng chọn Phường/Xã hợp lệ.';
         }
 
         if (empty($errors)) {
@@ -140,13 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             } catch (Exception $e) {
                 error_log("Address Save Error: " . $e->getMessage());
-                flash_set('error', 'Could not save address. Please try again.');
+                flash_set('error', 'Không thể lưu địa chỉ. Vui lòng thử lại.');
             }
-        } else {
-            foreach ($errors as $error) {
-                flash_set('error', $error);
-            }
-        }
+        } 
     } elseif ($action === 'delete_address' && isset($_POST['address_id'])) {
         // ... (Giữ nguyên logic Delete)
         $address_id = (int)$_POST['address_id'];
@@ -155,9 +151,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             // sẽ tự động bị xóa nhờ FOREIGN KEY ON DELETE CASCADE
             $stmt = $db->prepare('DELETE FROM addresses WHERE id = ? AND user_id = ?');
             $stmt->execute([$address_id, $userId]);
-            flash_set('success', 'Address deleted successfully.');
+            flash_set('success', 'Đã xóa địa chỉ thành công.');
         } catch (Exception $e) {
-            flash_set('error', 'Could not delete address. Please try again.');
+            flash_set('error', 'Không thể xóa địa chỉ. Vui lòng thử lại.');
         }
     } elseif ($action === 'set_default' && isset($_POST['address_id'])) {
         // ... (Giữ nguyên logic Set Default)
@@ -167,12 +163,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt->execute([$userId]);
             $stmt = $db->prepare('UPDATE addresses SET is_default = 1 WHERE id = ? AND user_id = ?');
             $stmt->execute([$address_id, $userId]);
-            flash_set('success', 'Default address updated successfully.');
+            flash_set('success', 'Đã cập nhật địa chỉ mặc định.');
         } catch (Exception $e) {
-            flash_set('error', 'Could not update default address. Please try again.');
+            flash_set('error', 'Không thể cập nhật địa chỉ mặc định.');
         }
     }
-    header('Location: profile.php');
+
+    // Nếu có lỗi, flash và reload
+    if (!empty($errors)) {
+        foreach ($errors as $error) { flash_set('error', $error); }
+    }
+
+    header('Location: ' . $_SERVER['REQUEST_URI']); // Reload the current page with its query params
     exit;
 }
 
@@ -195,161 +197,213 @@ $addresses = $stmt->fetchAll();
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="profile-page">
-    <h2>My Profile</h2>
-    <?php if ($m = flash_get('error')): echo "<div class='alert-error'>$m</div>"; endif; ?>
-    <?php if ($m = flash_get('success')): echo "<div class='alert-success'>$m</div>"; endif; ?>
+<div class="profile-page-wrapper">
+    <div class="profile-card">
+        <h2 class="profile-title">Tài khoản của tôi</h2>
+        <?php if ($m = flash_get('error')): echo "<div class='alert error'>$m</div>"; endif; ?>
+        <?php if ($m = flash_get('success')): echo "<div class='alert success'>$m</div>"; endif; ?>
 
-    <form class="profile-form" method="post">
-        <input type="hidden" name="action" value="update_profile">
-        <h3>Personal Information</h3>
-        <div class="form-group"><label for="name">Name</label><input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>" required></div>
-        <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" required></div>
-        <div class="form-group"><label for="phone">Phone</label><input type="tel" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>"></div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="profileTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="true">Thông tin cá nhân</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password-change" type="button" role="tab" aria-controls="password-change" aria-selected="false">Đổi mật khẩu</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="address-tab" data-bs-toggle="tab" data-bs-target="#address-book" type="button" role="tab" aria-controls="address-book" aria-selected="false">Sổ địa chỉ</button>
+        </li>
+    </ul>
 
-        <h3>Change Password</h3>
-        <p class="form-hint">Leave blank to keep your current password.</p>
-        <div class="form-group"><label for="password">New Password</label><input type="password" id="password" name="password"></div>
-        <div class="form-group"><label for="password_confirm">Confirm New Password</label><input type="password" id="password_confirm" name="password_confirm"></div>
+    <!-- Tab content -->
+    <div class="tab-content" id="profileTabContent">
+        <!-- Personal Info Tab -->
+        <div class="tab-pane show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                    <h5 class="tab-title">Thông tin cá nhân</h5>
+                    <form method="post" action="profile.php#info">
+                        <input type="hidden" name="action" value="update_profile">
+                        <div class="form-row">
+                            <label for="name">Họ và tên</label>
+                            <input type="text" class="input" id="name" name="name" value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="email">Email</label>
+                            <input type="email" class="input" id="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="tel" class="input" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>">
+                        </div>
 
-        <div class="form-actions"><button type="submit" class="btn">Save Changes</button></div>
-    </form>
-
- <h3>Addresses</h3>
-    <div class="addresses-list">
-        <?php foreach ($addresses as $addr): ?>
-            <div class="address-item <?php if ($addr['is_default']) echo 'default'; ?>">
-                
-                <p>
-                    <?php echo htmlspecialchars($addr['address']); ?>,
-                    <?php echo htmlspecialchars($addr['ward']); ?>,
-                    <?php echo htmlspecialchars($addr['district']); ?>,
-                    <?php echo htmlspecialchars($addr['city']); ?>
-                </p>
-                
-                <p><strong>Phone:</strong> <?php echo htmlspecialchars($addr['phone']); ?></p>
-                
-                <?php if (!empty($addr['postal_code'])): ?>
-                    <p><strong>Postal Code:</strong> <?php echo htmlspecialchars($addr['postal_code']); ?></p>
-                <?php endif; ?>
-
-                <div class="address-actions">
-                    <?php if ($addr['is_default']): ?>
-                        <p><em>(Địa chỉ mặc định)</em></p>
-                    <? else: ?>
-                        <form method="post" style="display:inline;">
-                            <input type="hidden" name="action" value="set_default">
-                            <input type="hidden" name="address_id" value="<?php echo $addr['id']; ?>">
-                            <button type="submit" class="btn btn-small">Đặt làm Mặc định</button>
-                        </form>
-                    <?php endif; ?>
-                    
-                    <button class="btn btn-small edit-address-btn" data-address-id="<?php echo $addr['id']; ?>">Edit</button>
-                    
-                    <form method="post" style="display:inline;">
-                        <input type="hidden" name="action" value="delete_address">
-                        <input type="hidden" name="address_id" value="<?php echo $addr['id']; ?>">
-                        <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">Delete</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Lưu thay đổi</button>
+                        </div>
                     </form>
-                </div>
+        </div>
+
+        <!-- Change Password Tab -->
+        <div class="tab-pane" id="password-change" role="tabpanel" aria-labelledby="password-tab">
+                    <h5 class="tab-title">Đổi mật khẩu</h5>
+                    <form method="post" action="profile.php#password-change">
+                        <input type="hidden" name="action" value="update_password">
+                        <div class="form-row">
+                            <label for="password">Mật khẩu mới</label>
+                            <input type="password" class="input" id="password" name="password" required>
+                            <div class="helper">Mật khẩu nên có ít nhất 6 ký tự để đảm bảo an toàn.</div>
+                        </div>
+                        <div class="form-row">
+                            <label for="password_confirm">Xác nhận mật khẩu mới</label>
+                            <input type="password" class="input" id="password_confirm" name="password_confirm" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Đổi mật khẩu</button>
+                        </div>
+                    </form>
+        </div>
+
+        <!-- Address Book Tab -->
+        <div class="tab-pane" id="address-book" role="tabpanel" aria-labelledby="address-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="tab-title" style="margin-bottom: 0;">Sổ địa chỉ của bạn</h5>
+                <button type="button" class="btn small" id="open-add-address-modal">
+                    <i class="fi fi-rr-plus"></i> Thêm địa chỉ mới
+                </button>
             </div>
-        <?php endforeach; ?>
-    </div>
 
-    <div class="form-actions">
-        <button type="button" class="btn" id="open-add-address-modal">
-            Add New Address
-        </button>
+            <div class="addresses-list mt-3">
+                <?php if (empty($addresses)): ?>
+                    <div class="alert info">Bạn chưa có địa chỉ nào.</div>
+                <?php else: ?>
+                    <?php foreach ($addresses as $addr): ?>
+                        <div class="address-block <?php if ($addr['is_default']) echo 'default'; ?>">
+                                <div class="address-content">
+                                    <p class="fw-bold mb-1"><?php echo htmlspecialchars($user['name']); ?> | <?php echo htmlspecialchars($addr['phone']); ?></p>
+                                    <p class="text-muted mb-1">
+                                        <?php echo htmlspecialchars($addr['address']); ?>, <?php echo htmlspecialchars($addr['ward']); ?>, <?php echo htmlspecialchars($addr['district']); ?>, <?php echo htmlspecialchars($addr['city']); ?>
+                                    </p>
+                                </div>
+                                <div class="address-actions-wrapper">
+                                    <div class="address-actions-main">
+                                        <button class="btn small secondary edit-address-btn" data-address-json='<?php echo htmlspecialchars(json_encode($addr), ENT_QUOTES, 'UTF-8'); ?>'>Sửa</button>
+                                        <form method="post" class="d-inline-block">
+                                            <input type="hidden" name="action" value="delete_address">
+                                            <input type="hidden" name="address_id" value="<?php echo $addr['id']; ?>">
+                                            <button type="submit" class="btn small danger" onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này?');">Xóa</button>
+                                        </form>
+                                    </div>
+                                    <?php if (!$addr['is_default']): ?>
+                                        <form method="post" class="d-inline-block">
+                                            <input type="hidden" name="action" value="set_default">
+                                            <input type="hidden" name="address_id" value="<?php echo $addr['id']; ?>">
+                                            <button type="submit" class="btn small link">Đặt làm mặc định</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
+    </div>
+</div>
 
-    <div id="add-address-modal" class="modal" style="display:none;">
+<!-- Address Modal (for both Add and Edit) -->
+<div class="modal fade" id="address-modal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h4>Add New Address</h4>
-            
-            <form class="address-form" method="post">
-                <input type="hidden" name="action" value="add_address">
-                
-                <div class="form-group">
-                    <label for="province">City (Tỉnh/Thành phố)</label>
-                    <select id="province" name="city" class="form-control province-select" required>
-                        <option value="">-- Chọn tỉnh/thành --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="district">District (Quận/Huyện)</label>
-                    <select id="district" name="district" class="form-control district-select" disabled required>
-                        <option value="">-- Chọn quận/huyện --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="ward">Ward (Phường/Xã)</label>
-                    <select id="ward" name="ward" class="form-control ward-select" disabled required>
-                        <option value="">-- Chọn phường/xã --</option>
-                    </select>
-                </div>
-                <input type="hidden" name="ghn_province_id" value="">
-                <input type="hidden" name="ghn_district_id" value="">
-                <input type="hidden" name="ghn_ward_code" value="">
-                <div class="form-group"><label for="address">Address (Detail)</label><input type="text" id="address" name="address" required></div>
-                <div class="form-group"><label for="postal_code">Postal Code</label><input type="text" id="postal_code" name="postal_code"></div>
-                <div class="form-group"><label for="phone_address">Phone</label><input type="tel" id="phone_address" name="phone" required></div>
-                <div class="form-group"><label><input type="checkbox" name="is_default"> Set as default</label></div>
-                <div class="form-actions"><button type="submit" class="btn">Add Address</button></div>
-            </form>
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">Thêm địa chỉ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <div class="modal-body">
+                <form id="address-form" method="post">
+                    <input type="hidden" name="action" value="add_address">
+                    <input type="hidden" name="address_id" value="">
+
+                    <div class="form-row-flex">
+                        <div class="form-row" style="flex: 1;">
+                            <label for="modal_phone">Số điện thoại</label>
+                            <input type="tel" class="input" id="modal_phone" name="phone" required>
+                        </div>
+                        <div class="form-row" style="flex: 1;">
+                            <label for="modal_postal_code">Mã bưu chính (Tùy chọn)</label>
+                            <input type="text" class="input" id="modal_postal_code" name="postal_code">
+                        </div>
+                    </div>
+
+                    <div class="form-row-flex">
+                        <div class="form-row" style="flex: 1;">
+                            <label for="modal_province">Tỉnh/Thành phố</label>
+                            <select id="modal_province" name="city" class="input province-select" required>
+                                <option value="">-- Chọn tỉnh/thành --</option>
+                            </select>
+                        </div>
+                        <div class="form-row" style="flex: 1;">
+                            <label for="modal_district">Quận/Huyện</label>
+                            <select id="modal_district" name="district" class="input district-select" required disabled>
+                                <option value="">-- Chọn quận/huyện --</option>
+                            </select>
+                        </div>
+                        <div class="form-row" style="flex: 1;">
+                            <label for="modal_ward">Phường/Xã</label>
+                            <select id="modal_ward" name="ward" class="input ward-select" required disabled>
+                                <option value="">-- Chọn phường/xã --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="modal_address">Địa chỉ cụ thể (Số nhà, tên đường...)</label>
+                        <input type="text" class="input" id="modal_address" name="address" required>
+                    </div>
+
+                    <div class="form-row-check">
+                        <input type="checkbox" name="is_default" id="modal_is_default">
+                        <label for="modal_is_default">
+                            Đặt làm địa chỉ mặc định
+                        </label>
+                    </div>
+
+                    <!-- Hidden fields for GHN IDs -->
+                    <input type="hidden" name="ghn_province_id" id="modal_ghn_province_id">
+                    <input type="hidden" name="ghn_district_id" id="modal_ghn_district_id">
+                    <input type="hidden" name="ghn_ward_code" id="modal_ghn_ward_code">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" form="address-form" class="btn">Lưu địa chỉ</button>
+            </div>
+        </div>
     </div>
-
-
-    <?php foreach ($addresses as $addr): ?>
-        <form class="address-form edit-form" id="edit-form-<?php echo $addr['id']; ?>" method="post" style="display:none;">
-            <input type="hidden" name="action" value="edit_address">
-            <input type="hidden" name="address_id" value="<?php echo $addr['id']; ?>">
-            <div class="form-group"><label for="address_<?php echo $addr['id']; ?>">Address (Detail)</label><input type="text" id="address_<?php echo $addr['id']; ?>" name="address" value="<?php echo htmlspecialchars($addr['address']); ?>" required></div>
-            <div class="form-group">
-                <label for="province_<?php echo $addr['id']; ?>">City (Tỉnh/Thành phố)</label>
-                <select id="province_<?php echo $addr['id']; ?>" name="city" class="form-control province-select" required>
-                    <option value="">-- Chọn tỉnh/thành --</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="district_<?php echo $addr['id']; ?>">District (Quận/Huyện)</label>
-                <select id="district_<?php echo $addr['id']; ?>" name="district" class="form-control district-select" disabled required>
-                    <option value="">-- Chọn quận/huyện --</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="ward_<?php echo $addr['id']; ?>">Ward (Phường/Xã)</label>
-                <select id="ward_<?php echo $addr['id']; ?>" name="ward" class="form-control ward-select" disabled required>
-                    <option value="">-- Chọn phường/xã --</option>
-                </select>
-            </div>
-            <input type="hidden" name="ghn_province_id" value=""> 
-            <input type="hidden" name="ghn_district_id" value="">
-            <input type="hidden" name="ghn_ward_code" value="">
-            
-            <div class="form-group"><label for="postal_code_<?php echo $addr['id']; ?>">Postal Code</label><input type="text" id="postal_code_<?php echo $addr['id']; ?>" name="postal_code" value="<?php echo htmlspecialchars($addr['postal_code'] ?? ''); ?>"></div>
-            <div class="form-group"><label for="phone_<?php echo $addr['id']; ?>">Phone</label><input type="tel" id="phone_<?php echo $addr['id']; ?>" name="phone" value="<?php echo htmlspecialchars($addr['phone']); ?>" required></div>
-            <div class="form-group"><label><input type="checkbox" name="is_default" <?php if ($addr['is_default']) echo 'checked'; ?>> Set as default</label></div>
-            <div class="form-actions"><button type="submit" class="btn">Save Address</button></div>
-        </form>
-    <?php endforeach; ?>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.edit-address-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const addressId = this.getAttribute('data-address-id');
-            const editForm = document.getElementById('edit-form-' + addressId);
-            if (editForm) {
-                editForm.style.display = 'block';
-                this.style.display = 'none'; // Hide edit button temporarily
-            }
-        });
-    });
+    const addressModalEl = document.getElementById('address-modal');
+
+    // Logic to activate the correct tab on page load (e.g., after a form submission)
+    const hash = window.location.hash;
+    if (hash) {
+        const tabTrigger = document.querySelector(`.nav-tabs button[data-bs-target="${hash}"]`);
+        if (tabTrigger) {
+            const tab = new bootstrap.Tab(tabTrigger);
+            tab.show();
+            // Scroll to the tab content after it's shown
+            setTimeout(() => {
+                document.querySelector(hash).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 150);
+        }
+    }
+
+    const addressModal = new bootstrap.Modal(addressModalEl);
+    const addressForm = document.getElementById('address-form');
+    const modalTitle = document.getElementById('addressModalLabel');
 
     // GHN API integration for address forms
     let provinceMap = {}; // Global map for province name to ID
@@ -357,19 +411,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadProvinces = new Promise((resolve, reject) => {
         // Giả định api/ghn_provinces.php gọi API GHN /master-data/province
         jQuery.getJSON('api/ghn_provinces.php', function(data) {
-            jQuery('.province-select').each(function() {
-                const select = jQuery(this);
-                select.empty().append('<option value="">-- Chọn tỉnh/thành --</option>');
-                data.forEach(p => {
-                    provinceMap[p.ProvinceName] = p.ProvinceID;
-                    select.append(`<option value="${p.ProvinceName}">${p.ProvinceName}</option>`);
-                });
+            const select = jQuery('#modal_province');
+            select.empty().append('<option value="">-- Chọn tỉnh/thành --</option>');
+            data.forEach(p => {
+                provinceMap[p.ProvinceName] = p.ProvinceID;
+                select.append(`<option value="${p.ProvinceName}">${p.ProvinceName}</option>`);
             });
             resolve();
         }).fail(reject);
     });
 
-    function loadDistricts(provinceId, districtSelect) {
+    async function loadDistricts(provinceId, districtSelect) {
         return new Promise((resolve, reject) => {
             // Giả định api/ghn_districts.php gọi API GHN /master-data/district
             jQuery.getJSON(`api/ghn_districts.php?province_id=${provinceId}`, function(data) {
@@ -377,38 +429,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 let map = {};
                 data.forEach(d => {
-                    // Ánh xạ bình thường, tên Quận/Huyện -> ID
                     map[d.DistrictName] = d.DistrictID;
                     districtSelect.append(`<option value="${d.DistrictName}">${d.DistrictName}</option>`);
                 });
-
-                // --- BỔ SUNG LOGIC GHI ĐÈ ID ĐANG HOẠT ĐỘNG (ACTIVE ID) ---
-                
-                // Trường hợp cụ thể: Quận 7 (Mã cũ: 1449, Mã active: 1573)
-                // Giả định Province ID của TP. HCM là 202 (Mã GHN tiêu chuẩn). 
-                // Nếu mã này sai, bạn có thể cần cập nhật ID này.
-                const TP_HCM_PROVINCE_ID = 202; 
-                const ACTIVE_QUAN_7_ID = 1573;
-                const DISTRICT_NAME_QUAN_7 = 'Quận 7';
-
-                if (provinceId === TP_HCM_PROVINCE_ID && map[DISTRICT_NAME_QUAN_7]) {
-                    // Force (ghi đè) mã Quận 7 trong map sang mã active
-                    map[DISTRICT_NAME_QUAN_7] = ACTIVE_QUAN_7_ID;
-                    
-                    // Ghi đè lại option trong dropdown để đảm bảo Ward Code được load đúng
-                    districtSelect.find(`option[value="${DISTRICT_NAME_QUAN_7}"]`).val(DISTRICT_NAME_QUAN_7);
-                    
-                    console.log(`[GHN Fix] Quận 7: Forced District ID to ${ACTIVE_QUAN_7_ID} to ensure fee calculation works.`);
-                }
-                
-                // --- KẾT THÚC LOGIC GHI ĐÈ ---
 
                 districtSelect.data('map', map);
                 resolve();
             }).fail(reject);
         });
     }
-    function loadWards(districtId, wardSelect) {
+    async function loadWards(districtId, wardSelect) {
         return new Promise((resolve, reject) => {
             // Giả định api/ghn_wards.php gọi API GHN /master-data/ward
             jQuery.getJSON(`api/ghn_wards.php?district_id=${districtId}`, function(data) {
@@ -422,153 +452,327 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Attach change events (QUAN TRỌNG: Cập nhật các trường ẩn GHN ID)
-    jQuery('body').on('change', '.province-select', async function() {
+    // Attach change events to modal dropdowns
+    jQuery('#modal_province').on('change', async function() {
         const provinceName = jQuery(this).val();
-        if (!provinceName) return;
-        const provinceId = provinceMap[provinceName];
-        const form = jQuery(this).closest('form');
-        form.find('input[name="ghn_province_id"]').val(provinceId); // Gán ID GHN chính xác
-        const districtSelect = form.find('.district-select');
-        const wardSelect = form.find('.ward-select');
+        const districtSelect = jQuery('#modal_district');
+        const wardSelect = jQuery('#modal_ward');
+
         districtSelect.prop('disabled', true);
-        // Reset luôn mã quận và phường khi đổi tỉnh
-        form.find('input[name="ghn_district_id"]').val('');
-        form.find('input[name="ghn_ward_code"]').val('');
         wardSelect.empty().append('<option value="">-- Chọn phường/xã --</option>').prop('disabled', true);
-        await loadDistricts(provinceId, districtSelect);
+        jQuery('#modal_ghn_province_id, #modal_ghn_district_id, #modal_ghn_ward_code').val('');
+
+        if (provinceName && provinceMap[provinceName]) {
+            const provinceId = provinceMap[provinceName];
+            jQuery('#modal_ghn_province_id').val(provinceId);
+            await loadDistricts(provinceId, districtSelect);
+        }
     });
 
-    jQuery('body').on('change', '.district-select', async function() {
+    jQuery('#modal_district').on('change', async function() {
         const districtName = jQuery(this).val();
-        if (!districtName) return;
-        const map = jQuery(this).data('map');
-        const districtId = map[districtName];
-        const form = jQuery(this).closest('form');
-        form.find('input[name="ghn_district_id"]').val(districtId); // Gán ID GHN chính xác
-        const wardSelect = form.find('.ward-select');
-        // Reset luôn mã phường khi đổi quận
-        form.find('input[name="ghn_ward_code"]').val('');
+        const wardSelect = jQuery('#modal_ward');
+
         wardSelect.prop('disabled', true);
-        await loadWards(districtId, wardSelect);
+        jQuery('#modal_ghn_district_id, #modal_ghn_ward_code').val('');
+
+        if (districtName) {
+            const map = jQuery(this).data('map');
+            const districtId = map[districtName];
+            jQuery('#modal_ghn_district_id').val(districtId);
+            await loadWards(districtId, wardSelect);
+        }
     });
 
-    jQuery('body').on('change', '.ward-select', function() {
+    jQuery('#modal_ward').on('change', function() {
         const wardName = jQuery(this).val();
-        if (!wardName) return;
-        const selectedOption = jQuery(this).find('option:selected');
-        const wardCode = selectedOption.data('ward-code');
-        const form = jQuery(this).closest('form');
-        form.find('input[name="ghn_ward_code"]').val(wardCode); // Gán Code GHN chính xác
+        jQuery('#modal_ghn_ward_code').val('');
+        if (wardName) {
+            const selectedOption = jQuery(this).find('option:selected');
+            const wardCode = selectedOption.data('ward-code');
+            jQuery('#modal_ghn_ward_code').val(wardCode);
+        }
     });
 
-    // Initialize edit forms (Tự động chọn lại và kích hoạt thay đổi để lấy mã GHN MỚI)
-    async function initAddressForms() {
+    // Handle "Add New Address" button
+    document.getElementById('open-add-address-modal').addEventListener('click', async () => {
         await loadProvinces;
-        <?php foreach ($addresses as $addr): ?>
-            (async () => {
-                const form = jQuery('#edit-form-<?php echo $addr['id']; ?>');
-                const provinceSelect = form.find('.province-select');
-                const districtSelect = form.find('.district-select');
-                const wardSelect = form.find('.ward-select');
-                const storedCity = <?php echo json_encode($addr['city'] ?? ''); ?>;
-                const storedDistrict = <?php echo json_encode($addr['district'] ?? ''); ?>;
-                const storedWard = <?php echo json_encode($addr['ward'] ?? ''); ?>;
-                
-                // Bắt đầu chuỗi kích hoạt: Tỉnh -> Quận -> Phường
-                if (storedCity && provinceMap[storedCity]) {
-                    provinceSelect.val(storedCity);
-                    
-                    // Trigger change để load districts và set hidden province ID MỚI
-                    provinceSelect.trigger('change'); 
+        modalTitle.textContent = 'Thêm địa chỉ mới';
+        addressForm.reset();
+        addressForm.querySelector('input[name="action"]').value = 'add_address';
+        addressForm.querySelector('input[name="address_id"]').value = '';
+        jQuery('#modal_district, #modal_ward').empty().prop('disabled', true);
+        addressModal.show();
+    });
 
-                    const provinceId = provinceMap[storedCity];
-                    await loadDistricts(provinceId, districtSelect);
-                    
-                    if (storedDistrict) {
-                        districtSelect.val(storedDistrict);
-                        
-                        // Trigger change để load wards và set hidden district ID MỚI
-                        districtSelect.trigger('change'); 
-                        
-                        const dmap = districtSelect.data('map');
-                        if (dmap && dmap[storedDistrict]) {
-                            const districtId = dmap[storedDistrict];
-                            await loadWards(districtId, wardSelect);
-                            if (storedWard) {
-                                wardSelect.val(storedWard);
-                                
-                                // Trigger change để set hidden ward code MỚI
-                                wardSelect.trigger('change'); 
-                            }
+    // Handle "Edit" buttons
+    document.querySelectorAll('.edit-address-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            await loadProvinces;
+            const addr = JSON.parse(this.dataset.addressJson);
+
+            modalTitle.textContent = 'Chỉnh sửa địa chỉ';
+            addressForm.reset();
+            addressForm.querySelector('input[name="action"]').value = 'edit_address';
+            addressForm.querySelector('input[name="address_id"]').value = addr.id;
+
+            // Populate form
+            jQuery('#modal_phone').val(addr.phone);
+            jQuery('#modal_postal_code').val(addr.postal_code);
+            jQuery('#modal_address').val(addr.address);
+            jQuery('#modal_is_default').prop('checked', addr.is_default == 1);
+
+            // Set and trigger dropdowns
+            const provinceSelect = jQuery('#modal_province');
+            const districtSelect = jQuery('#modal_district');
+            const wardSelect = jQuery('#modal_ward');
+
+            if (addr.city && provinceMap[addr.city]) {
+                provinceSelect.val(addr.city);
+                const provinceId = provinceMap[addr.city];
+                jQuery('#modal_ghn_province_id').val(provinceId);
+
+                await loadDistricts(provinceId, districtSelect);
+                if (addr.district) {
+                    districtSelect.val(addr.district);
+                    const dmap = districtSelect.data('map');
+                    if (dmap && dmap[addr.district]) {
+                        const districtId = dmap[addr.district];
+                        jQuery('#modal_ghn_district_id').val(districtId);
+
+                        await loadWards(districtId, wardSelect);
+                        if (addr.ward) {
+                            wardSelect.val(addr.ward);
+                            const selectedOption = wardSelect.find('option:selected');
+                            const wardCode = selectedOption.data('ward-code');
+                            jQuery('#modal_ghn_ward_code').val(wardCode);
                         }
                     }
                 }
-            })();
-        <?php endforeach; ?>
-    }
-    initAddressForms();
-// --- Logic điều khiển Modal ---
-const modal = document.getElementById('add-address-modal');
-const openBtn = document.getElementById('open-add-address-modal');
-const closeBtn = document.querySelector('.modal-content .close-btn');
+            }
 
-// Mở modal khi nhấn nút
-openBtn.addEventListener('click', function() {
-    modal.style.display = 'block';
-});
-
-// Đóng modal khi nhấn nút X
-closeBtn.addEventListener('click', function() {
-    modal.style.display = 'none';
-});
-
-// Đóng modal khi nhấn ra ngoài
-window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-});
+            addressModal.show();
+        });
+    });
 
 }); // Kết thúc DOMContentLoaded
 </script>
 <style>
-    /* Thêm vào file CSS của bạn */
-.modal {
-    display: none; /* Ẩn mặc định */
-    position: fixed; /* Giữ cố định */
-    z-index: 1000; /* Đảm bảo nằm trên mọi thứ */
-    left: 0;
-    top: 0;
+/* General Layout */
+.profile-page-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+.profile-card {
     width: 100%;
-    height: 100%;
-    overflow: auto; /* Cho phép cuộn nếu nội dung lớn */
-    background-color: rgba(0,0,0,0.4); /* Nền mờ */
+    max-width: 800px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.13);
+    border: 1px solid #e3e8ee;
+}
+.profile-title {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--text-dark);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
 }
 
+/* Tab Styles */
+.nav-tabs {
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+}
+.nav-tabs .nav-item {
+    margin-bottom: -2px;
+}
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #64748b;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.2s ease-in-out;
+}
+.nav-tabs .nav-link:hover {
+    color: var(--primary);
+}
+.nav-tabs .nav-link.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background-color: transparent;
+}
+.tab-pane {
+    display: none;
+}
+.tab-pane.active {
+    display: block;
+    animation: fadeIn 0.5s;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.tab-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+/* Form Styles (from login.php) */
+.form-row { margin-bottom: 20px; }
+.form-row label { display: block; font-weight: 700; margin-bottom: 7px; color: #334155; font-size: 15px; }
+.input {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: 10px;
+  border: 1.5px solid #e6eefb;
+  background: #f8fafc;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: box-shadow .13s, border-color .13s;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+select.input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+}
+.form-actions {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.form-row-flex {
+    display: flex;
+    gap: 1rem;
+}
+.form-row-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.form-row-check input[type="checkbox"] {
+    width: 1.1em;
+    height: 1.1em;
+}
+.form-row-check label {
+    font-weight: 500;
+}
+.helper {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Button Styles (from login.php) */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px;
+  border-radius: 10px; background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
+  color: #fff; border: 0; cursor: pointer; font-weight: 700; font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(14,165,233,0.07); transition: background 0.18s; text-decoration: none;
+}
+.btn:hover { color: #fff; }
+.btn.secondary { background: #64748b; color: #fff; font-weight: 600; }
+.btn.danger { background: var(--danger); }
+.btn.small { padding: 8px 12px; font-size: 14px; }
+.btn.link {
+    background: none; color: var(--primary); box-shadow: none;
+    padding: 4px; text-decoration: none; font-weight: 600;
+}
+.btn.link:hover { text-decoration: underline; }
+
+/* Alert Styles (from login.php) */
+.alert {
+  padding: 13px 16px; border-radius: 9px; margin-bottom: 18px; font-size: 1rem;
+  display: flex; align-items: center; gap: 10px; font-weight: 600;
+}
+.alert.error {
+  background: #fff1f2; color: #b91c1c; border: 1.5px solid #fecaca;
+}
+.alert.error::before { content: '\26A0'; font-size: 1.3em; }
+.alert.success {
+  background: #ecfdf5; color: #047857; border: 1.5px solid #bbf7d0;
+}
+.alert.success::before { content: '\2714'; font-size: 1.2em; }
+.alert.info {
+    background: #f0f9ff; color: #0369a1; border: 1.5px solid #bae6fd;
+}
+
+/* Address List Styles */
+.addresses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.address-block {
+    border: 1.5px solid #e6eefb;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    position: relative; /* Cần thiết để định vị badge */
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: box-shadow 0.2s;
+}
+.address-block.default {
+    border-left: 4px solid var(--primary);
+    background: #f0f9ff;
+}
+.address-block:hover {
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+.address-actions-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+.address-actions-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.address-actions-wrapper .btn, .address-actions-wrapper form {
+    white-space: nowrap;
+}
+
+/* Modal Styles */
 .modal-content {
-    background-color: #fefefe;
-    margin: 10% auto; /* Đặt modal ở giữa */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Chiều rộng */
-    max-width: 600px;
-    border-radius: 8px;
-    position: relative;
+    border-radius: 18px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.13);
 }
-
-.close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+.modal-header {
+    border-bottom: 1px solid #e3e8ee;
+    padding: 1.25rem 1.5rem;
 }
-
-.close-btn:hover,
-.close-btn:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
+.modal-header .modal-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+.modal-body {
+    padding: 1.5rem;
+}
+.modal-footer {
+    border-top: 1px solid #e3e8ee;
+    padding: 1rem 1.5rem;
 }
 </style>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

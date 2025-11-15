@@ -277,6 +277,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     const coupon = data.coupon || {};
                     document.getElementById('validated_shipping_coupon_code').value = coupon.code || code;
                     document.getElementById('shipping_discount_amount').value = coupon.value || 0;
+
+                    // === FIX: LƯU MÃ GIẢM PHÍ VẬN CHUYỂN VÀO LOCALSTORAGE ===
+                    // Điều này cho phép các trang khác (như cart.php) có thể đọc được mã này.
+                    localStorage.setItem('shipping_coupon', JSON.stringify(coupon));
                 } else {
                     // === FIX: Lấy discount_percent từ bên trong đối tượng data.coupon ===
                     const couponData = data.coupon || {};
@@ -301,6 +305,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     // === FIX: XÓA COUPON KHỎI LOCALSTORAGE KHI MÃ KHÔNG HỢP LỆ ===
                     localStorage.removeItem('product_coupon_code');
                     localStorage.removeItem('product_coupon_data');
+                } else { // isShipping
+                    // Xóa mã vận chuyển khỏi localStorage nếu không hợp lệ
+                    localStorage.removeItem('shipping_coupon');
                 }
             }
         } catch (err) {
@@ -970,39 +977,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("🧾 [DEBUG] Kiểm tra mã giảm phí vận chuyển khi load product.php...");
-
-    try {
-        const stored = localStorage.getItem("shipping_coupon");
-        if (stored) {
-            const coupon = JSON.parse(stored);
-            console.log("✅ Đã tìm thấy mã giảm phí vận chuyển trong localStorage:", coupon);
-
-            // Hiển thị tạm thông tin mã ngay trên trang
-            const infoBox = document.createElement("div");
-            infoBox.style.cssText = `
-                position: fixed; bottom: 10px; right: 10px;
-                background: #f0f9ff; border: 1px solid #0ea5e9;
-                color: #0369a1; padding: 8px 12px;
-                border-radius: 6px; font-size: 14px;
-                z-index: 9999;
-            `;
-            infoBox.innerHTML = `🚚 Mã vận chuyển: <b>${coupon.code}</b><br>Giảm: ${coupon.discount_type} (${coupon.discount_value})`;
-            document.body.appendChild(infoBox);
-
-            setTimeout(() => infoBox.remove(), 6000);
-        } else {
-            console.warn("⚠️ Không tìm thấy mã giảm phí vận chuyển trong localStorage.");
-        }
-    } catch (err) {
-        console.error("❌ Lỗi khi đọc shipping_coupon từ localStorage:", err);
-    }
-});
 </script>
 
-</script>
 <style>
     /* Ẩn form sửa review mặc định */
     .review .review-edit-form { display: none; }

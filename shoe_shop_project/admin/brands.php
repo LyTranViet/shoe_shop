@@ -125,9 +125,30 @@ if ($action === 'edit' && $id > 0) {
 
 			<?php if ($totalPages > 1): ?>
 				<div class="pagination">
-					<?php for ($i = 1; $i <= $totalPages; $i++): ?>
-						<a href="index.php?page=brands&p=<?= $i ?>&q=<?= urlencode($search_query) ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : '' ?>"><?= $i ?></a>
+					<?php if ($currentPage > 1): ?>
+						<a href="index.php?page=brands&p=1&q=<?= urlencode($search_query) ?>">« Đầu</a>
+						<a href="index.php?page=brands&p=<?= $currentPage - 1 ?>&q=<?= urlencode($search_query) ?>">‹ Trước</a>
+					<?php endif; ?>
+					<?php
+					$window = 5;
+					$half = floor($window / 2);
+					$start = $currentPage - $half;
+					$end = $currentPage + $half;
+					if ($start < 1) {
+						$start = 1;
+						$end = min($window, $totalPages);
+					}
+					if ($end > $totalPages) {
+						$end = $totalPages;
+						$start = max(1, $end - $window + 1);
+					}
+					for ($i = $start; $i <= $end; $i++): ?>
+						<a href="index.php?page=brands&p=<?= $i ?>&q=<?= urlencode($search_query) ?>" class="<?= $i == $currentPage ? 'current' : '' ?>"><?= $i ?></a>
 					<?php endfor; ?>
+					<?php if ($currentPage < $totalPages): ?>
+						<a href="index.php?page=brands&p=<?= $currentPage + 1 ?>&q=<?= urlencode($search_query) ?>">Tiếp ›</a>
+						<a href="index.php?page=brands&p=<?= $totalPages ?>&q=<?= urlencode($search_query) ?>">Cuối »</a>
+					<?php endif; ?>
 				</div>
 			<?php endif; ?>
 		</div>

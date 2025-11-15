@@ -172,14 +172,30 @@ $users = $stmt->fetchAll();
 
 	<?php if ($totalPages > 1): ?>
 	<div class="pagination">
+		<?php if ($currentPage > 1): ?>
+			<a href="index.php?page=users&p=1&q=<?= urlencode($search_query) ?>">« Đầu</a>
+			<a href="index.php?page=users&p=<?= $currentPage - 1 ?>&q=<?= urlencode($search_query) ?>">‹ Trước</a>
+		<?php endif; ?>
 		<?php
-		$query_params = !empty($search_query) ? '&q=' . urlencode($search_query) : '';
-		for ($i = 1; $i <= $totalPages; $i++): ?>
-			<a href="index.php?page=users&p=<?php echo $i . $query_params; ?>" 
-			class="page-btn <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-			<?php echo $i; ?>
-			</a>
+		$window = 5;
+		$half = floor($window / 2);
+		$start = $currentPage - $half;
+		$end = $currentPage + $half;
+		if ($start < 1) {
+			$start = 1;
+			$end = min($window, $totalPages);
+		}
+		if ($end > $totalPages) {
+			$end = $totalPages;
+			$start = max(1, $end - $window + 1);
+		}
+		for ($i = $start; $i <= $end; $i++): ?>
+			<a href="index.php?page=users&p=<?= $i ?>&q=<?= urlencode($search_query) ?>" class="<?= $i == $currentPage ? 'current' : '' ?>"><?= $i ?></a>
 		<?php endfor; ?>
+		<?php if ($currentPage < $totalPages): ?>
+			<a href="index.php?page=users&p=<?= $currentPage + 1 ?>&q=<?= urlencode($search_query) ?>">Tiếp ›</a>
+			<a href="index.php?page=users&p=<?= $totalPages ?>&q=<?= urlencode($search_query) ?>">Cuối »</a>
+		<?php endif; ?>
 	</div>
 	<?php endif; ?>
 <?php endif; ?>

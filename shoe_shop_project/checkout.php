@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment = $_POST['payment_method'] ?? 'COD';
     $shipping_fee = isset($_POST['shipping_fee']) ? (float)$_POST['shipping_fee'] : 0.0;
     $shipping_carrier = $_POST['shipping_carrier'] ?? 'GHN';
-    $couponCode = trim($_POST['validated_coupon_code'] ?? ''); // Chỉ sử dụng mã đã được xác thực từ JS
+    $couponCode = trim($_POST['coupon_code'] ?? ''); // Lấy mã từ input người dùng nhập
 
     // === LẤY ĐỊA CHỈ ĐÃ CHỌN ===
     $addrStmt = $db->prepare('SELECT a.*, c.ghn_district_id, c.ghn_ward_code FROM addresses a LEFT JOIN address_codes c ON a.id = c.address_id WHERE a.id = ? AND a.user_id = ?');
@@ -155,10 +155,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Xác thực coupon và tính toán giảm giá
     $coupon = validate_coupon($db, $couponCode);
     $discount = 0;
     if ($coupon) {
         $discount = ((int)$coupon['discount_percent']) * $subtotal / 100.0;
+        $couponCode = $coupon['code']; // Đảm bảo mã đúng được lưu
     }
 
     // ----- Áp dụng mã giảm phí vận chuyển (sửa nhanh) -----
@@ -217,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $statusId = 1; // chờ thanh toán
             $couponId = $coupon ? $coupon['id'] : null;
 
-            $ins = $db->prepare('INSERT INTO orders (user_id, total_amount, shipping_address, phone, status_id, coupon_id, payment_method, shipping_fee, shipping_carrier, discount_amount, coupon_code, shipping_discount_amount, shipping_coupon_code) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)');
+            $ins = $db->prepare('INSERT INTO orders (user_id, total_amount, shipping_address, phone, status_id, coupon_id, payment_method, shipping_fee, shipping_carrier, discount_amount, coupon_code, shipping_discount_amount, shipping_coupon_code) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'); // Thêm coupon_code
             $ins->execute([$userId, $total_Amount, $address, $phone, $statusId, $couponId, 'VNPAY', $final_shipping_fee, $shipping_carrier, $discount, $couponCode, $shipping_discount, $shipping_coupon_code]);
 
             $orderId = $db->lastInsertId();
@@ -296,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  shipping_fee, shipping_carrier, discount_amount, coupon_code, 
  shipping_discount_amount, shipping_coupon_code)
 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-    ');
+    '); // Thêm coupon_code
         $ins->execute([
             $userId,
             $total_Amount,
@@ -308,7 +310,7 @@ VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
             $final_shipping_fee,
             $shipping_carrier,
             $discount,
-            $couponCode,
+            $coupon ? $coupon['code'] : null, // Lưu mã coupon nếu hợp lệ
             $shipping_discount,
             $shipping_coupon_code
         ]);
@@ -476,21 +478,21 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
 
             <div class="form-group coupon-group">
                 <label for="coupon_code">Mã giảm giá</label>
-                <input type="text" id="coupon_code" name="coupon_code"
-                    value="<?php echo htmlspecialchars($sessionCoupon); ?>">
-                <button type="button" id="applyCoupon" class="btn small"
-                    style="margin-top: 4px;">Apply</button>
+                <div class="input-with-button">
+                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Nhập mã giảm giá" value="<?php echo htmlspecialchars($sessionCoupon); ?>">
+                    <button type="button" id="applyCoupon" class="btn small">Áp dụng
+                    </button>
+                </div>
                 <div class="coupon-result"></div>
             </div>
             <!-- Mã giảm phí vận chuyển -->
-            <div class="form-group mt-3">
-                <label for="shipping_coupon_code" class="font-semibold">Mã giảm phí vận chuyển</label>
-                <div class="input-group">
-                    <input type="text" id="shipping_coupon_code" name="shipping_coupon_code" class="form-control"
-                        placeholder="Nhập mã vận chuyển ">
-                    <button type="button" id="applyShippingCoupon" class="btn btn-outline-primary">Áp dụng</button>
+            <div class="form-group coupon-group">
+                <label for="shipping_coupon_code">Mã giảm phí vận chuyển</label>
+                <div class="input-with-button">
+                    <input type="text" id="shipping_coupon_code" name="shipping_coupon_code" placeholder="Nhập mã vận chuyển">
+                    <button type="button" id="applyShippingCoupon" class="btn small">Áp dụng</button>
                 </div>
-                <small id="shippingCouponMessage" class="text-success"></small>
+                <div id="shippingCouponMessage" class="coupon-result"></div>
                 <input type="hidden" name="validated_shipping_coupon_code" id="validated_shipping_coupon_code" value="">
             </div>
 
@@ -1630,6 +1632,29 @@ document.addEventListener('DOMContentLoaded', () => {
         min-width: 180px;
         border-radius: 8px;
         font-weight: 500;
+    }
+
+    /* CSS để input và button nằm chung 1 hàng (giống product.php) */
+    .input-with-button {
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .input-with-button input[type="text"] {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .input-with-button .btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Responsive cho màn hình nhỏ */
+    @media (max-width: 576px) {
+        .input-with-button { flex-direction: column; }
+        .input-with-button .btn { width: 100%; }
     }
 
     /* === 3 NÚT THANH TOÁN ĐỀU NHAU – CHỈNH CẢ 3 TRONG 1 NƠI === */

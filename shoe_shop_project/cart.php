@@ -384,13 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Xóa alert khi giỏ trống
     function clearAlertsIfEmpty() {
-        if (document.querySelectorAll('.cart-item').length === 0) {
-            localStorage.removeItem('product_coupon_code');
-            localStorage.removeItem('product_coupon_data');
-            localStorage.removeItem('shipping_coupon_code');
-            localStorage.removeItem('shipping_coupon_data');
-            applyShippingCouponAlert();
-        }
+        // Logic này sẽ được xử lý trong hàm remove()
     }
 
     // Xóa tất cả thông báo lỗi tồn kho
@@ -461,10 +455,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(r => r.json())
             .then(res => {
                 if (res.success) {
-                    cartItem.remove();
-                    updateTotal(res.total);
-                    clearAlertsIfEmpty();
-                    applyShippingCouponAlert();
+                    // Nếu giỏ hàng sẽ trở nên trống sau khi xóa, tải lại trang
+                    if (document.querySelectorAll('.cart-item').length <= 1) {
+                        window.location.reload();
+                    } else {
+                        cartItem.remove();
+                        updateTotal(res.total);
+                    }
                 }
             });
     }

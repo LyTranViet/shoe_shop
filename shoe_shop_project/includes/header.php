@@ -320,6 +320,30 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             color: #fff !important; /* Use !important to override Bootstrap specificity */
             border: none;
         }
+
+        /* === Pagination Styles === */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 2.5rem;
+        }
+        .pagination a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 10px;
+            background: var(--text-dark);
+            color: var(--bg-white);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .pagination a:hover { background: var(--accent); }
+        .pagination a.current { background: var(--danger); color: var(--bg-white); font-weight: 700; }
     </style>
 
     

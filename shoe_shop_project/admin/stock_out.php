@@ -233,17 +233,30 @@ if ($action === 'view' && $id > 0) {
     <div id="pagination-container-stock-out">
         <?php if ($totalPages > 1): ?>
         <div class="pagination">
+            <?php if ($currentPage > 1): ?>
+                <a href="index.php?page=stock_out&p=1&q=<?= urlencode($search_query) ?>&product_id=<?= $filter_product_id ?>">« Đầu</a>
+                <a href="index.php?page=stock_out&p=<?= $currentPage - 1 ?>&q=<?= urlencode($search_query) ?>&product_id=<?= $filter_product_id ?>">‹ Trước</a>
+            <?php endif; ?>
             <?php
-            $query_params = [];
-            if ($filter_product_id > 0) $query_params['product_id'] = $filter_product_id;
-            if (!empty($search_query)) $query_params['q'] = $search_query;
-            
-            for ($i = 1; $i <= $totalPages; $i++): 
-                $query_params['p'] = $i;
-                $queryString = http_build_query($query_params);
-            ?>
-                <a href="index.php?page=stock_out&<?= $queryString ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : '' ?>"><?= $i ?></a>
+            $window = 5;
+            $half = floor($window / 2);
+            $start = $currentPage - $half;
+            $end = $currentPage + $half;
+            if ($start < 1) {
+                $start = 1;
+                $end = min($window, $totalPages);
+            }
+            if ($end > $totalPages) {
+                $end = $totalPages;
+                $start = max(1, $end - $window + 1);
+            }
+            for ($i = $start; $i <= $end; $i++): ?>
+                <a href="index.php?page=stock_out&p=<?= $i ?>&q=<?= urlencode($search_query) ?>&product_id=<?= $filter_product_id ?>" class="<?= $i == $currentPage ? 'current' : '' ?>"><?= $i ?></a>
             <?php endfor; ?>
+            <?php if ($currentPage < $totalPages): ?>
+                <a href="index.php?page=stock_out&p=<?= $currentPage + 1 ?>&q=<?= urlencode($search_query) ?>&product_id=<?= $filter_product_id ?>">Tiếp ›</a>
+                <a href="index.php?page=stock_out&p=<?= $totalPages ?>&q=<?= urlencode($search_query) ?>&product_id=<?= $filter_product_id ?>">Cuối »</a>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>

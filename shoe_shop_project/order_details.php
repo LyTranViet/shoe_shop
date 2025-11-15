@@ -155,14 +155,14 @@ require_once __DIR__ . '/includes/header.php';
                 <?php if ($discountAmount > 0): ?>
                 <div class="d-flex justify-content-between mb-2 text-danger">
                     <span>Mã KM: <strong><?php echo htmlspecialchars($couponCode); ?></strong></span>
-                    <span>- <?php echo number_format($discountAmount, 0); ?>₫</span>
+                    <span><?php echo number_format($discountAmount, 0); ?>₫</span>
                 </div>
                 <?php endif; ?>
 
                 <?php if ($shippingDiscountAmount > 0): ?>
                 <div class="d-flex justify-content-between mb-2 text-success">
                     <span>Mã vận chuyển: <strong><?php echo htmlspecialchars($shippingCouponCode); ?></strong></span>
-                    <span>- <?php echo number_format($shippingDiscountAmount, 0); ?>₫</span>
+                    <span>- <?php echo number_format($shippingDiscountAmount, 0); ?>%</span>
                 </div>
                 <?php endif; ?>
 

@@ -174,8 +174,6 @@ if (!empty($ids)) {
     .product-sizes.active { display: flex; }
     .product-sizes .btn-size { font-size: 0.85em; padding: 6px 10px; background: var(--bg-light); border: 1px solid var(--border); cursor: pointer; border-radius: 4px; }
     .product-sizes .btn-size:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .pagination { display: flex; gap: 10px; justify-content: center; margin: 48px 0 0 0; }
-    .pagination .btn { border-radius: 8px; padding: 8px 14px; }
     @media (max-width:900px) { .wishlist-grid { grid-template-columns: repeat(3,1fr); gap: 20px; } }
     @media (max-width:700px) { .wishlist-grid { grid-template-columns: repeat(2,1fr); } }
     @media (max-width:480px) { .wishlist-grid { grid-template-columns: 1fr; } .wishlist-wrap{padding:0 8px} }
@@ -228,13 +226,28 @@ if (!empty($ids)) {
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php if ($currentPage > 1): ?>
-                    <a href="?p=<?php echo $currentPage - 1; ?>" class="btn">‹ Trước</a>
+                    <a href="?p=1">« Đầu</a>
+                    <a href="?p=<?php echo $currentPage - 1; ?>">‹ Trước</a>
                 <?php endif; ?>
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a href="?p=<?php echo $i; ?>" class="btn <?php echo $i === $currentPage ? 'current' : ''; ?>"><?php echo $i; ?></a>
+                <?php
+                $window = 5;
+                $half = floor($window / 2);
+                $start = $currentPage - $half;
+                $end = $currentPage + $half;
+                if ($start < 1) {
+                    $start = 1;
+                    $end = min($window, $totalPages);
+                }
+                if ($end > $totalPages) {
+                    $end = $totalPages;
+                    $start = max(1, $end - $window + 1);
+                }
+                for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="?p=<?php echo $i; ?>" class="<?php echo $i === $currentPage ? 'current' : ''; ?>"><?php echo $i; ?></a>
                 <?php endfor; ?>
                 <?php if ($currentPage < $totalPages): ?>
-                    <a href="?p=<?php echo $currentPage + 1; ?>" class="btn">Tiếp ›</a>
+                    <a href="?p=<?php echo $currentPage + 1; ?>">Tiếp ›</a>
+                    <a href="?p=<?php echo $totalPages; ?>">Cuối »</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

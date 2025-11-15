@@ -230,13 +230,7 @@ try {
         padding: 6px 10px;
         background: var(--border);
     }
-    .product-sizes .btn-size:hover {
-        background: var(--primary); /* Màu nền xanh khi hover */
-        color: #fff; /* Chữ màu trắng khi hover */
-    }
-    .pagination { display: flex; gap: 10px; justify-content: center; margin: 40px 0 0 0; }
-    .pagination .btn { border-radius: 7px; font-size: 1em; padding: 8px 16px; }
-    .pagination .btn.current { background: var(--primary); color: #fff; font-weight: 700; }
+    .product-sizes .btn-size:hover { background: var(--primary); color: #fff; }
     @media (max-width: 900px) {
         .layout { grid-template-columns: 1fr; }
         .sidebar { margin-bottom: 24px; }
@@ -378,13 +372,28 @@ try {
                 $queryString = http_build_query($queryParams);
                 ?>
                 <?php if ($filters['page'] > 1): ?>
-                    <a href="?page=<?php echo $filters['page'] - 1; ?>&<?php echo $queryString; ?>" class="btn">‹ Trước</a>
+                    <a href="?page=1&<?php echo $queryString; ?>">« Đầu</a>
+                    <a href="?page=<?php echo $filters['page'] - 1; ?>&<?php echo $queryString; ?>">‹ Trước</a>
                 <?php endif; ?>
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a href="?page=<?php echo $i; ?>&<?php echo $queryString; ?>" class="btn <?php echo $i === $filters['page'] ? 'current' : ''; ?>"><?php echo $i; ?></a>
+                <?php
+                $window = 5;
+                $half = floor($window / 2);
+                $start = $filters['page'] - $half;
+                $end = $filters['page'] + $half;
+                if ($start < 1) {
+                    $start = 1;
+                    $end = min($window, $totalPages);
+                }
+                if ($end > $totalPages) {
+                    $end = $totalPages;
+                    $start = max(1, $end - $window + 1);
+                }
+                for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="?page=<?php echo $i; ?>&<?php echo $queryString; ?>" class="<?php echo $i === $filters['page'] ? 'current' : ''; ?>"><?php echo $i; ?></a>
                 <?php endfor; ?>
                 <?php if ($filters['page'] < $totalPages): ?>
-                    <a href="?page=<?php echo $filters['page'] + 1; ?>&<?php echo $queryString; ?>" class="btn">Tiếp ›</a>
+                    <a href="?page=<?php echo $filters['page'] + 1; ?>&<?php echo $queryString; ?>">Tiếp ›</a>
+                    <a href="?page=<?php echo $totalPages; ?>&<?php echo $queryString; ?>">Cuối »</a>
                 <?php endif; ?>
             </nav>
         <?php endif; ?>

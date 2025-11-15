@@ -96,3 +96,30 @@ if ($db) {
 </div>
 
 <main class="admin-container">
+
+<style>
+/* === Pagination Styles for Admin === */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 2.5rem;
+    }
+    .pagination a, .pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 10px;
+        background: var(--text-dark);
+        color: var(--bg-white);
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .pagination a:hover { background: var(--accent); }
+    .pagination a.current, .pagination span.current { background: var(--danger); color: var(--bg-white); font-weight: 700; }
+    .pagination span.disabled { background: #4a5568; color: #a0aec0; cursor: not-allowed; }
+</style>

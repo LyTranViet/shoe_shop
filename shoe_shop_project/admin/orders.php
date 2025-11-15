@@ -138,13 +138,39 @@ else:
 	</div>
 
 	<?php if ($totalPages > 1): ?>
-		<div class="pagination">
+		<nav class="pagination">
 			<?php
 			$query_params = !empty($search_query) ? '&q=' . urlencode($search_query) : '';
-			for ($i = 1; $i <= $totalPages; $i++): ?>
-				<a href="index.php?page=orders&p=<?= $i . $query_params; ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : ''; ?>"><?= $i; ?></a>
+			?>
+			<?php if ($currentPage > 1): ?>
+				<a href="index.php?page=orders&p=1<?= $query_params; ?>">« Đầu</a>
+				<a href="index.php?page=orders&p=<?= $currentPage - 1 . $query_params; ?>">‹ Trước</a>
+			<?php endif; ?>
+			<?php
+			// Logic for sliding window pagination
+			$window = 5;
+			$half = floor($window / 2);
+			$start = $currentPage - $half;
+			$end = $currentPage + $half;
+
+			if ($start < 1) {
+				$start = 1;
+				$end = min($window, $totalPages);
+			}
+
+			if ($end > $totalPages) {
+				$end = $totalPages;
+				$start = max(1, $end - $window + 1);
+			}
+
+			for ($i = $start; $i <= $end; $i++): ?>
+				<a href="index.php?page=orders&p=<?= $i . $query_params; ?>" class="<?= ($i == $currentPage) ? 'current' : ''; ?>"><?= $i; ?></a>
 			<?php endfor; ?>
-		</div>
+			<?php if ($currentPage > 1): ?>
+				<a href="index.php?page=orders&p=<?= $currentPage + 1 . $query_params; ?>">Tiếp ›</a>
+				<a href="index.php?page=orders&p=<?= $totalPages . $query_params; ?>">Cuối »</a>
+			<?php endif; ?>
+		</nav>
 	<?php endif; ?>
 </div>
 <?php endif; ?>
