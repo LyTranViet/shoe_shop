@@ -501,20 +501,28 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
             </div>
 
             <!-- New Payment Buttons -->
-            <div class="form-actions payment-buttons">
-                <button class="btn btn-cod" type="submit" name="payment_method" value="COD">Đặt hàng COD</button>
-                <button class="btn btn-vnpay" type="submit" name="payment_method" value="VNPAY">
-                    <img src="assets/images/vnpay_logo.png" alt="VNPay Logo" class="vnpay-logo">
-                    <span class="vnpay-text">
-                        <span class="vnpay-vn">VN</span><span class="vnpay-pay">PAY</span>
-                    </span>
-                </button>
-                <!-- PayPal Button Container is now inside the flex container -->
-                <div id="paypal-button-container"></div>
-                <input type="hidden" name="coupon_code" id="hidden_product_coupon" value="">
-                <input type="hidden" name="validated_shipping_coupon_code" id="hidden_shipping_coupon" value="">
-                <input type="hidden" name="original_shipping_fee" id="hidden_original_shipping_fee" value="">
-            </div>
+            <form id="checkout-form" method="post" action="process_checkout.php">
+                <input type="hidden" name="coupon_code" id="form_coupon_code" value="">
+                <input type="hidden" name="shipping_coupon_code" id="form_shipping_coupon_code" value="">
+
+                <!-- ... phần chọn địa chỉ, sản phẩm, v.v. ... -->
+
+                <div class="form-actions payment-buttons">
+                    <button class="btn btn-cod" type="submit" name="payment_method" value="COD">Đặt hàng COD</button>
+                    <button class="btn btn-vnpay" type="submit" name="payment_method" value="VNPAY">
+                        <img src="assets/images/vnpay_logo.png" alt="VNPay Logo" class="vnpay-logo">
+                        <span class="vnpay-text">
+                            <span class="vnpay-vn">VN</span><span class="vnpay-pay">PAY</span>
+                        </span>
+                    </button>
+                    <div id="paypal-button-container"></div>
+
+                    <!-- 3 input cho PayPal (để lại, không xóa) -->
+                    <input type="hidden" name="coupon_code" id="hidden_product_coupon" value="">
+                    <input type="hidden" name="validated_shipping_coupon_code" id="hidden_shipping_coupon" value="">
+                    <input type="hidden" name="original_shipping_fee" id="hidden_original_shipping_fee" value="">
+                </div>
+            </form>
         </form>
     </section>
     <aside>
@@ -1438,6 +1446,8 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
                 resultDiv.className = 'coupon-result success';
 
                 localStorage.setItem('product_coupon_code', code);
+                document.getElementById('form_coupon_code').value = code;
+                document.getElementById('hidden_product_coupon').value = code;
                 localStorage.setItem('product_coupon_data', JSON.stringify(data.coupon));
 
                 updateCheckoutSummary();

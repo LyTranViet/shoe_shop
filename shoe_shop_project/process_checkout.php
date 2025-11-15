@@ -16,4 +16,5 @@ if ($order_id) {
     header("Location: checkout.php?order_success=$order_id");
     exit;
 }
-?>
+$couponCode = trim($_POST['coupon_code'] ?? '');
+$shippingCouponCode = trim($_POST['shipping_coupon_code'] ?? '');
