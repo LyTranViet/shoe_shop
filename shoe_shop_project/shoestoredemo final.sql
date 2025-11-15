@@ -204,7 +204,42 @@ INSERT INTO `categories` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
+<<<<<<< HEAD
+-- Cấu trúc bảng cho bảng `chat_messages`
+--
+
+CREATE TABLE `chat_messages` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `session_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sender` enum('user','admin') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
+  `is_read_by_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `chat_messages`
+--
+
+CREATE TABLE `chat_messages` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `session_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sender` enum('user','admin') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
+  `is_read_by_admin` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+--
+-- Cấu trúc bảng cho bảng `coupons`
+=======
 -- Table structure for table `coupons`
+>>>>>>> 306bbc44839a04fe76846ec25e9f86c6b30a488c
 --
 
 CREATE TABLE `coupons` (
@@ -1570,7 +1605,27 @@ ALTER TABLE `product_sizes`
   ADD KEY `product_id` (`product_id`);
 
 --
+<<<<<<< HEAD
+-- Chỉ mục cho bảng `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `session_id` (`session_id`);
+
+--
+-- Chỉ mục cho bảng `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `session_id` (`session_id`);
+
+--
+-- Chỉ mục cho bảng `roles`
+=======
 -- Indexes for table `roles`
+>>>>>>> 306bbc44839a04fe76846ec25e9f86c6b30a488c
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
@@ -1652,7 +1707,23 @@ ALTER TABLE `cart_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=246;
 
 --
+<<<<<<< HEAD
+-- AUTO_INCREMENT cho bảng `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `categories`
+=======
 -- AUTO_INCREMENT for table `categories`
+>>>>>>> 306bbc44839a04fe76846ec25e9f86c6b30a488c
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
@@ -1801,7 +1872,23 @@ ALTER TABLE `cart_items`
   ADD CONSTRAINT `cart_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
+<<<<<<< HEAD
+-- Các ràng buộc cho bảng `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `export_receipt`
+=======
 -- Constraints for table `export_receipt`
+>>>>>>> 306bbc44839a04fe76846ec25e9f86c6b30a488c
 --
 ALTER TABLE `export_receipt`
   ADD CONSTRAINT `export_receipt_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,

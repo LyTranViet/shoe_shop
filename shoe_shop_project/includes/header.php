@@ -384,9 +384,9 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             <div class="nav-actions">
                 <a href="<?php echo BASE_URL; ?>category.php">🏷️ Danh mục</a>
                 <a href="<?php echo BASE_URL; ?>about.php">ℹ️ Giới thiệu</a>
-                  <a href="<?php echo BASE_URL; ?>contact.php">📞 Liên hệ</a>
+                <a href="<?php echo BASE_URL; ?>contact.php">📞 Liên hệ</a>
                 <a href="<?php echo BASE_URL; ?>cart.php">🛒 Giỏ hàng <span class="badge"><?php echo cart_count(); ?></span></a>
-                <?php if ($isLoggedIn): ?>
+                <?php if ($isLoggedIn): ?>  
                 <div class="user-menu">
                     <button class="user-btn"><?php echo htmlspecialchars($displayName); ?> ⬇️</button>
                     <div class="dropdown-menu">
@@ -480,7 +480,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-</body>
-</html>
-<?php ob_end_flush(); ?>

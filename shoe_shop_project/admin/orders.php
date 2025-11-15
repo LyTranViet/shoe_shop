@@ -23,7 +23,7 @@ if ($action === 'view' && $id > 0) {
 }
 
 
-if ($action === 'view' && $id > 0):
+if ($action === 'view' && $id > 0) {
 	$stmt = $db->prepare("
         SELECT o.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone, os.name as status_name
         FROM orders o
@@ -49,8 +49,7 @@ if ($action === 'view' && $id > 0):
 		$statuses = $db->query("SELECT * FROM order_status")->fetchAll();
 		include __DIR__ . '/order_view.php';
 	}
-
-else:
+} else {
 	$search_query = trim($_GET['q'] ?? '');
 	$itemsPerPage = 10;
 	$currentPage = (int)($_GET['p'] ?? 1);
@@ -143,34 +142,16 @@ else:
 			$query_params = !empty($search_query) ? '&q=' . urlencode($search_query) : '';
 			?>
 			<?php if ($currentPage > 1): ?>
-				<a href="index.php?page=orders&p=1<?= $query_params; ?>">« Đầu</a>
 				<a href="index.php?page=orders&p=<?= $currentPage - 1 . $query_params; ?>">‹ Trước</a>
 			<?php endif; ?>
 			<?php
-			// Logic for sliding window pagination
-			$window = 5;
-			$half = floor($window / 2);
-			$start = $currentPage - $half;
-			$end = $currentPage + $half;
-
-			if ($start < 1) {
-				$start = 1;
-				$end = min($window, $totalPages);
-			}
-
-			if ($end > $totalPages) {
-				$end = $totalPages;
-				$start = max(1, $end - $window + 1);
-			}
-
-			for ($i = $start; $i <= $end; $i++): ?>
+			for ($i = 1; $i <= $totalPages; $i++): ?>
 				<a href="index.php?page=orders&p=<?= $i . $query_params; ?>" class="<?= ($i == $currentPage) ? 'current' : ''; ?>"><?= $i; ?></a>
 			<?php endfor; ?>
-			<?php if ($currentPage > 1): ?>
+			<?php if ($currentPage < $totalPages): ?>
 				<a href="index.php?page=orders&p=<?= $currentPage + 1 . $query_params; ?>">Tiếp ›</a>
-				<a href="index.php?page=orders&p=<?= $totalPages . $query_params; ?>">Cuối »</a>
 			<?php endif; ?>
 		</nav>
 	<?php endif; ?>
 </div>
-<?php endif; ?>
+<?php } ?>
