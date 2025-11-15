@@ -37,7 +37,7 @@ $vnp_ReturnUrl = 'http://localhost/shoe_shop/shoe_shop_project/vnpay_return.php'
 if (!is_logged_in()) {
     $_SESSION['return_to'] = BASE_URL . 'checkout.php'; // Lưu lại trang checkout để quay lại sau khi đăng nhập
     flash_set('info', 'Vui lòng đăng nhập để tiến hành thanh toán.');
-    header('Location: ' . BASE_URL . 'login.php'); 
+    header('Location: ' . BASE_URL . 'login.php');
     exit;
 }
 
@@ -418,52 +418,54 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
         <form method="post">
             <h3>Shipping information</h3>
 
-                    <div class="form-group">
+            <div class="form-group">
                 <label for="saved_address">Chọn địa chỉ giao hàng <span class="text-danger">*</span></label>
                 <select id="saved_address" name="saved_address_id" class="form-control" required>
                     <option value="">-- Chọn địa chỉ --</option>
-                    <?php 
+                    <?php
                     $hasDefault = false;
-                    foreach ($addresses as $addr): 
+                    foreach ($addresses as $addr):
                         $fullAddr = trim("{$addr['address']}, {$addr['ward']}, {$addr['district']}, {$addr['city']}");
                         $isDefault = ($addr['is_default'] == 1);
                         if ($isDefault) $hasDefault = true;
                     ?>
-                        <option value="<?= $addr['id'] ?>"
-                                <?= $isDefault ? 'selected' : '' ?>
-                                data-phone="<?= htmlspecialchars($addr['phone']) ?>"
-                                data-district-id="<?= $addr['ghn_district_id'] ?>"
-                                data-ward-code="<?= $addr['ghn_ward_code'] ?>"
-                                data-province="<?= htmlspecialchars($addr['city']) ?>"
-                                data-district="<?= htmlspecialchars($addr['district']) ?>"
-                                data-ward="<?= htmlspecialchars($addr['ward']) ?>">
+                        <option value="<?= $addr['id'] ?>" <?= $isDefault ? 'selected' : '' ?>
+                            data-phone="<?= htmlspecialchars($addr['phone']) ?>"
+                            data-district-id="<?= $addr['ghn_district_id'] ?>"
+                            data-ward-code="<?= $addr['ghn_ward_code'] ?>"
+                            data-province="<?= htmlspecialchars($addr['city']) ?>"
+                            data-district="<?= htmlspecialchars($addr['district']) ?>"
+                            data-ward="<?= htmlspecialchars($addr['ward']) ?>">
                             <?= htmlspecialchars($fullAddr) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
-                <!-- Ẩn các input cũ -->
-                <input type="hidden" name="address" id="address" value="">
-                <input type="hidden" name="phone" id="phone" value="">
-                <input type="hidden" name="ghn_district_id" id="hidden_district_id" value="">
-                <input type="hidden" name="ghn_ward_code" id="hidden_ward_code" value="">
-                <!-- Original fee (before shipping coupon) - used server-side to compute discount reliably -->
-                <input type="hidden" name="original_shipping_fee" id="original-shipping-fee-input" value="0">
-                <input type="hidden" name="shipping_fee" id="shipping-fee-input" value="0">
-                <input type="hidden" name="shipping_carrier" id="shipping-carrier-input" value="GHN">
+            <!-- Ẩn các input cũ -->
+            <input type="hidden" name="address" id="address" value="">
+            <input type="hidden" name="phone" id="phone" value="">
+            <input type="hidden" name="ghn_district_id" id="hidden_district_id" value="">
+            <input type="hidden" name="ghn_ward_code" id="hidden_ward_code" value="">
+            <!-- Original fee (before shipping coupon) - used server-side to compute discount reliably -->
+            <input type="hidden" name="original_shipping_fee" id="original-shipping-fee-input" value="0">
+            <input type="hidden" name="shipping_fee" id="shipping-fee-input" value="0">
+            <input type="hidden" name="shipping_carrier" id="shipping-carrier-input" value="GHN">
             <div class="form-group">
                 <label>Chọn dịch vụ giao hàng</label>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input carrier-select" type="radio" name="carrier" id="carrierGHN" value="GHN" checked>
+                    <input class="form-check-input carrier-select" type="radio" name="carrier" id="carrierGHN"
+                        value="GHN" checked>
                     <label class="form-check-label" for="carrierGHN">Giao Hàng Nhanh (GHN)</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input carrier-select" type="radio" name="carrier" id="carrierGHTK" value="GHTK">
+                    <input class="form-check-input carrier-select" type="radio" name="carrier" id="carrierGHTK"
+                        value="GHTK">
                     <label class="form-check-label" for="carrierGHTK">Giao hàng tiết kiệm (GHTK)</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input carrier-select" type="radio" name="carrier" id="carrierShoeShopShip" value="ShoeShopShip">
+                    <input class="form-check-input carrier-select" type="radio" name="carrier" id="carrierShoeShopShip"
+                        value="ShoeShopShip">
                     <label class="form-check-label" for="carrierShoeShopShip">ShoeShopShip</label>
                 </div>
 
@@ -479,7 +481,8 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
             <div class="form-group coupon-group">
                 <label for="coupon_code">Mã giảm giá</label>
                 <div class="input-with-button">
-                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Nhập mã giảm giá" value="<?php echo htmlspecialchars($sessionCoupon); ?>">
+                    <input type="text" id="coupon_code" name="coupon_code" placeholder="Nhập mã giảm giá"
+                        value="<?php echo htmlspecialchars($sessionCoupon); ?>">
                     <button type="button" id="applyCoupon" class="btn small">Áp dụng
                     </button>
                 </div>
@@ -489,7 +492,8 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
             <div class="form-group coupon-group">
                 <label for="shipping_coupon_code">Mã giảm phí vận chuyển</label>
                 <div class="input-with-button">
-                    <input type="text" id="shipping_coupon_code" name="shipping_coupon_code" placeholder="Nhập mã vận chuyển">
+                    <input type="text" id="shipping_coupon_code" name="shipping_coupon_code"
+                        placeholder="Nhập mã vận chuyển">
                     <button type="button" id="applyShippingCoupon" class="btn small">Áp dụng</button>
                 </div>
                 <div id="shippingCouponMessage" class="coupon-result"></div>
@@ -603,223 +607,224 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
 
 <script>
     // === CÂN NẶNG MẶC ĐỊNH: 1KG = 1000g ===
-function getCartWeight() {
-    return 1000;
-}
-// === CHỈ THÊM PHẦN JS MỚI CHO VẬN CHUYỂN ===
-$(document).on('change', '#saved_address', function() {
-    const $option = $(this).find('option:selected');
-    
-    // CẬP NHẬT ĐỊA CHỈ
-    let fullAddress = $option.text().replace(/ \(Mặc định\)$/, '');
-    fullAddress = fullAddress.replace(/^>\s*\d+,\s*/, '');
-    $('#address').val(fullAddress);
-
-    // CẬP NHẬT SỐ ĐIỆN THOẠI
-    const phone = $option.data('phone') || '';
-    $('#phone-display').val(phone);
-    $('#phone').val(phone);
-
-    // CẬP NHẬT BIẾN TOÀN CỤC
-    selectedDistrictId = $option.data('district-id') || null;
-    selectedWardCode = $option.data('ward-code') || null;
-
-    // GỌI TÍNH LẠI PHÍ
-    calculateShippingFee();
-});
-// TỰ ĐỘNG CHẠY KHI LOAD TRANG
-$(document).ready(function() {
-    if ($('#saved_address').val()) {
-        $('#saved_address').trigger('change');
+    function getCartWeight() {
+        return 1000;
     }
-});
-
-
-$(document).on("change", "input[name='carrier']", calculateShippingFee);
-$(document).ready(function() {
-    if ($('#saved_address').val()) $('#saved_address').trigger('change');
-    // TỰ ĐỘNG ÁP DỤNG MÃ GIẢM GIÁ SẢN PHẨM
-const savedProductCoupon = localStorage.getItem('product_coupon_data');
-if (savedProductCoupon) {
-    const coupon = JSON.parse(savedProductCoupon);
-    const code = localStorage.getItem('product_coupon_code') || '';
-
-    $('#coupon_code').val(code);
-    $('#validated_coupon_code').val(coupon.code || '');
-    
-    // Cập nhật giao diện
-    $('.coupon-result').text(`Áp dụng thành công! Giảm ${coupon.discount_percent}%`).addClass('success').removeClass('error');
-    
-    updateCheckoutSummary(coupon.discount_percent);
-}
-});
-$(document).ready(function() {
-    const savedProductCoupon = localStorage.getItem('product_coupon_data');
-    if (savedProductCoupon) {
-        const coupon = JSON.parse(savedProductCoupon);
-        $('#coupon_code').val(localStorage.getItem('product_coupon_code') || '');
-        $('#validated_coupon_code').val(coupon.code);
-        updateCheckoutSummary(coupon.discount_percent);
-    }
-
-    // GỌI TÍNH PHÍ KHI ĐỔI ĐỊA CHỈ
+    // === CHỈ THÊM PHẦN JS MỚI CHO VẬN CHUYỂN ===
     $(document).on('change', '#saved_address', function() {
+        const $option = $(this).find('option:selected');
+
+        // CẬP NHẬT ĐỊA CHỈ
+        let fullAddress = $option.text().replace(/ \(Mặc định\)$/, '');
+        fullAddress = fullAddress.replace(/^>\s*\d+,\s*/, '');
+        $('#address').val(fullAddress);
+
+        // CẬP NHẬT SỐ ĐIỆN THOẠI
+        const phone = $option.data('phone') || '';
+        $('#phone-display').val(phone);
+        $('#phone').val(phone);
+
+        // CẬP NHẬT BIẾN TOÀN CỤC
+        selectedDistrictId = $option.data('district-id') || null;
+        selectedWardCode = $option.data('ward-code') || null;
+
+        // GỌI TÍNH LẠI PHÍ
         calculateShippingFee();
     });
-});
- // === CẬP NHẬT TỔNG TIỀN (CHỈ CẬP NHẬT GIAO DIỆN) ===
-        window.updateSummaryTotal = function(shippingFeeVND = 0, originalFee = 0, discountInfo = '') {
-    const subtotal = parseFloat($('#summary-subtotal').data('value')) || 0;
-    let discount = 0;
-    const savedCoupon = localStorage.getItem('product_coupon_data');
-    if (savedCoupon) {
-        const coupon = JSON.parse(savedCoupon);
-        discount = (subtotal * (coupon.discount_percent || 0)) / 100;
-    }
+    // TỰ ĐỘNG CHẠY KHI LOAD TRANG
+    $(document).ready(function() {
+        if ($('#saved_address').val()) {
+            $('#saved_address').trigger('change');
+        }
+    });
 
-    const total = subtotal - discount + shippingFeeVND;
 
-    if (originalFee > 0 && shippingFeeVND < originalFee && discountInfo) {
-        $('#original-shipping-fee').text(originalFee.toLocaleString('vi-VN') + ' ₫').show();
-        $('#shipping-fee-text').text(shippingFeeVND.toLocaleString('vi-VN') + ' ₫');
-        $('#shipping-discount-info').text(discountInfo).show();
-    } else {
-        $('#original-shipping-fee').hide();
-        $('#shipping-fee-text').text(shippingFeeVND.toLocaleString('vi-VN') + ' ₫');
-        $('#shipping-discount-info').hide();
-    }
+    $(document).on("change", "input[name='carrier']", calculateShippingFee);
+    $(document).ready(function() {
+        if ($('#saved_address').val()) $('#saved_address').trigger('change');
+        // TỰ ĐỘNG ÁP DỤNG MÃ GIẢM GIÁ SẢN PHẨM
+        const savedProductCoupon = localStorage.getItem('product_coupon_data');
+        if (savedProductCoupon) {
+            const coupon = JSON.parse(savedProductCoupon);
+            const code = localStorage.getItem('product_coupon_code') || '';
 
-    $('#summary-total').text(total.toLocaleString('vi-VN') + ' ₫');
-    $('#shipping-fee-input').val(shippingFeeVND);
-    $('#shipping-fee-row').show();
+            $('#coupon_code').val(code);
+            $('#validated_coupon_code').val(coupon.code || '');
+
+            // Cập nhật giao diện
+            $('.coupon-result').text(`Áp dụng thành công! Giảm ${coupon.discount_percent}%`).addClass('success')
+                .removeClass('error');
+
+            updateCheckoutSummary(coupon.discount_percent);
+        }
+    });
+    $(document).ready(function() {
+        const savedProductCoupon = localStorage.getItem('product_coupon_data');
+        if (savedProductCoupon) {
+            const coupon = JSON.parse(savedProductCoupon);
+            $('#coupon_code').val(localStorage.getItem('product_coupon_code') || '');
+            $('#validated_coupon_code').val(coupon.code);
+            updateCheckoutSummary(coupon.discount_percent);
+        }
+
+        // GỌI TÍNH PHÍ KHI ĐỔI ĐỊA CHỈ
+        $(document).on('change', '#saved_address', function() {
+            calculateShippingFee();
+        });
+    });
+    // === CẬP NHẬT TỔNG TIỀN (CHỈ CẬP NHẬT GIAO DIỆN) ===
+    window.updateSummaryTotal = function(shippingFeeVND = 0, originalFee = 0, discountInfo = '') {
+        const subtotal = parseFloat($('#summary-subtotal').data('value')) || 0;
+        let discount = 0;
+        const savedCoupon = localStorage.getItem('product_coupon_data');
+        if (savedCoupon) {
+            const coupon = JSON.parse(savedCoupon);
+            discount = (subtotal * (coupon.discount_percent || 0)) / 100;
+        }
+
+        const total = subtotal - discount + shippingFeeVND;
+
+        if (originalFee > 0 && shippingFeeVND < originalFee && discountInfo) {
+            $('#original-shipping-fee').text(originalFee.toLocaleString('vi-VN') + ' ₫').show();
+            $('#shipping-fee-text').text(shippingFeeVND.toLocaleString('vi-VN') + ' ₫');
+            $('#shipping-discount-info').text(discountInfo).show();
+        } else {
+            $('#original-shipping-fee').hide();
+            $('#shipping-fee-text').text(shippingFeeVND.toLocaleString('vi-VN') + ' ₫');
+            $('#shipping-discount-info').hide();
+        }
+
+        $('#summary-total').text(total.toLocaleString('vi-VN') + ' ₫');
+        $('#shipping-fee-input').val(shippingFeeVND);
+        $('#shipping-fee-row').show();
     };
-        // === TÍNH PHÍ VẬN CHUYỂN (CHỈ TÍNH, KHÔNG GỌI updateSummaryTotal) ===
-        window.calculateShippingFeet = function() {
-    if (!selectedDistrictId || !selectedWardCode) {
-        updateSummaryTotal(0);
-        $('#shipping-fee-text').html('<span style="color:red">Vui lòng chọn địa chỉ đầy đủ</span>');
-        return;
-    }
+    // === TÍNH PHÍ VẬN CHUYỂN (CHỈ TÍNH, KHÔNG GỌI updateSummaryTotal) ===
+    window.calculateShippingFeet = function() {
+        if (!selectedDistrictId || !selectedWardCode) {
+            updateSummaryTotal(0);
+            $('#shipping-fee-text').html('<span style="color:red">Vui lòng chọn địa chỉ đầy đủ</span>');
+            return;
+        }
 
-    $('#shipping-fee-text').html('Đang tính...');
-    const selectedCarrier = $('input[name="carrier"]:checked').val() || 'GHN';
-    $('#shipping-carrier-input').val(selectedCarrier);
-    serviceTypeId = 2;
-    $.ajax({
-        url: "CalculateFee.php",
-        method: "POST",
-        dataType: "json",
-        data: {
-            districtId: selectedDistrictId,
-            wardCode: selectedWardCode,
-            serviceTypeId: serviceTypeId,
-            carrier: selectedCarrier
-        },
-        success: function(response) {
-            if (response && response.error === false) {
-                let feeVND = Number(response.fee);
-                if (isNaN(feeVND) || feeVND <= 0) {
+        $('#shipping-fee-text').html('Đang tính...');
+        const selectedCarrier = $('input[name="carrier"]:checked').val() || 'GHN';
+        $('#shipping-carrier-input').val(selectedCarrier);
+        serviceTypeId = 2;
+        $.ajax({
+            url: "CalculateFee.php",
+            method: "POST",
+            dataType: "json",
+            data: {
+                districtId: selectedDistrictId,
+                wardCode: selectedWardCode,
+                serviceTypeId: serviceTypeId,
+                carrier: selectedCarrier
+            },
+            success: function(response) {
+                if (response && response.error === false) {
+                    let feeVND = Number(response.fee);
+                    if (isNaN(feeVND) || feeVND <= 0) {
+                        updateSummaryTotal(0);
+                        $('#shipping-fee-text').html('<span style="color:red">Không lấy được phí</span>');
+                        return;
+                    }
+
+                    let finalFeeVND = feeVND;
+                    let discountText = '';
+
+                    // ÁP DỤNG MÃ GIẢM PHÍ
+                    const couponData = localStorage.getItem('shipping_coupon_data');
+                    if (couponData) {
+                        const coupon = JSON.parse(couponData);
+                        if (coupon.type === 'percent') {
+                            const discount = (feeVND * coupon.value) / 100;
+                            finalFeeVND = Math.max(0, feeVND - discount);
+                            discountText = `Giảm ${coupon.value}% phí vận chuyển`;
+                        } else if (coupon.type === 'fixed') {
+                            finalFeeVND = Math.max(0, feeVND - coupon.value);
+                            discountText = `Giảm ${coupon.value.toLocaleString()}₫ phí vận chuyển`;
+                        }
+                    }
+
+                    updateSummaryTotal(finalFeeVND, feeVND, discountText);
+                    $('#shipping-fee-detail').text(selectedCarrier + ' - tính theo địa chỉ đã chọn');
+                } else {
                     updateSummaryTotal(0);
-                    $('#shipping-fee-text').html('<span style="color:red">Không lấy được phí</span>');
+                    $('#shipping-fee-text').html('<span style="color:red">Lỗi tính phí</span>');
+                }
+            },
+            error: function() {
+                updateSummaryTotal(0);
+                $('#shipping-fee-text').html('<span style="color:red">Lỗi mạng</span>');
+            }
+        });
+    }; // 👉 Khi người dùng đổi hãng vận chuyển, gọi lại hàm tính phí
+</script>
+<script>
+    // === TỰ ĐỘNG ĐIỀN MÃ GIẢM PHÍ VẬN CHUYỂN - CHỜ DOM SẴN SÀNG ===
+    const applySavedShippingCoupon = async () => {
+        const savedCode = localStorage.getItem('shipping_coupon_code');
+        if (!savedCode) return;
+
+        // Chờ input xuất hiện (tối đa 5s)
+        let attempts = 0;
+        const maxAttempts = 50; // 5 giây
+
+        const tryFill = setInterval(() => {
+            const codeInput = document.getElementById('shipping_coupon_code');
+            const validatedInput = document.getElementById('validated_shipping_coupon_code');
+            const msgEl = document.getElementById('shippingCouponMessage');
+
+            if (codeInput && validatedInput && msgEl || attempts >= maxAttempts) {
+                clearInterval(tryFill);
+
+                if (attempts >= maxAttempts) {
+                    console.warn('Không tìm thấy input mã giảm phí vận chuyển');
                     return;
                 }
 
-                let finalFeeVND = feeVND;
-                let discountText = '';
+                // Điền vào form
+                codeInput.value = savedCode;
+                validatedInput.value = savedCode;
 
-                // ÁP DỤNG MÃ GIẢM PHÍ
-                const couponData = localStorage.getItem('shipping_coupon_data');
-                if (couponData) {
-                    const coupon = JSON.parse(couponData);
-                    if (coupon.type === 'percent') {
-                        const discount = (feeVND * coupon.value) / 100;
-                        finalFeeVND = Math.max(0, feeVND - discount);
-                        discountText = `Giảm ${coupon.value}% phí vận chuyển`;
-                    } else if (coupon.type === 'fixed') {
-                        finalFeeVND = Math.max(0, feeVND - coupon.value);
-                        discountText = `Giảm ${coupon.value.toLocaleString()}₫ phí vận chuyển`;
-                    }
-                }
+                // GỌI API ĐỂ XÁC NHẬN LẠI
+                const formData = new FormData();
+                formData.append('code', savedCode);
 
-                updateSummaryTotal(finalFeeVND, feeVND, discountText);
-                $('#shipping-fee-detail').text(selectedCarrier + ' - tính theo địa chỉ đã chọn');
-            } else {
-                updateSummaryTotal(0);
-                $('#shipping-fee-text').html('<span style="color:red">Lỗi tính phí</span>');
+                fetch('validate_shipping_coupon.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            msgEl.textContent = data.message;
+                            msgEl.className = 'text-success';
+                            localStorage.setItem('shipping_coupon_data', JSON.stringify(data.coupon));
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    })
+                    .catch(err => {
+                        msgEl.textContent = 'Mã đã hết hạn';
+                        msgEl.className = 'text-danger';
+                        localStorage.removeItem('shipping_coupon_code');
+                        localStorage.removeItem('shipping_coupon_data');
+                        validatedInput.value = '';
+                    })
+                    .finally(() => {
+                        // BẮT BUỘC GỌI TÍNH LẠI PHÍ
+                        if (typeof calculateShippingFee === 'function') {
+                            calculateShippingFee();
+                        }
+                    });
             }
-        },
-        error: function() {
-            updateSummaryTotal(0);
-            $('#shipping-fee-text').html('<span style="color:red">Lỗi mạng</span>');
-        }
-    });
-};      // 👉 Khi người dùng đổi hãng vận chuyển, gọi lại hàm tính phí
-</script>
-<script>
-// === TỰ ĐỘNG ĐIỀN MÃ GIẢM PHÍ VẬN CHUYỂN - CHỜ DOM SẴN SÀNG ===
-const applySavedShippingCoupon = async () => {
-    const savedCode = localStorage.getItem('shipping_coupon_code');
-    if (!savedCode) return;
+            attempts++;
+        }, 100); // Kiểm tra mỗi 100ms
+    };
 
-    // Chờ input xuất hiện (tối đa 5s)
-    let attempts = 0;
-    const maxAttempts = 50; // 5 giây
-
-    const tryFill = setInterval(() => {
-        const codeInput = document.getElementById('shipping_coupon_code');
-        const validatedInput = document.getElementById('validated_shipping_coupon_code');
-        const msgEl = document.getElementById('shippingCouponMessage');
-
-        if (codeInput && validatedInput && msgEl || attempts >= maxAttempts) {
-            clearInterval(tryFill);
-
-            if (attempts >= maxAttempts) {
-                console.warn('Không tìm thấy input mã giảm phí vận chuyển');
-                return;
-            }
-
-            // Điền vào form
-            codeInput.value = savedCode;
-            validatedInput.value = savedCode;
-
-            // GỌI API ĐỂ XÁC NHẬN LẠI
-            const formData = new FormData();
-            formData.append('code', savedCode);
-
-            fetch('validate_shipping_coupon.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    msgEl.textContent = data.message;
-                    msgEl.className = 'text-success';
-                    localStorage.setItem('shipping_coupon_data', JSON.stringify(data.coupon));
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(err => {
-                msgEl.textContent = 'Mã đã hết hạn';
-                msgEl.className = 'text-danger';
-                localStorage.removeItem('shipping_coupon_code');
-                localStorage.removeItem('shipping_coupon_data');
-                validatedInput.value = '';
-            })
-            .finally(() => {
-                // BẮT BUỘC GỌI TÍNH LẠI PHÍ
-                if (typeof calculateShippingFee === 'function') {
-                    calculateShippingFee();
-                }
-            });
-        }
-        attempts++;
-    }, 100); // Kiểm tra mỗi 100ms
-};
-
-// CHẠY SAU KHI TOÀN BỘ TRANG LOAD XONG
-window.addEventListener('load', applySavedShippingCoupon);
+    // CHẠY SAU KHI TOÀN BỘ TRANG LOAD XONG
+    window.addEventListener('load', applySavedShippingCoupon);
 </script>
 <style>
     /* --- Coupon Input Group Styles --- */
@@ -963,467 +968,489 @@ window.addEventListener('load', applySavedShippingCoupon);
     src="https://www.paypal.com/sdk/js?client-id=Ab4kmqecM_NRnL8i9rrLZtklHlFaspC7IGKFeW7JDFMWoIA8oWF2V326kFxtVYUyE14ap-chRZu1U77P&currency=USD">
 </script>
 <script>
-// === CÂN NẶNG MẶC ĐỊNH ===
-function getCartWeight() { return 1000; }
-
-// === BIẾN TOÀN CỤC ===
-let selectedProvinceName = "";
-let selectedDistrictName = "";
-let selectedWardName = "";
-let selectedDistrictId = null;
-let selectedWardCode = null;
-let serviceTypeId = 2;
-const GHN_TOKEN = "658b57db-acf1-11f0-93b8-b675d1187f91";
-
-// === CẬP NHẬT PHÍ VẬN CHUYỂN (CHỈ GÁN, KHÔNG TÍNH LẠI TỔNG) ===
-function updateShippingFee(fee, text = '', carrier = 'GHN') {
-    const display = document.getElementById('shipping-fee-text');
-    const input = document.getElementById('shipping-fee-input');
-    const carrierInput = document.getElementById('shipping-carrier-input');
-    const originalFeeEl = document.getElementById('original-shipping-fee');
-    const discountInfoEl = document.getElementById('shipping-discount-info');
-
-    if (fee === null) {
-        if (display) display.textContent = text || 'Đang tính...';
-        if (display) display.style.color = '#666';
-        return;
+    // === CÂN NẶNG MẶC ĐỊNH ===
+    function getCartWeight() {
+        return 1000;
     }
 
-    const formatted = new Intl.NumberFormat('vi-VN').format(fee) + '₫';
-    // Save original fee (before applying any shipping coupon)
-    const origInput = document.getElementById('original-shipping-fee-input');
-    if (origInput) origInput.value = fee;
-    input.value = fee;
-    carrierInput.value = carrier;
+    // === BIẾN TOÀN CỤC ===
+    let selectedProvinceName = "";
+    let selectedDistrictName = "";
+    let selectedWardName = "";
+    let selectedDistrictId = null;
+    let selectedWardCode = null;
+    let serviceTypeId = 2;
+    const GHN_TOKEN = "658b57db-acf1-11f0-93b8-b675d1187f91";
 
-    // === TÍNH GIẢM PHÍ VẬN CHUYỂN ===
-    let shippingDiscount = 0;
-    const savedCoupon = localStorage.getItem('shipping_coupon_data');
-    if (savedCoupon) {
-        const coupon = JSON.parse(savedCoupon);
-        if (coupon.type === 'percent') {
-            shippingDiscount = (fee * coupon.value) / 100;
-        } else {
-            shippingDiscount = Math.min(fee, coupon.value);
+    // === CẬP NHẬT PHÍ VẬN CHUYỂN (CHỈ GÁN, KHÔNG TÍNH LẠI TỔNG) ===
+    function updateShippingFee(fee, text = '', carrier = 'GHN') {
+        const display = document.getElementById('shipping-fee-text');
+        const input = document.getElementById('shipping-fee-input');
+        const carrierInput = document.getElementById('shipping-carrier-input');
+        const originalFeeEl = document.getElementById('original-shipping-fee');
+        const discountInfoEl = document.getElementById('shipping-discount-info');
+
+        if (fee === null) {
+            if (display) display.textContent = text || 'Đang tính...';
+            if (display) display.style.color = '#666';
+            return;
         }
-    }
 
-    const finalFee = Math.max(0, fee - shippingDiscount);
-    input.value = finalFee; // GHI ĐÈ INPUT CUỐI CÙNG
+        const formatted = new Intl.NumberFormat('vi-VN').format(fee) + '₫';
+        // Save original fee (before applying any shipping coupon)
+        const origInput = document.getElementById('original-shipping-fee-input');
+        if (origInput) origInput.value = fee;
+        input.value = fee;
+        carrierInput.value = carrier;
 
-    // === HIỂN THỊ ===
-    if (carrier === 'GHTK') {
-        document.getElementById('ghtk-fee-text').textContent = formatted;
-        document.getElementById('ghtk-fee-row').style.display = 'table-row';
-        document.getElementById('shipping-fee-row').style.display = 'none';
-    } else {
-        document.getElementById('shipping-fee-row').style.display = 'table-row';
-        document.getElementById('ghtk-fee-row').style.display = 'none';
-
-        if (shippingDiscount > 0) {
-            originalFeeEl.textContent = new Intl.NumberFormat('vi-VN').format(fee) + '₫';
-            originalFeeEl.style.display = 'inline';
-            display.textContent = new Intl.NumberFormat('vi-VN').format(finalFee) + '₫';
-            discountInfoEl.textContent = `Giảm ${shippingDiscount.toLocaleString()}₫ phí vận chuyển`;
-            discountInfoEl.style.display = 'block';
-        } else {
-            display.textContent = formatted;
-            originalFeeEl.style.display = 'none';
-            discountInfoEl.style.display = 'none';
-        }
-    }
-
-    // === CHỈ CẬP NHẬT TỔNG SAU KHI PHÍ ĐÃ XONG ===
-    updateCheckoutSummary();
-}
-
-// === CẬP NHẬT TỔNG TIỀN (TỰ TÍNH, KHÔNG GỌI HÀM KHÁC) ===
-function updateCheckoutSummary() {
-    const subtotal = parseFloat(document.getElementById('summary-subtotal')?.dataset.value) || 0;
-    const shippingFee = parseFloat(document.getElementById('shipping-fee-input')?.value) || 0;
-
-    // Giảm giá sản phẩm
-    let productDiscount = 0;
-    const savedProductCoupon = localStorage.getItem('product_coupon_data');
-    if (savedProductCoupon) {
-        const coupon = JSON.parse(savedProductCoupon);
-        productDiscount = (subtotal * (coupon.discount_percent || 0)) / 100;
-    }
-
-    const total = subtotal - productDiscount + shippingFee;
-    const totalEl = document.getElementById('summary-total');
-    if (totalEl) {
-        totalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + '₫';
-    }
-
-    // Cập nhật dòng giảm giá sản phẩm
-    const discountRow = document.getElementById('summary-discount-row');
-    const discountAmountEl = document.getElementById('summary-discount-amount');
-    if (productDiscount > 0 && discountRow && discountAmountEl) {
-        discountRow.style.display = 'table-row';
-        discountAmountEl.textContent = `- ${new Intl.NumberFormat('vi-VN').format(productDiscount)}₫`;
-    } else if (discountRow) {
-        discountRow.style.display = 'none';
-    }
-}
-
-// === TÍNH PHÍ VẬN CHUYỂN (CHUẨN VỚI TYPE = "shipping") ===
-async function calculateShippingFee() {
-    console.log("🚀 Bắt đầu calculateShippingFee()");
-
-    const addressSelect = document.getElementById('saved_address');
-    const carrierChecked = document.querySelector('input[name="carrier"]:checked');
-
-    if (!addressSelect || !addressSelect.value || !carrierChecked) {
-        console.warn("⚠️ Thiếu địa chỉ hoặc hãng vận chuyển");
-        updateShippingFee(0, 'Vui lòng chọn địa chỉ và hãng vận chuyển');
-        return;
-    }
-
-    const opt = addressSelect.options[addressSelect.selectedIndex];
-    const districtId = opt.dataset.districtId;
-    const wardCode = opt.dataset.wardCode;
-    const province = opt.dataset.province;
-    const district = opt.dataset.district;
-    const ward = opt.dataset.ward;
-    const carrier = carrierChecked.value;
-    const weight = getCartWeight();
-
-    console.log("📦 Dữ liệu gửi đi:", { districtId, wardCode, carrier, weight });
-
-    if (!districtId || !wardCode) {
-        updateShippingFee(0, 'Địa chỉ chưa hỗ trợ', carrier);
-        console.warn("🚫 Địa chỉ chưa có districtId hoặc wardCode");
-        return;
-    }
-
-    let url = '', isPost = false;
-    const data = new FormData();
-
-    if (carrier === 'GHTK') {
-        url = 'ghtk_fee.php?' + new URLSearchParams({
-            pick_province: 'Hà Nội',
-            pick_district: 'Quận Ba Đình',
-            province, district, ward, weight, value: 200000
-        });
-    } else {
-        url = 'CalculateFee.php';
-        isPost = true;
-        data.append('districtId', districtId);
-        data.append('wardCode', wardCode);
-        data.append('carrier', carrier);
-        data.append('weight', weight);
-        if (carrier === 'GHN') data.append('serviceTypeId', 2);
-    }
-
-    console.log("🌐 Gửi request tới:", url);
-    updateShippingFee(null, 'Đang tính...', carrier);
-
-    try {
-        const res = await fetch(url, isPost ? { method: 'POST', body: data } : { method: 'GET' });
-        const json = await res.json();
-        console.log("📨 Phản hồi phí vận chuyển:", json);
-
-        let shippingFee = json.fee || 0;
-
-        // === ÁP DỤNG MÃ GIẢM PHÍ VẬN CHUYỂN (type = "shipping") ===
-        try {
-            const stored = localStorage.getItem('shipping_coupon');
-            console.log("📦 Dữ liệu localStorage.shipping_coupon:", stored);
-
-            if (stored) {
-                const coupon = JSON.parse(stored);
-                console.log("✅ Đã đọc mã giảm phí vận chuyển:", coupon);
-
-                const type = coupon.type;
-                const value = parseFloat(coupon.value) || 0;
-
-                if (type === 'shipping') {
-                    // Giảm phần trăm phí vận chuyển
-                    const discount = (shippingFee * value) / 100;
-                    shippingFee = Math.max(0, shippingFee - discount);
-                    console.log(`💸 Mã ${coupon.code}: Giảm ${value}% (${discount.toLocaleString()}₫)`);
-                } else {
-                    console.warn("⚠️ Kiểu giảm không xác định:", type);
-                }
-
-                console.log(`📉 Phí sau giảm: ${shippingFee.toLocaleString()}₫`);
+        // === TÍNH GIẢM PHÍ VẬN CHUYỂN ===
+        let shippingDiscount = 0;
+        const savedCoupon = localStorage.getItem('shipping_coupon_data');
+        if (savedCoupon) {
+            const coupon = JSON.parse(savedCoupon);
+            if (coupon.type === 'percent') {
+                shippingDiscount = (fee * coupon.value) / 100;
             } else {
-                console.log('❌ Không tìm thấy mã giảm phí vận chuyển trong localStorage.');
+                shippingDiscount = Math.min(fee, coupon.value);
             }
-        } catch (e) {
-            console.error('💥 Lỗi khi xử lý mã giảm phí vận chuyển:', e);
         }
 
-        updateShippingFee(shippingFee, '', carrier);
-    } catch (err) {
-        console.error('💥 Lỗi fetch:', err);
-        updateShippingFee(0, 'Lỗi mạng', carrier);
-    }
+        const finalFee = Math.max(0, fee - shippingDiscount);
+        input.value = finalFee; // GHI ĐÈ INPUT CUỐI CÙNG
 
-    updateCheckoutSummary();
-    console.log("✅ Kết thúc calculateShippingFee()");
-}
+        // === HIỂN THỊ ===
+        if (carrier === 'GHTK') {
+            document.getElementById('ghtk-fee-text').textContent = formatted;
+            document.getElementById('ghtk-fee-row').style.display = 'table-row';
+            document.getElementById('shipping-fee-row').style.display = 'none';
+        } else {
+            document.getElementById('shipping-fee-row').style.display = 'table-row';
+            document.getElementById('ghtk-fee-row').style.display = 'none';
 
-// === GỌI LẠI KHI THAY ĐỔI ===
-document.getElementById('saved_address')?.addEventListener('change', calculateShippingFee);
-document.querySelectorAll('input[name="carrier"]').forEach(r => r.addEventListener('change', calculateShippingFee));
-
-// === NÚT ÁP DỤNG MÃ GIẢM PHÍ VẬN CHUYỂN ===
-document.getElementById('applyShippingCoupon')?.addEventListener('click', async () => {
-    const codeInput = document.getElementById('shipping_coupon_code');
-    const validatedInput = document.getElementById('validated_shipping_coupon_code');
-    const msgEl = document.getElementById('shippingCouponMessage');
-
-    if (!codeInput || !validatedInput || !msgEl) return;
-
-    const code = codeInput.value.trim().toUpperCase();
-    if (!code) {
-        msgEl.textContent = 'Vui lòng nhập mã';
-        msgEl.className = 'text-danger';
-        return;
-    }
-
-    msgEl.textContent = 'Đang kiểm tra...';
-    msgEl.className = 'text-info';
-
-    const formData = new FormData();
-    formData.append('code', code);
-
-    try {
-    const res = await fetch('validate_shipping_coupon.php', {
-        method: 'POST',
-        body: formData
-    });
-    if (!res.ok) throw new Error('Lỗi mạng');
-
-    const data = await res.json();
-    console.log('validate_shipping_coupon response:', data); // <--- debug
-
-    if (data.success) {
-    const couponObj = {
-    code: data.coupon?.code,
-    type: data.coupon?.type,
-    value: data.coupon?.value,
-    message: data.message
-    };
-
-
-
-        localStorage.setItem('shipping_coupon', JSON.stringify(couponObj));
-        validatedInput.value = code;
-        msgEl.textContent = data.message;
-        msgEl.className = 'text-success';
-    
-        if (typeof calculateShippingFee === 'function') {
-            calculateShippingFee();
-        }
-    } else {
-        throw new Error(data.message);
-    }
-} catch (err) {
-    msgEl.textContent = err.message || 'Lỗi hệ thống';
-    msgEl.className = 'text-danger';
-    localStorage.removeItem('shipping_coupon');
-    validatedInput.value = '';
-
-    if (typeof calculateShippingFee === 'function') {
-        calculateShippingFee();
-    }
-}
-
-});
-
-// === TỰ ĐỘNG ÁP DỤNG MÃ KHI LOAD TRANG ===
-document.addEventListener('DOMContentLoaded', () => {
-    const savedCode = localStorage.getItem('shipping_coupon_code');
-    const savedData = localStorage.getItem('shipping_coupon_data');
-
-    if (!savedCode || !savedData) return;
-
-    const input = document.getElementById('shipping_coupon_code');
-    const validatedInput = document.getElementById('validated_shipping_coupon_code');
-    const msgEl = document.getElementById('shippingCouponMessage');
-
-    if (input) input.value = savedCode;
-    if (validatedInput) validatedInput.value = savedCode;
-
-    // Gọi lại API để xác thực
-    const formData = new FormData();
-    formData.append('code', savedCode);
-
-    fetch('validate_shipping_coupon.php', { method: 'POST', body: formData })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                localStorage.setItem('shipping_coupon_data', JSON.stringify(data.coupon));
-                 alert('Đã lưu mã vào localStorage: ' + localStorage.getItem('shipping_coupon_code'));
-                if (msgEl) {
-                    msgEl.textContent = data.message;
-                    msgEl.className = 'text-success';
-                }
-                if (typeof calculateShippingFee === 'function') calculateShippingFee();
+            if (shippingDiscount > 0) {
+                originalFeeEl.textContent = new Intl.NumberFormat('vi-VN').format(fee) + '₫';
+                originalFeeEl.style.display = 'inline';
+                display.textContent = new Intl.NumberFormat('vi-VN').format(finalFee) + '₫';
+                discountInfoEl.textContent = `Giảm ${shippingDiscount.toLocaleString()}₫ phí vận chuyển`;
+                discountInfoEl.style.display = 'block';
             } else {
-                throw new Error(data.message);
+                display.textContent = formatted;
+                originalFeeEl.style.display = 'none';
+                discountInfoEl.style.display = 'none';
             }
-        })
-        .catch(err => {
-            console.warn('Mã giảm phí cũ không hợp lệ:', err.message);
-            if (msgEl) {
-                msgEl.textContent = 'Mã giảm phí vận chuyển không hợp lệ. Vui lòng nhập lại.';
-                msgEl.className = 'text-danger';
-            }
-            localStorage.removeItem('shipping_coupon_code');
-            localStorage.removeItem('shipping_coupon_data');
-            if (validatedInput) validatedInput.value = '';
-            if (typeof calculateShippingFee === 'function') {
-                calculateShippingFee();
-            }
-        });
-});
+        }
 
-// === TỰ ĐỘNG ÁP DỤNG MÃ GIẢM GIÁ SẢN PHẨM ===
-$(document).ready(function() {
-    const saved = localStorage.getItem('product_coupon_data');
-    if (saved) {
-        const coupon = JSON.parse(saved);
-        $('#coupon_code').val(localStorage.getItem('product_coupon_code') || '');
-        $('.coupon-result').text(`Áp dụng thành công! Giảm ${coupon.discount_percent}%`).addClass('success');
+        // === CHỈ CẬP NHẬT TỔNG SAU KHI PHÍ ĐÃ XONG ===
         updateCheckoutSummary();
     }
-});
 
-// === ĐIỀN SỐ ĐIỆN THOẠI ===
-setTimeout(() => {
-    if (typeof $ === 'undefined') return;
-    const fill = () => {
-        const phone = $('#saved_address option:selected').data('phone') || '';
-        $('#phone-display').val(phone);
-        $('#phone').val(phone);
-    };
-    $(document).off('change.phone').on('change.phone', '#saved_address', fill);
-    if ($('#saved_address').val()) fill();
-}, 600);
+    // === CẬP NHẬT TỔNG TIỀN (TỰ TÍNH, KHÔNG GỌI HÀM KHÁC) ===
+    function updateCheckoutSummary() {
+        const subtotal = parseFloat(document.getElementById('summary-subtotal')?.dataset.value) || 0;
+        const shippingFee = parseFloat(document.getElementById('shipping-fee-input')?.value) || 0;
 
-// === KHỞI TẠO: Đọc lại mã giảm phí vận chuyển từ localStorage ===
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        const storedShippingCoupon = localStorage.getItem('shipping_coupon');
-        if (storedShippingCoupon) {
-            const coupon = JSON.parse(storedShippingCoupon);
-            const input = document.getElementById('shipping_coupon_code');
-            const validatedInput = document.getElementById('validated_shipping_coupon_code');
-            const msgEl = document.getElementById('shippingCouponMessage');
+        // Giảm giá sản phẩm
+        let productDiscount = 0;
+        const savedProductCoupon = localStorage.getItem('product_coupon_data');
+        if (savedProductCoupon) {
+            const coupon = JSON.parse(savedProductCoupon);
+            productDiscount = (subtotal * (coupon.discount_percent || 0)) / 100;
+        }
 
-            if (input && validatedInput && msgEl) {
-                input.value = coupon.code || '';
-                validatedInput.value = coupon.code || '';
-                msgEl.textContent = coupon.message || 'Đã áp dụng mã giảm phí vận chuyển';
-                msgEl.className = 'text-success';
+        const total = subtotal - productDiscount + shippingFee;
+        const totalEl = document.getElementById('summary-total');
+        if (totalEl) {
+            totalEl.textContent = new Intl.NumberFormat('vi-VN').format(total) + '₫';
+        }
+
+        // Cập nhật dòng giảm giá sản phẩm
+        const discountRow = document.getElementById('summary-discount-row');
+        const discountAmountEl = document.getElementById('summary-discount-amount');
+        if (productDiscount > 0 && discountRow && discountAmountEl) {
+            discountRow.style.display = 'table-row';
+            discountAmountEl.textContent = `- ${new Intl.NumberFormat('vi-VN').format(productDiscount)}₫`;
+        } else if (discountRow) {
+            discountRow.style.display = 'none';
+        }
+    }
+
+    // === TÍNH PHÍ VẬN CHUYỂN (CHUẨN VỚI TYPE = "shipping") ===
+    async function calculateShippingFee() {
+        console.log("🚀 Bắt đầu calculateShippingFee()");
+
+        const addressSelect = document.getElementById('saved_address');
+        const carrierChecked = document.querySelector('input[name="carrier"]:checked');
+
+        if (!addressSelect || !addressSelect.value || !carrierChecked) {
+            console.warn("⚠️ Thiếu địa chỉ hoặc hãng vận chuyển");
+            updateShippingFee(0, 'Vui lòng chọn địa chỉ và hãng vận chuyển');
+            return;
+        }
+
+        const opt = addressSelect.options[addressSelect.selectedIndex];
+        const districtId = opt.dataset.districtId;
+        const wardCode = opt.dataset.wardCode;
+        const province = opt.dataset.province;
+        const district = opt.dataset.district;
+        const ward = opt.dataset.ward;
+        const carrier = carrierChecked.value;
+        const weight = getCartWeight();
+
+        console.log("📦 Dữ liệu gửi đi:", {
+            districtId,
+            wardCode,
+            carrier,
+            weight
+        });
+
+        if (!districtId || !wardCode) {
+            updateShippingFee(0, 'Địa chỉ chưa hỗ trợ', carrier);
+            console.warn("🚫 Địa chỉ chưa có districtId hoặc wardCode");
+            return;
+        }
+
+        let url = '',
+            isPost = false;
+        const data = new FormData();
+
+        if (carrier === 'GHTK') {
+            url = 'ghtk_fee.php?' + new URLSearchParams({
+                pick_province: 'Hà Nội',
+                pick_district: 'Quận Ba Đình',
+                province,
+                district,
+                ward,
+                weight,
+                value: 200000
+            });
+        } else {
+            url = 'CalculateFee.php';
+            isPost = true;
+            data.append('districtId', districtId);
+            data.append('wardCode', wardCode);
+            data.append('carrier', carrier);
+            data.append('weight', weight);
+            if (carrier === 'GHN') data.append('serviceTypeId', 2);
+        }
+
+        console.log("🌐 Gửi request tới:", url);
+        updateShippingFee(null, 'Đang tính...', carrier);
+
+        try {
+            const res = await fetch(url, isPost ? {
+                method: 'POST',
+                body: data
+            } : {
+                method: 'GET'
+            });
+            const json = await res.json();
+            console.log("📨 Phản hồi phí vận chuyển:", json);
+
+            let shippingFee = json.fee || 0;
+
+            // === ÁP DỤNG MÃ GIẢM PHÍ VẬN CHUYỂN (type = "shipping") ===
+            try {
+                const stored = localStorage.getItem('shipping_coupon');
+                console.log("📦 Dữ liệu localStorage.shipping_coupon:", stored);
+
+                if (stored) {
+                    const coupon = JSON.parse(stored);
+                    console.log("✅ Đã đọc mã giảm phí vận chuyển:", coupon);
+
+                    const type = coupon.type;
+                    const value = parseFloat(coupon.value) || 0;
+
+                    if (type === 'shipping') {
+                        // Giảm phần trăm phí vận chuyển
+                        const discount = (shippingFee * value) / 100;
+                        shippingFee = Math.max(0, shippingFee - discount);
+                        console.log(`💸 Mã ${coupon.code}: Giảm ${value}% (${discount.toLocaleString()}₫)`);
+                    } else {
+                        console.warn("⚠️ Kiểu giảm không xác định:", type);
+                    }
+
+                    console.log(`📉 Phí sau giảm: ${shippingFee.toLocaleString()}₫`);
+                } else {
+                    console.log('❌ Không tìm thấy mã giảm phí vận chuyển trong localStorage.');
+                }
+            } catch (e) {
+                console.error('💥 Lỗi khi xử lý mã giảm phí vận chuyển:', e);
             }
+
+            updateShippingFee(shippingFee, '', carrier);
+        } catch (err) {
+            console.error('💥 Lỗi fetch:', err);
+            updateShippingFee(0, 'Lỗi mạng', carrier);
+        }
+
+        updateCheckoutSummary();
+        console.log("✅ Kết thúc calculateShippingFee()");
+    }
+
+    // === GỌI LẠI KHI THAY ĐỔI ===
+    document.getElementById('saved_address')?.addEventListener('change', calculateShippingFee);
+    document.querySelectorAll('input[name="carrier"]').forEach(r => r.addEventListener('change', calculateShippingFee));
+
+    // === NÚT ÁP DỤNG MÃ GIẢM PHÍ VẬN CHUYỂN ===
+    document.getElementById('applyShippingCoupon')?.addEventListener('click', async () => {
+        const codeInput = document.getElementById('shipping_coupon_code');
+        const validatedInput = document.getElementById('validated_shipping_coupon_code');
+        const msgEl = document.getElementById('shippingCouponMessage');
+
+        if (!codeInput || !validatedInput || !msgEl) return;
+
+        const code = codeInput.value.trim().toUpperCase();
+        if (!code) {
+            msgEl.textContent = 'Vui lòng nhập mã';
+            msgEl.className = 'text-danger';
+            return;
+        }
+
+        msgEl.textContent = 'Đang kiểm tra...';
+        msgEl.className = 'text-info';
+
+        const formData = new FormData();
+        formData.append('code', code);
+
+        try {
+            const res = await fetch('validate_shipping_coupon.php', {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error('Lỗi mạng');
+
+            const data = await res.json();
+            console.log('validate_shipping_coupon response:', data); // <--- debug
+
+            if (data.success) {
+                const couponObj = {
+                    code: data.coupon?.code,
+                    type: data.coupon?.type,
+                    value: data.coupon?.value,
+                    message: data.message
+                };
+
+
+
+                localStorage.setItem('shipping_coupon', JSON.stringify(couponObj));
+                validatedInput.value = code;
+                msgEl.textContent = data.message;
+                msgEl.className = 'text-success';
+
+                if (typeof calculateShippingFee === 'function') {
+                    calculateShippingFee();
+                }
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (err) {
+            msgEl.textContent = err.message || 'Lỗi hệ thống';
+            msgEl.className = 'text-danger';
+            localStorage.removeItem('shipping_coupon');
+            validatedInput.value = '';
 
             if (typeof calculateShippingFee === 'function') {
                 calculateShippingFee();
             }
         }
-    } catch (e) {
-        console.warn('Lỗi đọc shipping_coupon từ localStorage', e);
-    }
-});
 
+    });
+
+    // === TỰ ĐỘNG ÁP DỤNG MÃ KHI LOAD TRANG ===
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedCode = localStorage.getItem('shipping_coupon_code');
+        const savedData = localStorage.getItem('shipping_coupon_data');
+
+        if (!savedCode || !savedData) return;
+
+        const input = document.getElementById('shipping_coupon_code');
+        const validatedInput = document.getElementById('validated_shipping_coupon_code');
+        const msgEl = document.getElementById('shippingCouponMessage');
+
+        if (input) input.value = savedCode;
+        if (validatedInput) validatedInput.value = savedCode;
+
+        // Gọi lại API để xác thực
+        const formData = new FormData();
+        formData.append('code', savedCode);
+
+        fetch('validate_shipping_coupon.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('shipping_coupon_data', JSON.stringify(data.coupon));
+                    alert('Đã lưu mã vào localStorage: ' + localStorage.getItem('shipping_coupon_code'));
+                    if (msgEl) {
+                        msgEl.textContent = data.message;
+                        msgEl.className = 'text-success';
+                    }
+                    if (typeof calculateShippingFee === 'function') calculateShippingFee();
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(err => {
+                console.warn('Mã giảm phí cũ không hợp lệ:', err.message);
+                if (msgEl) {
+                    msgEl.textContent = 'Mã giảm phí vận chuyển không hợp lệ. Vui lòng nhập lại.';
+                    msgEl.className = 'text-danger';
+                }
+                localStorage.removeItem('shipping_coupon_code');
+                localStorage.removeItem('shipping_coupon_data');
+                if (validatedInput) validatedInput.value = '';
+                if (typeof calculateShippingFee === 'function') {
+                    calculateShippingFee();
+                }
+            });
+    });
+
+    // === TỰ ĐỘNG ÁP DỤNG MÃ GIẢM GIÁ SẢN PHẨM ===
+    $(document).ready(function() {
+        const saved = localStorage.getItem('product_coupon_data');
+        if (saved) {
+            const coupon = JSON.parse(saved);
+            $('#coupon_code').val(localStorage.getItem('product_coupon_code') || '');
+            $('.coupon-result').text(`Áp dụng thành công! Giảm ${coupon.discount_percent}%`).addClass('success');
+            updateCheckoutSummary();
+        }
+    });
+
+    // === ĐIỀN SỐ ĐIỆN THOẠI ===
+    setTimeout(() => {
+        if (typeof $ === 'undefined') return;
+        const fill = () => {
+            const phone = $('#saved_address option:selected').data('phone') || '';
+            $('#phone-display').val(phone);
+            $('#phone').val(phone);
+        };
+        $(document).off('change.phone').on('change.phone', '#saved_address', fill);
+        if ($('#saved_address').val()) fill();
+    }, 600);
+
+    // === KHỞI TẠO: Đọc lại mã giảm phí vận chuyển từ localStorage ===
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const storedShippingCoupon = localStorage.getItem('shipping_coupon');
+            if (storedShippingCoupon) {
+                const coupon = JSON.parse(storedShippingCoupon);
+                const input = document.getElementById('shipping_coupon_code');
+                const validatedInput = document.getElementById('validated_shipping_coupon_code');
+                const msgEl = document.getElementById('shippingCouponMessage');
+
+                if (input && validatedInput && msgEl) {
+                    input.value = coupon.code || '';
+                    validatedInput.value = coupon.code || '';
+                    msgEl.textContent = coupon.message || 'Đã áp dụng mã giảm phí vận chuyển';
+                    msgEl.className = 'text-success';
+                }
+
+                if (typeof calculateShippingFee === 'function') {
+                    calculateShippingFee();
+                }
+            }
+        } catch (e) {
+            console.warn('Lỗi đọc shipping_coupon từ localStorage', e);
+        }
+    });
 </script>
 <script>
-// === TỰ ĐỘNG ÁP DỤNG MÃ GIẢM GIÁ SẢN PHẨM + GỌI VALIDATE ===
-$(document).ready(function() {
-    const savedProductCode = localStorage.getItem('product_coupon_code');
-    const savedProductData = localStorage.getItem('product_coupon_data');
+    // === TỰ ĐỘNG ÁP DỤNG MÃ GIẢM GIÁ SẢN PHẨM + GỌI VALIDATE ===
+    $(document).ready(function() {
+        const savedProductCode = localStorage.getItem('product_coupon_code');
+        const savedProductData = localStorage.getItem('product_coupon_data');
 
-    if (savedProductCode && savedProductData) {
-        const coupon = JSON.parse(savedProductData);
-        const input = document.getElementById('coupon_code');
+        if (savedProductCode && savedProductData) {
+            const coupon = JSON.parse(savedProductData);
+            const input = document.getElementById('coupon_code');
+            const resultDiv = document.querySelector('.checkout-layout .coupon-result');
+
+            if (input) input.value = savedProductCode;
+
+            // GỌI LẠI VALIDATE ĐỂ ĐẢM BẢO HỢP LỆ
+            const formData = new FormData();
+            formData.append('code', savedProductCode);
+
+            fetch('validate_coupon.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // Cập nhật giao diện
+                        if (resultDiv) {
+                            resultDiv.textContent = `Áp dụng thành công! Giảm ${data.coupon.discount_percent}%`;
+                            resultDiv.className = 'coupon-result success';
+                        }
+                        // Cập nhật localStorage (đảm bảo đồng bộ)
+                        localStorage.setItem('product_coupon_data', JSON.stringify(data.coupon));
+                        updateCheckoutSummary();
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(err => {
+                    console.warn('Mã giảm giá cũ không hợp lệ:', err.message);
+                    if (resultDiv) {
+                        resultDiv.textContent = 'Mã giảm giá không hợp lệ. Vui lòng nhập lại.';
+                        resultDiv.className = 'coupon-result error';
+                    }
+                    localStorage.removeItem('product_coupon_code');
+                    localStorage.removeItem('product_coupon_data');
+                    updateCheckoutSummary();
+                });
+        }
+    });
+
+    // === XỬ LÝ NÚT "APPLY" MÃ GIẢM GIÁ ===
+    document.getElementById('applyCoupon')?.addEventListener('click', async function() {
+        const codeInput = document.getElementById('coupon_code');
         const resultDiv = document.querySelector('.checkout-layout .coupon-result');
+        if (!codeInput || !resultDiv) return;
 
-        if (input) input.value = savedProductCode;
+        const code = codeInput.value.trim().toUpperCase();
+        if (!code) {
+            resultDiv.textContent = 'Vui lòng nhập mã giảm giá.';
+            resultDiv.className = 'coupon-result error';
+            return;
+        }
 
-        // GỌI LẠI VALIDATE ĐỂ ĐẢM BẢO HỢP LỆ
-        const formData = new FormData();
-        formData.append('code', savedProductCode);
+        resultDiv.textContent = 'Đang kiểm tra...';
+        resultDiv.className = 'coupon-result';
 
-        fetch('validate_coupon.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(r => r.json())
-        .then(data => {
+        try {
+            const formData = new FormData();
+            formData.append('code', code);
+            const res = await fetch('validate_coupon.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
             if (data.success) {
-                // Cập nhật giao diện
-                if (resultDiv) {
-                    resultDiv.textContent = `Áp dụng thành công! Giảm ${data.coupon.discount_percent}%`;
-                    resultDiv.className = 'coupon-result success';
-                }
-                // Cập nhật localStorage (đảm bảo đồng bộ)
+                resultDiv.textContent = `Áp dụng thành công! Giảm ${data.coupon.discount_percent}%`;
+                resultDiv.className = 'coupon-result success';
+
+                localStorage.setItem('product_coupon_code', code);
                 localStorage.setItem('product_coupon_data', JSON.stringify(data.coupon));
+
                 updateCheckoutSummary();
             } else {
-                throw new Error(data.message);
+                throw new Error(data.message || 'Mã không hợp lệ');
             }
-        })
-        .catch(err => {
-            console.warn('Mã giảm giá cũ không hợp lệ:', err.message);
-            if (resultDiv) {
-                resultDiv.textContent = 'Mã giảm giá không hợp lệ. Vui lòng nhập lại.';
-                resultDiv.className = 'coupon-result error';
-            }
+        } catch (err) {
+            resultDiv.textContent = err.message;
+            resultDiv.className = 'coupon-result error';
             localStorage.removeItem('product_coupon_code');
             localStorage.removeItem('product_coupon_data');
             updateCheckoutSummary();
-        });
-    }
-});
-
-// === XỬ LÝ NÚT "APPLY" MÃ GIẢM GIÁ ===
-document.getElementById('applyCoupon')?.addEventListener('click', async function() {
-    const codeInput = document.getElementById('coupon_code');
-    const resultDiv = document.querySelector('.checkout-layout .coupon-result');
-    if (!codeInput || !resultDiv) return;
-
-    const code = codeInput.value.trim().toUpperCase();
-    if (!code) {
-        resultDiv.textContent = 'Vui lòng nhập mã giảm giá.';
-        resultDiv.className = 'coupon-result error';
-        return;
-    }
-
-    resultDiv.textContent = 'Đang kiểm tra...';
-    resultDiv.className = 'coupon-result';
-
-    try {
-        const formData = new FormData();
-        formData.append('code', code);
-        const res = await fetch('validate_coupon.php', { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-            resultDiv.textContent = `Áp dụng thành công! Giảm ${data.coupon.discount_percent}%`;
-            resultDiv.className = 'coupon-result success';
-
-            localStorage.setItem('product_coupon_code', code);
-            localStorage.setItem('product_coupon_data', JSON.stringify(data.coupon));
-
-            updateCheckoutSummary();
-        } else {
-            throw new Error(data.message || 'Mã không hợp lệ');
         }
-    } catch (err) {
-        resultDiv.textContent = err.message;
-        resultDiv.className = 'coupon-result error';
-        localStorage.removeItem('product_coupon_code');
-        localStorage.removeItem('product_coupon_data');
-        updateCheckoutSummary();
-    }
-});
+    });
 
-// === TỰ ĐỘNG ÁP DỤNG MÃ GIẢM PHÍ VẬN CHUYỂN TỪ localStorage ===
+    // === TỰ ĐỘNG ÁP DỤNG MÃ GIẢM PHÍ VẬN CHUYỂN TỪ localStorage ===
     document.addEventListener('DOMContentLoaded', async () => {
         const savedCode = localStorage.getItem('shipping_coupon_code');
         const savedData = localStorage.getItem('shipping_coupon_data');
@@ -1477,77 +1504,76 @@ document.getElementById('applyCoupon')?.addEventListener('click', async function
             }
         }
     });
-    
-// === XÓA localStorage KHI TRANG CÓ order_success (F5 VẪN XÓA) ===
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('order_success')) {
-        // XÓA NGAY LẬP TỨC
-        localStorage.removeItem('product_coupon_code');
-        localStorage.removeItem('product_coupon_data');
-        localStorage.removeItem('shipping_coupon_code');
-        localStorage.removeItem('shipping_coupon_data');
-        console.log('[OK] Xóa mã giảm giá do có order_success');
 
-        // Tự động ẩn modal (nếu có)
-        setTimeout(() => {
-            const modal = document.querySelector('#orderSuccessModal');
-            if (modal && typeof bootstrap !== 'undefined') {
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) bsModal.hide();
+    // === XÓA localStorage KHI TRANG CÓ order_success (F5 VẪN XÓA) ===
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('order_success')) {
+            // XÓA NGAY LẬP TỨC
+            localStorage.removeItem('product_coupon_code');
+            localStorage.removeItem('product_coupon_data');
+            localStorage.removeItem('shipping_coupon_code');
+            localStorage.removeItem('shipping_coupon_data');
+            console.log('[OK] Xóa mã giảm giá do có order_success');
+
+            // Tự động ẩn modal (nếu có)
+            setTimeout(() => {
+                const modal = document.querySelector('#orderSuccessModal');
+                if (modal && typeof bootstrap !== 'undefined') {
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    if (bsModal) bsModal.hide();
+                }
+            }, 3000);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const hasShippingCoupon = !!localStorage.getItem('shipping_coupon') ||
+                !!localStorage.getItem('shipping_coupon_code');
+
+            console.log('🔎 Có mã giảm phí vận chuyển trong localStorage không?', hasShippingCoupon);
+
+            if (hasShippingCoupon) {
+                const data =
+                    JSON.parse(localStorage.getItem('shipping_coupon') || localStorage.getItem(
+                        'shipping_coupon_data'));
+                console.log('📦 Dữ liệu mã giảm phí vận chuyển:', data);
+            } else {
+                console.log('⚠️ Không tìm thấy mã giảm phí vận chuyển trong localStorage.');
             }
-        }, 3000);
-    }
-});
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        const hasShippingCoupon =
-            !!localStorage.getItem('shipping_coupon') ||
-            !!localStorage.getItem('shipping_coupon_code');
-
-        console.log('🔎 Có mã giảm phí vận chuyển trong localStorage không?', hasShippingCoupon);
-
-        if (hasShippingCoupon) {
-            const data =
-                JSON.parse(localStorage.getItem('shipping_coupon') || localStorage.getItem('shipping_coupon_data'));
-            console.log('📦 Dữ liệu mã giảm phí vận chuyển:', data);
-        } else {
-            console.log('⚠️ Không tìm thấy mã giảm phí vận chuyển trong localStorage.');
+        } catch (e) {
+            console.error('🚫 Lỗi truy cập localStorage:', e);
         }
-    } catch (e) {
-        console.error('🚫 Lỗi truy cập localStorage:', e);
-    }
-});
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        localStorage.setItem('test_local', 'ok');
-        const val = localStorage.getItem('test_local');
-        console.log('✅ localStorage test:', val);
-    } catch (e) {
-        console.error('🚫 localStorage bị chặn:', e);
-    }
-});
-// === KHỞI TẠO LẠI MÃ GIẢM PHÍ VẬN CHUYỂN KHI LOAD TRANG ===
-document.addEventListener('DOMContentLoaded', () => {
-    const savedShippingCode = localStorage.getItem('shipping_coupon_code');
-    const savedShippingData = localStorage.getItem('shipping_coupon_data');
-    const codeInput = document.getElementById('shipping_coupon_code');
-    const validatedInput = document.getElementById('validated_shipping_coupon_code');
-    const msgEl = document.getElementById('shippingCouponMessage');
-
-    if (savedShippingCode && savedShippingData && codeInput && msgEl) {
-        codeInput.value = savedShippingCode;
-        if (validatedInput) validatedInput.value = savedShippingCode;
-        msgEl.textContent = 'Áp dụng lại mã: ' + savedShippingCode;
-        msgEl.className = 'text-success';
-
-        // Gọi lại tính phí sau khi load
-        if (typeof calculateShippingFee === 'function') {
-            calculateShippingFee();
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            localStorage.setItem('test_local', 'ok');
+            const val = localStorage.getItem('test_local');
+            console.log('✅ localStorage test:', val);
+        } catch (e) {
+            console.error('🚫 localStorage bị chặn:', e);
         }
-    }
-});
+    });
+    // === KHỞI TẠO LẠI MÃ GIẢM PHÍ VẬN CHUYỂN KHI LOAD TRANG ===
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedShippingCode = localStorage.getItem('shipping_coupon_code');
+        const savedShippingData = localStorage.getItem('shipping_coupon_data');
+        const codeInput = document.getElementById('shipping_coupon_code');
+        const validatedInput = document.getElementById('validated_shipping_coupon_code');
+        const msgEl = document.getElementById('shippingCouponMessage');
 
+        if (savedShippingCode && savedShippingData && codeInput && msgEl) {
+            codeInput.value = savedShippingCode;
+            if (validatedInput) validatedInput.value = savedShippingCode;
+            msgEl.textContent = 'Áp dụng lại mã: ' + savedShippingCode;
+            msgEl.className = 'text-success';
+
+            // Gọi lại tính phí sau khi load
+            if (typeof calculateShippingFee === 'function') {
+                calculateShippingFee();
+            }
+        }
+    });
 </script>
 <!-- MODAL: ĐẶT HÀNG THÀNH CÔNG -->
 <div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
@@ -1653,8 +1679,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* Responsive cho màn hình nhỏ */
     @media (max-width: 576px) {
-        .input-with-button { flex-direction: column; }
-        .input-with-button .btn { width: 100%; }
+        .input-with-button {
+            flex-direction: column;
+        }
+
+        .input-with-button .btn {
+            width: 100%;
+        }
     }
 
     /* === 3 NÚT THANH TOÁN ĐỀU NHAU – CHỈNH CẢ 3 TRONG 1 NƠI === */
@@ -1767,34 +1798,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }).render('#paypal-button-container');
 </script>
 <script>
-// === TỰ ĐỘNG ĐIỀN SỐ ĐIỆN THOẠI - CHẠY SAU TẤT CẢ JS ===
-setTimeout(() => {
-    if (typeof $ === 'undefined') return;
+    // === TỰ ĐỘNG ĐIỀN SỐ ĐIỆN THOẠI - CHẠY SAU TẤT CẢ JS ===
+    setTimeout(() => {
+        if (typeof $ === 'undefined') return;
 
-    const fillPhone = () => {
-        const phone = $('#saved_address option:selected').data('phone') || '';
-        $('#phone-display').val(phone);
-        $('#phone').val(phone); // Gửi form
-        console.log('[OK] Phone filled:', phone);
-    };
+        const fillPhone = () => {
+            const phone = $('#saved_address option:selected').data('phone') || '';
+            $('#phone-display').val(phone);
+            $('#phone').val(phone); // Gửi form
+            console.log('[OK] Phone filled:', phone);
+        };
 
-    $(document).off('change.phone').on('change.phone', '#saved_address', fillPhone);
+        $(document).off('change.phone').on('change.phone', '#saved_address', fillPhone);
 
 
-}, 600);
+    }, 600);
 
-document.addEventListener('DOMContentLoaded', () => {
-    const code = localStorage.getItem('shipping_coupon_code');
-    const input = document.getElementById('shipping_coupon_code');
-    const validated = document.getElementById('validated_shipping_coupon_code');
+    document.addEventListener('DOMContentLoaded', () => {
+        const code = localStorage.getItem('shipping_coupon_code');
+        const input = document.getElementById('shipping_coupon_code');
+        const validated = document.getElementById('validated_shipping_coupon_code');
 
-    if (code && input && validated) {
-        input.value = code;
-        validated.value = code;
-        // Gọi calculateShippingFee() nếu có
-        if (typeof calculateShippingFee === 'function') calculateShippingFee();
-    }
-});
+        if (code && input && validated) {
+            input.value = code;
+            validated.value = code;
+            // Gọi calculateShippingFee() nếu có
+            if (typeof calculateShippingFee === 'function') calculateShippingFee();
+        }
+    });
 </script>
+<script>
+    // === TỰ ĐỘNG ĐIỀN ĐỊA CHỈ ĐẦY ĐỦ KHI CHỌN SAVED ADDRESS ===
+    $(document).ready(function() {
+        const fillAddressAndPhone = () => {
+            const selected = $('#saved_address option:selected');
+            if (!selected.val()) return;
 
+            const parts = [
+                selected.data('address'),
+                selected.data('ward'),
+                selected.data('district'),
+                selected.data('city')
+            ].filter(Boolean).join(', ');
+
+            const phone = selected.data('phone') || '';
+
+            $('#address').val(parts); // ← Quan trọng: PayPal cần
+            $('#phone').val(phone); // ← Gửi form
+            $('#phone-display').val(phone); // ← Hiển thị
+
+            console.log('[OK] Address filled:', parts);
+        };
+
+        // Khi thay đổi địa chỉ
+        $(document).off('change.address').on('change.address', '#saved_address', fillAddressAndPhone);
+
+        // Tự động điền khi load trang (nếu có default)
+        if ($('#saved_address').val()) {
+            fillAddressAndPhone();
+        }
+    });
+</script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
