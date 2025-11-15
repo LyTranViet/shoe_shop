@@ -42,12 +42,11 @@ $couponCode             = $order['coupon_code'] ?? '';
 $shippingCouponCode     = $order['shipping_coupon_code'] ?? '';
 
 // Tạm tính = tổng + giảm + phí vận chuyển thực tế
-$subtotal = $order['total_amount'] + $discountAmount + $finalShippingFee;
+$subtotal = $order['total_amount'] + $discountAmount - $finalShippingFee;
 
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -301,6 +300,76 @@ function printOrder() {
 }
 </script>
 
+<style>
+    .container {
+        max-width: 800px;
+    }
+    .card {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        background-color: var(--bg-light) !important;
+        border-bottom: 1px solid var(--border);
+    }
+    .card-header h4 {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+    .badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    /* Status colors from order_history.php */
+    .badge.bg-success { background-color: rgba(40, 167, 69, 0.15) !important; color: var(--success) !important; }
+    .badge.bg-warning { background-color: rgba(255, 193, 7, 0.15) !important; color: #b58500 !important; }
+    .badge.bg-info { background-color: rgba(23, 162, 184, 0.15) !important; color: var(--info) !important; }
+    .badge.bg-danger { background-color: rgba(220, 53, 69, 0.1) !important; color: var(--danger) !important; }
+
+    .order-items-list .d-flex {
+        gap: 15px;
+    }
+    .item-image {
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+    .flex-grow-1 a {
+        text-decoration: none;
+        color: var(--text-dark);
+    }
+    .flex-grow-1 a:hover {
+        color: var(--primary);
+    }
+    .mt-4.p-3.bg-light {
+        background-color: var(--bg-light) !important;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+    }
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 12px;
+        margin-top: 8px;
+        border-top: 1px solid var(--border);
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .total-row .text-primary {
+        color: var(--primary) !important;
+    }
+</style>
+
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
+
 </body>
 </html>

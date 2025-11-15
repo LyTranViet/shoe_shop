@@ -107,12 +107,14 @@ if ($action === 'view' && $id > 0) {
 	</div>
 
 <?php else: // --- LIST VIEW ---
+    $search_query = trim($_GET['q'] ?? '');
     $filter_product_id = (int)($_GET['product_id'] ?? 0);
     $itemsPerPage = 10;
     $currentPage = max(1, (int)($_GET['p'] ?? 1));
     $filter_product_name = '';
     $params = [];
-    $where_clause = '';
+    $where_clauses = [];
+    $joins = ['LEFT JOIN users u ON er.employee_id = u.id'];
 
     if ($filter_product_id > 0) {
         $where_clause = "WHERE er.id IN (
@@ -129,14 +131,26 @@ if ($action === 'view' && $id > 0) {
         $filter_product_name = $product_stmt->fetchColumn();
     }
 
-    $countSql = "SELECT COUNT(er.id) FROM export_receipt er $where_clause";
+    if (!empty($search_query)) {
+        $where_clauses[] = "(er.id = :q_id OR er.receipt_code LIKE :q_like OR er.export_type LIKE :q_like OR u.name LIKE :q_like)";
+        $params[':q_id'] = $search_query;
+        $params[':q_like'] = "%$search_query%";
+    }
+
+    $where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
+    $join_sql = implode(' ', $joins);
+
+    $countSql = "SELECT COUNT(er.id) FROM export_receipt er $join_sql $where_sql";
     $countStmt = $db->prepare($countSql);
     $countStmt->execute($params);
     $totalItems = (int)$countStmt->fetchColumn();
     $totalPages = ceil($totalItems / $itemsPerPage);
     $offset = ($currentPage - 1) * $itemsPerPage;
 
-    $sql = "
+    $sql = "SELECT er.id, er.receipt_code, er.export_date, er.export_type, er.status, er.total_amount, er.note, u.name as employeeName 
+            FROM export_receipt er $join_sql $where_sql
+            ORDER BY er.export_date DESC LIMIT :limit OFFSET :offset";
+    /* $sql = "
         SELECT er.id, er.receipt_code, er.export_date, er.export_type, er.status, er.total_amount, er.note, u.name as employeeName 
         FROM export_receipt er
         LEFT JOIN users u ON er.employee_id = u.id
@@ -144,21 +158,25 @@ if ($action === 'view' && $id > 0) {
         ORDER BY er.export_date DESC
         LIMIT :limit OFFSET :offset
     ";
+    */
     $stmt = $db->prepare($sql);
     
-    // Bind các tham số cho WHERE clause (nếu có)
-    if ($filter_product_id > 0) {
-        $stmt->bindValue(':product_id', $filter_product_id, PDO::PARAM_INT);
-    }
-    // Bind các tham số cho LIMIT và OFFSET với kiểu INT để tránh lỗi SQL
+    // Bind params
+    foreach ($params as $key => &$value) $stmt->bindParam($key, $value);
+
     $stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $stmt->execute(); // Thực thi câu lệnh một lần duy nhất sau khi đã bind tất cả tham số
+    $stmt->execute();
     $receipts = $stmt->fetchAll();
 ?>
 	<header class="admin-header">
         <h2>📤 Danh sách Phiếu Xuất <?= $filter_product_name ? 'cho sản phẩm "' . htmlspecialchars($filter_product_name) . '"' : '' ?></h2>
         <div class="admin-tools">
+            <form class="search-form" method="get">
+                <input type="hidden" name="page" value="stock_out">
+                <input type="text" id="search-input-stock-out" name="q" placeholder="Tìm theo mã phiếu, loại, nhân viên..." value="<?= htmlspecialchars($search_query) ?>">
+                <button type="submit">Tìm</button>
+            </form>
             <a href="index.php?page=stock_out&action=add" class="add-btn">➕ Tạo Phiếu Xuất</a>
         </div>
     </header>
@@ -212,15 +230,23 @@ if ($action === 'view' && $id > 0) {
         </table>
     </div>
 
-    <?php if ($totalPages > 1): ?>
-    <div class="pagination">
-        <?php
-        $query_params = $filter_product_id > 0 ? '&product_id=' . $filter_product_id : '';
-        for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="index.php?page=stock_out&p=<?= $i . $query_params ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : '' ?>"><?= $i ?></a>
-        <?php endfor; ?>
+    <div id="pagination-container-stock-out">
+        <?php if ($totalPages > 1): ?>
+        <div class="pagination">
+            <?php
+            $query_params = [];
+            if ($filter_product_id > 0) $query_params['product_id'] = $filter_product_id;
+            if (!empty($search_query)) $query_params['q'] = $search_query;
+            
+            for ($i = 1; $i <= $totalPages; $i++): 
+                $query_params['p'] = $i;
+                $queryString = http_build_query($query_params);
+            ?>
+                <a href="index.php?page=stock_out&<?= $queryString ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
 
 <?php endif; ?>
 </div>

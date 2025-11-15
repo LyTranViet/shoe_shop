@@ -66,8 +66,8 @@ if (!isset($db) || !isset($order)) {
                     <td><?php echo htmlspecialchars($item['product_name']); ?> (<?php echo htmlspecialchars($item['product_code']); ?>)</td>
                     <td><?php echo htmlspecialchars($item['size']); ?></td>
                     <td><?php echo (int)$item['quantity']; ?></td>
-                    <td>$<?php echo number_format($item['price'], 2); ?></td>
-                    <td>$<?php echo number_format($item['price'] * $item['quantity'], 2); ?></td>
+                    <td><?php echo number_format($item['price'], 0); ?>₫</td>
+                    <td><?php echo number_format($item['price'] * $item['quantity'], 0); ?>₫</td>
                 </tr>
             <?php endforeach; ?>
             </tbody>

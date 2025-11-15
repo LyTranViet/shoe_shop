@@ -1,4 +1,5 @@
 <?php
+
 ob_start();
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/init.php'; // Nạp init.php trước để có BASE_URL và các hàm khác
@@ -64,30 +65,47 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <link rel="stylesheet" href="assets/css/site.css">
     <link rel="stylesheet" href="assets/css/chat.css">
-    
+    <!-- FIX jQuery: Load từ CDN ổn định, version 3.6.0 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <!-- Nếu CDN fail, fallback local (tải jquery-3.6.0.min.js về thư mục js/) -->
+    <script>window.jQuery || document.write('<script src="js/jquery-3.6.0.min.js"><\/script>')</script>
     <script>window.siteBasePath = '<?php echo $basePath; ?>';</script>
     <script src="assets/js/chat.js" defer></script>
+    <script src="assets/js/site.js" defer></script>
 
     <style>
         :root {
-            /* 70/20/10 Color Palette */
-            --bg-light: #f8f9fa;      /* 70% - Light Gray */
-            --bg-white: #ffffff;      /* 10% - White */
-            --text-dark: #1a1a1a;      /* 20% - Black */
+            /* === PRIMARY COLORS === */
+            --primary: #38bdf8;
+            --primary-dark: #0c8ad8;
+            --primary-light: #bae6fd;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+
+            /* === NEUTRAL COLORS === */
+            --bg-white: #ffffff;
+            --bg-light: #f8f9fa;
+            --bg-gray: #f1f5f9;
+            --text-dark: #1a202c;
+            --text-body: #4a5568;
             --text-muted: #6c757d;
-            --border: #dee2e6;
+            --border: #e2e8f0;
+            --border-dark: #cbd5e1;
 
-            /* Accent Color */
-            --accent: #0056b3;
-            --accent-hover: #003d82;
-            --accent-light: #e3f2fd;
+            /* === SEMANTIC COLORS === */
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
 
-            /* Other Colors */
-            --footer-bg: #181c1f;
+            /* === SHADOWS === */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
         }
         body {
             font-family: 'Poppins', sans-serif;
-            background: var(--bg-light);
+            background: var(--bg-gray);
             margin: 0;
             color: var(--text-dark);
             display: flex;
@@ -97,7 +115,7 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 
         /* 🔹 Top Bar */
         .top-bar {
-            background: #343a40;
+            background: var(--text-dark);
             color: #eee;
             font-size: 0.9rem;
             padding: 0.3rem 0;
@@ -111,8 +129,8 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 
         /* 🔹 Header */
         header {
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: var(--bg-white);
+            box-shadow: var(--shadow-sm);
             position: sticky;
             top: 0;
             z-index: 999;
@@ -134,7 +152,7 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             font-size: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
         }
         .brand span { color: var(--accent); }
         .brand .logo { font-size: 2rem; }
@@ -142,14 +160,14 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
         /* Search Bar */
         .search-form {
             display: flex;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: 50px;
             overflow: hidden;
-            background: #fafafa;
+            background: var(--bg-light);
             position: relative; /* Cần thiết cho hộp kết quả */
             transition: box-shadow 0.3s;
         }
-        .search-form:hover { box-shadow: 0 0 6px rgba(0,0,0,0.1); }
+        .search-form:hover { box-shadow: var(--shadow-sm); }
         .search-form input {
             border: none;
             flex: 1;
@@ -159,14 +177,14 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             background: transparent;
         }
         .search-form button {
-            background: var(--accent);
+            background: var(--primary);
             color: #fff;
             border: none;
             padding: 0.6rem 1.5rem;
             cursor: pointer;
             transition: 0.3s;
         }
-        .search-form button:hover { background: var(--accent-hover); }
+        .search-form button:hover { background: var(--primary-dark); }
 
         /* Nav Actions */
         .nav-actions {
@@ -180,11 +198,11 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             font-weight: 500;
             transition: 0.3s;
         }
-        .nav-actions a:hover { color: var(--accent); }
+        .nav-actions a:hover { color: var(--primary); }
 
         /* Badge */
         .badge {
-            background: var(--accent);
+            background: var(--primary);
             color: white;
             border-radius: 10px;
             padding: 0.15rem 0.6rem;
@@ -214,14 +232,14 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             top: 120%;
             right: 0;
             flex-direction: column;
-            background: #fff;
+            background: var(--bg-white);
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
             overflow: hidden;
             min-width: 200px;
             animation: fadeIn 0.3s ease;
         }
-        .dropdown-menu a {
+        .dropdown-menu a, .dropdown-menu a:visited {
             padding: 0.8rem 1rem;
             text-decoration: none;
             color: var(--text-dark);
@@ -240,11 +258,11 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             top: 100%;
             left: 0;
             right: 0;
-            background: #fff;
-            border: 1px solid #ddd;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
             border-top: none;
             border-radius: 0 0 12px 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-lg);
             z-index: 1000;
             max-height: 400px;
             overflow-y: auto;
@@ -255,14 +273,14 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             align-items: center;
             padding: 10px;
             gap: 15px;
-            text-decoration: none;
-            color: #333;
-            border-bottom: 1px solid #f0f0f0;
+            text-decoration: none !important;
+            color: var(--text-body);
+            border-bottom: 1px solid var(--bg-gray);
         }
         .search-result-item:last-child {
             border-bottom: none;
         }
-        .search-result-item:hover {
+        .search-result-item:hover, .search-result-item:focus {
             background-color: #f8f9fa;
         }
         .search-result-item img {
@@ -277,15 +295,16 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
         .search-result-name {
             font-weight: 600;
             margin: 0;
+            color: var(--text-dark);
         }
         .search-result-category {
-            color: #6c757d;
+            color: var(--text-muted);
             font-size: 0.85em;
             margin-top: 2px;
         }
         .search-result-price {
-            color: var(--accent);
-            font-size: 0.9em;
+            color: var(--primary);
+            font-size: 0.95em;
             margin-top: 4px;
         }
         .search-results-box .loading,
@@ -294,7 +313,16 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             text-align: center;
             color: #888;
         }
+
+        /* Custom button for consistent login/register style */
+        .btn-gradient {
+            background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
+            color: #fff !important; /* Use !important to override Bootstrap specificity */
+            border: none;
+        }
     </style>
+
+    
 </head>
 
 <body>
@@ -341,18 +369,25 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                         <a href="<?php echo BASE_URL; ?>profile.php">👤 Hồ sơ</a>
                         <a href="<?php echo BASE_URL; ?>order_history.php">📦 Đơn hàng</a>
                         <a href="<?php echo BASE_URL; ?>wishlist.php">❤️ Yêu thích</a>
+<<<<<<< HEAD
                         <a href="<?php echo BASE_URL; ?>offchat.php">Liên Hệ Hỗ Trợ</a>
                         <?php if ($_SESSION['user_role'] === 'SupperAdmin' || $_SESSION['user_role'] === 'SupperAdmin' || $_SESSION['user_role'] === 'staff'): ?>
 <a href="<?php echo $adminUrl; ?>" style="color:#0d6efd;font-weight:600;">
     ⚙️ Quản trị
 </a>                         </a>
+=======
+                        <?php if (is_superadmin()): ?>
+                            <a href="<?php echo BASE_URL; ?>admin/index.php" style="color:var(--primary);font-weight:600;">
+                                ⚙️ Quản trị
+                            </a>
+>>>>>>> 306bbc44839a04fe76846ec25e9f86c6b30a488c
                         <?php endif; ?>
-                        <a href="<?php echo BASE_URL; ?>logout.php" style="color:#dc3545;font-weight:600;">🚪 Đăng xuất</a>
+                        <a href="<?php echo BASE_URL; ?>logout.php" style="color:var(--danger);font-weight:600;">🚪 Đăng xuất</a>
                     </div>
                 </div>
                 <?php else: ?>
-                <a href="<?php echo BASE_URL; ?>login.php" class="btn btn-primary rounded-pill px-3 fw-semibold">Đăng nhập</a>
-                <a href="<?php echo BASE_URL; ?>register.php" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">Đăng ký</a>
+                <a href="<?php echo BASE_URL; ?>login.php" class="btn btn-gradient rounded-pill px-3 fw-semibold">Đăng nhập</a>
+                <a href="<?php echo BASE_URL; ?>register.php" class="btn btn-gradient rounded-pill px-3 fw-semibold">Đăng ký</a>
                 <?php endif; ?>
             </div>
         </div>

@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 $code = trim($_POST['code'] ?? '');
 
@@ -13,9 +13,9 @@ if (empty($code)) {
 
 try {
     $db = get_db();
-    $st = $db->prepare('SELECT * FROM coupons WHERE code = ? LIMIT 1');
+    $st = $db->prepare('SELECT * FROM coupons WHERE UPPER(code) = UPPER(?) LIMIT 1');
     $st->execute([$code]);
-    $coupon = $st->fetch();
+    $coupon = $st->fetch(PDO::FETCH_ASSOC);
 
     if (!$coupon) {
         echo json_encode(['success' => false, 'message' => 'Mã giảm giá không hợp lệ.']);
@@ -28,8 +28,22 @@ try {
         exit;
     }
 
-    echo json_encode(['success' => true, 'discount_percent' => (int)$coupon['discount_percent'], 'message' => 'Áp dụng mã thành công!']);
+    // FIX: Sử dụng floatval để lấy số từ cột discount_percent một cách an toàn.
+    // Điều này sẽ xử lý đúng cả trường hợp giá trị là số (30), chuỗi số ('30'), 
+    // hoặc chuỗi có ký tự ('30%').
+    $discount_percent = floatval($coupon['discount_percent']);
+
+    echo json_encode([
+        'success' => true,
+        'message' => "Áp dụng thành công! Giảm {$discount_percent}%",
+        'coupon' => [  // <-- THÊM ĐỐI TƯỢNG COUPON
+            'code' => $coupon['code'],
+            'discount_percent' => $discount_percent
+        ]
+    ]);
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Server error.']);
+    error_log("Lỗi validate_coupon: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Lỗi hệ thống']);
 }
+?>

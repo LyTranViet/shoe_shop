@@ -61,7 +61,7 @@ $leftCell->addText('HỘ, CÁ NHÂN KINH DOANH:', ['size' => 13, 'bold' => true]
 $leftCell->addText('Địa chỉ: ...................................................', ['size' => 13]);
 
 $rightCell = $headerTable->addCell(5000);
-$rightCell->addText('Mẫu số 04 - VT', ['size' => 13, 'bold' => true], ['alignment' => 'right']);
+$rightCell->addText('Mẫu số 02 - VT', ['size' => 13, 'bold' => true], ['alignment' => 'center']);
 $rightCell->addText('(Ban hành kèm theo Thông tư số', ['size' => 11], ['alignment' => 'right']);
 $rightCell->addText('88/2021/TT-BTC ngày 11/10/2021 của Bộ Tài chính)', ['size' => 11], ['alignment' => 'right']);
 
@@ -129,8 +129,8 @@ $table->addCell(1500, ['valign' => 'center'])->addText('C', ['bold' => true, 'si
 $table->addCell(1000, ['valign' => 'center'])->addText('D', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
 $table->addCell(1000, ['valign' => 'center'])->addText('Yêu cầu', ['size' => 11], ['alignment' => 'center']);
 $table->addCell(1000, ['valign' => 'center'])->addText('Thực xuất', ['size' => 11], ['alignment' => 'center']);
-$table->addCell(1500, ['valign' => 'center'])->addText('3', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
-$table->addCell(2000, ['valign' => 'center'])->addText('4', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
+$table->addCell(1500, ['valign' => 'center'])->addText('1', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
+$table->addCell(2000, ['valign' => 'center'])->addText('2', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
 
 // Dữ liệu sản phẩm
 $stt = 1;
@@ -170,7 +170,7 @@ $signatureTable->addRow();
 $signatureTable->addCell(2500)->addText('Người nhận hàng', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
 $signatureTable->addCell(2500)->addText('Thủ kho', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
 $signatureTable->addCell(2500)->addText('Người lập biểu', ['bold' => true, 'size' => 13], ['alignment' => 'center']);
-$signatureTable->addCell(2500)->addText('Người đại diện hộ kinh doanh/cá nhân kinh doanh', ['bold' => true, 'size' => 11], ['alignment' => 'center']);
+$signatureTable->addCell(2500)->addText('Kế toán trưởng (Hoặc bộ phận có nhu cầu nhập)', ['bold' => true, 'size' => 11], ['alignment' => 'center']);
 
 $signatureTable->addRow(1000);
 $signatureTable->addCell(2500)->addText('(Ký, họ tên)', ['size' => 11, 'italic' => true], ['alignment' => 'center']);

@@ -32,14 +32,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     // --- PRODUCTS ---
     if ($page === 'products') {
-        $id = (int)($_POST['id'] ?? 0);
-        $form_action = $_POST['form_action'] ?? 'add';
+        if (isset($_POST['form_action'])) {
+            $id = (int)($_POST['id'] ?? 0);
+            $form_action = $_POST['form_action'];
+            $errors = [];
 
-        // The full processing logic is complex, involving file uploads and transactions.
-        // We will let products.php handle the logic but prevent it from sending headers.
-        // This is a temporary measure. The full logic should be moved here for a cleaner architecture.
-        // For now, we just need to prevent the header() call in products.php.
-        // The actual fix will be removing the header() call from products.php.
+            // Lấy dữ liệu từ form
+            $name = trim($_POST['name'] ?? '');
+            $code = trim($_POST['code'] ?? '');
+            $price = (float)($_POST['price'] ?? 0);
+            $category_id = (int)($_POST['category_id'] ?? 0);
+            $brand_id = (int)($_POST['brand_id'] ?? 0);
+            $description = trim($_POST['description'] ?? '');
+            $sizes = $_POST['sizes'] ?? [];
+            $stocks = $_POST['stocks'] ?? [];
+
+            // Validation
+            if (empty($name)) $errors[] = "Tên sản phẩm là bắt buộc.";
+            if (empty($code)) $errors[] = "Mã sản phẩm là bắt buộc.";
+            if ($price <= 0) $errors[] = "Giá sản phẩm phải lớn hơn 0.";
+            if ($category_id <= 0) $errors[] = "Vui lòng chọn danh mục.";
+            if ($brand_id <= 0) $errors[] = "Vui lòng chọn thương hiệu.";
+
+            if (empty($errors)) {
+                $db->beginTransaction();
+                try {
+                    // 1. Thêm/Cập nhật sản phẩm
+                    if ($form_action === 'add') {
+                        $stmt = $db->prepare("INSERT INTO products (name, code, price, category_id, brand_id, description) VALUES (?, ?, ?, ?, ?, ?)");
+                        $stmt->execute([$name, $code, $price, $category_id, $brand_id, $description]);
+                        $id = $db->lastInsertId();
+                    } else { // edit
+                        $stmt = $db->prepare("UPDATE products SET name=?, code=?, price=?, category_id=?, brand_id=?, description=? WHERE id=?");
+                        $stmt->execute([$name, $code, $price, $category_id, $brand_id, $description, $id]);
+                    }
+
+                    // 2. Xử lý size và tồn kho
+                    $current_sizes_db = [];
+                    if ($form_action === 'edit') {
+                        $stmt_sizes = $db->prepare("SELECT size, stock FROM product_sizes WHERE product_id = ?");
+                        $stmt_sizes->execute([$id]);
+                        $current_sizes_db = $stmt_sizes->fetchAll(PDO::FETCH_KEY_PAIR);
+                    }
+
+                    $new_sizes_from_form = [];
+                    foreach ($sizes as $key => $size_value) {
+                        $size_value = trim($size_value);
+                        if (!empty($size_value)) {
+                            $new_sizes_from_form[$size_value] = (int)($stocks[$key] ?? 0);
+                        }
+                    }
+
+                    // Chỉ thêm size mới, không cập nhật tồn kho ở đây
+                    foreach ($new_sizes_from_form as $size => $stock) {
+                        if (!isset($current_sizes_db[$size])) {
+                            $stmt_add_size = $db->prepare("INSERT INTO product_sizes (product_id, size, stock) VALUES (?, ?, 0)");
+                            $stmt_add_size->execute([$id, $size]);
+                        }
+                    }
+
+                    // 3. Xử lý hình ảnh
+                    // Xóa ảnh được chọn
+                    if (!empty($_POST['delete_images'])) {
+                        $placeholders = implode(',', array_fill(0, count($_POST['delete_images']), '?'));
+                        $stmt_img = $db->prepare("DELETE FROM product_images WHERE id IN ($placeholders) AND product_id = ?");
+                        $stmt_img->execute(array_merge($_POST['delete_images'], [$id]));
+                    }
+
+                    // Tải ảnh mới
+                    if (!empty($_FILES['images']['name'][0])) {
+                        $upload_dir = __DIR__ . '/../assets/images/products/';
+                        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                        foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+                            $filename = uniqid() . '-' . basename($_FILES['images']['name'][$key]);
+                            if (move_uploaded_file($tmp_name, $upload_dir . $filename)) {
+                                $stmt_img = $db->prepare("INSERT INTO product_images (product_id, url) VALUES (?, ?)");
+                                $stmt_img->execute([$id, 'assets/images/products/' . $filename]);
+                            }
+                        }
+                    }
+
+                    // Cập nhật ảnh chính
+                    if (isset($_POST['main_image'])) {
+                        $main_image_id = (int)$_POST['main_image'];
+                        $db->prepare("UPDATE product_images SET is_main = 0 WHERE product_id = ?")->execute([$id]);
+                        $db->prepare("UPDATE product_images SET is_main = 1 WHERE id = ? AND product_id = ?")->execute([$main_image_id, $id]);
+                    }
+
+                    $db->commit();
+                    flash_set('success', "Sản phẩm đã được " . ($form_action === 'add' ? 'thêm' : 'cập nhật') . " thành công!");
+                    header('Location: index.php?page=products');
+                    exit;
+                } catch (PDOException $e) {
+                    $db->rollBack();
+                    $errors[] = "Lỗi cơ sở dữ liệu: " . $e->getMessage();
+                }
+            }
+            // Nếu có lỗi, flash errors và để trang products.php hiển thị lại form
+            $_SESSION['form_errors'] = $errors;
+        }
     }
     // --- SUPPLIERS ---
     if ($page === 'suppliers') {

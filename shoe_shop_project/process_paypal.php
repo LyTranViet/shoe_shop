@@ -144,4 +144,11 @@ try {
         'success' => false,
         'message' => 'Lỗi xử lý đơn hàng: ' . $e->getMessage()
     ]);
+    // SAU KHI THANH TOÁN THÀNH CÔNG
+echo "<script>
+    localStorage.removeItem('product_coupon_code');
+    localStorage.removeItem('product_coupon_data');
+    localStorage.removeItem('shipping_coupon_code');
+    localStorage.removeItem('shipping_coupon_data');
+</script>";
 }

@@ -99,21 +99,37 @@ if ($action === 'view' && $id > 0) {
 
 <?php else: // --- LIST VIEW ---
     $itemsPerPage = 10;
-    $currentPage = max(1, (int)($_GET['p'] ?? 1));
-
-    $countStmt = $db->query("SELECT COUNT(*) FROM import_receipt");
+    $currentPage = max(1, (int)($_GET['p'] ?? 1));    
+    $search_query = trim($_GET['q'] ?? '');
+    $where_clause = '';
+    $params = [];
+    
+    if (!empty($search_query)) {
+        // Tìm kiếm giống trang đơn hàng: ID chính xác hoặc Tên/Mã phiếu tương đối
+        $where_clause = "WHERE ir.id = :q_id OR ir.receipt_code LIKE :q_like OR s.supplierName LIKE :q_like OR u.name LIKE :q_like";
+        $params[':q_id'] = $search_query; // Cho ID
+        $params[':q_like'] = "%$search_query%"; // Cho LIKE
+    }
+    $countSql = "SELECT COUNT(ir.id) FROM import_receipt ir LEFT JOIN supplier s ON ir.supplier_id = s.supplier_id LEFT JOIN users u ON ir.employee_id = u.id $where_clause";
+    $countStmt = $db->prepare($countSql);
+    $countStmt->execute($params);
     $totalItems = (int)$countStmt->fetchColumn();
     $totalPages = ceil($totalItems / $itemsPerPage);
     $offset = ($currentPage - 1) * $itemsPerPage;
 
-	$stmt = $db->prepare("
+	$sql = "
         SELECT ir.*, s.supplierName, u.name as employeeName 
         FROM import_receipt ir
         LEFT JOIN supplier s ON ir.supplier_id = s.supplier_id
-        LEFT JOIN users u ON ir.employee_id = u.id
+        LEFT JOIN users u ON ir.employee_id = u.id $where_clause
         ORDER BY ir.import_date DESC
         LIMIT :limit OFFSET :offset
-    ");
+    ";
+    $stmt = $db->prepare($sql);
+    
+    // Bind params cho câu lệnh chính
+    foreach ($params as $key => &$value) $stmt->bindParam($key, $value);
+
     $stmt->bindValue(':limit', $itemsPerPage, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -122,6 +138,11 @@ if ($action === 'view' && $id > 0) {
 	<header class="admin-header">
         <h2>🧾 Danh sách Phiếu Nhập</h2>
         <div class="admin-tools">
+            <form class="search-form" method="get">
+                <input type="hidden" name="page" value="stock_in">
+                <input type="text" id="search-input-stock-in" name="q" placeholder="Tìm theo mã phiếu, NCC, nhân viên..." value="<?= htmlspecialchars($search_query) ?>">
+                <button type="submit">Tìm</button>
+            </form>
             <a href="index.php?page=stock_in&action=add" class="add-btn">➕ Tạo Phiếu Nhập</a>
         </div>
     </header>
@@ -180,13 +201,17 @@ if ($action === 'view' && $id > 0) {
         </table>
     </div>
 
-    <?php if ($totalPages > 1): ?>
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="index.php?page=stock_in&p=<?= $i ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : '' ?>"><?= $i ?></a>
-        <?php endfor; ?>
+    <div id="pagination-container-stock-in">
+        <?php if ($totalPages > 1): ?>
+        <div class="pagination">
+            <?php 
+            $queryParams = !empty($search_query) ? '&q=' . urlencode($search_query) : '';
+            for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="index.php?page=stock_in&p=<?= $i . $queryParams ?>" class="page-btn <?= ($i == $currentPage) ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
 
 <?php endif; ?>
 </div>

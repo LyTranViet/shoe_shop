@@ -30,17 +30,17 @@ try {
     $db = get_db();
     
     // Kiểm tra phiếu xuất tồn tại
-    $stmt = $db->prepare("SELECT status FROM export_receipt WHERE id = ?");
+    $stmt = $db->prepare("SELECT status, order_id FROM export_receipt WHERE id = ?");
     $stmt->execute([$export_id]);
-    $current_status = $stmt->fetchColumn();
+    $receipt = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if (!$current_status) {
+    if (!$receipt) {
         echo json_encode(['success' => false, 'message' => 'Phiếu xuất không tồn tại.']);
         exit;
     }
     
     // Chỉ cho phép cập nhật từ "Đang xử lý"
-    if ($current_status !== 'Đang xử lý') {
+    if ($receipt['status'] !== 'Đang xử lý') {
         echo json_encode(['success' => false, 'message' => 'Chỉ có thể thay đổi trạng thái của phiếu đang xử lý.']);
         exit;
     }
@@ -49,7 +49,7 @@ try {
     
     // Nếu chuyển sang "Đã xuất kho", không cần làm gì vì kho đã bị trừ khi tạo phiếu.
     // Nếu chuyển sang "Đã hủy", hoàn lại tồn kho đã bị tạm giữ.
-    if ($new_status === 'Đã hủy' && $current_status === 'Đang xử lý') {
+    if ($new_status === 'Đã hủy' && $receipt['status'] === 'Đang xử lý') {
         $detailStmt = $db->prepare("
             SELECT batch_id, productsize_id, quantity 
             FROM export_receipt_detail 
@@ -73,6 +73,12 @@ try {
     $updateStmt = $db->prepare("UPDATE export_receipt SET status = ? WHERE id = ?");
     $updateStmt->execute([$new_status, $export_id]);
     
+    // Nếu trạng thái mới là "Đã xuất kho" và có order_id liên quan, cập nhật trạng thái đơn hàng thành "Đang giao" (status_id = 2)
+    if ($new_status === 'Đã xuất kho' && !empty($receipt['order_id'])) {
+        $orderUpdateStmt = $db->prepare("UPDATE orders SET status_id = 2 WHERE id = ?");
+        $orderUpdateStmt->execute([$receipt['order_id']]);
+    }
+
     $db->commit();
     
     // Tạo thông báo phù hợp
