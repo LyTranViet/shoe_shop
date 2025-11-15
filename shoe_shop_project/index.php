@@ -1148,5 +1148,248 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 </script>
+<!-- Chat Button / Box -->
+<div id="chat-container" style="position: fixed; bottom: 25px; left: 25px; z-index: 9999; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 10px;">
+    
+    <!-- Nút chat tròn đẹp -->
+    <div id="chat-button" style="
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #0ea5ff, #3b82f6);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-size: 32px;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        transition: transform 0.3s, background-color 0.3s;
+    ">
+        💬
+        <!-- Chuông báo tin nhắn mới -->
+        <div id="chat-bell" style="
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 22px;
+            height: 22px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #000;
+            transform-origin: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        ">🔔</div>
+    </div>
+
+    <!-- Dòng chữ Hỗ trợ khách hàng bên phải nút chat -->
+    <div id="chat-label" style="
+        background: #0ea5ff;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        cursor: pointer;
+        user-select: none;
+    ">Hỗ trợ khách hàng</div>
+
+    <!-- Popup chat box -->
+    <div id="chat-box" style="
+        width: 320px;
+        max-height: 450px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        margin-top: 12px;
+        font-size: 14px;
+    ">
+        <div id="chat-header" style="
+            background: linear-gradient(90deg, #0ea5ff, #3b82f6);
+            color: #fff;
+            padding: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            font-size: 15px;
+        ">Hỗ trợ khách hàng</div>
+        <div id="chat-body" style="
+            flex: 1;
+            padding: 0.8rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: #f1f5f9;
+        "></div>
+        <form id="chat-form" style="
+            border-top: 1px solid #e2e8f0;
+            padding: 0.5rem;
+            display: flex;
+            background: #f8fafc;
+        ">
+            <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." style="
+                flex: 1;
+                padding: 0.6rem 1rem;
+                border-radius: 25px;
+                border: 1px solid #cbd5e1;
+                outline: none;
+                font-size: 14px;
+            ">
+            <button type="submit" style="
+                margin-left: 5%;
+                border: none;
+                background: #0ea5ff;
+                color: #fff;
+                border-radius: 50%;
+                width: 45px;
+                height: 45px;
+                cursor: pointer;
+                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">➤</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatButton = document.getElementById('chat-button');
+    const chatBox = document.getElementById('chat-box');
+    const chatBody = document.getElementById('chat-body');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatBell = document.getElementById('chat-bell');
+    const chatLabel = document.getElementById('chat-label');
+
+    let lastMessageId = 0;
+    let chatOpen = false;
+
+    // Toggle chat box
+    function toggleChat() {
+        chatOpen = !chatOpen;
+        chatBox.style.display = chatOpen ? 'flex' : 'none';
+        if(chatOpen){
+            scrollToBottom();
+            stopNotification();
+        }
+    }
+
+    chatButton.addEventListener('click', toggleChat);
+    chatLabel.addEventListener('click', toggleChat); // click chữ mở chat
+
+    function scrollToBottom() {
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function addMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.textContent = text;
+        msgDiv.style.maxWidth = '75%';
+        msgDiv.style.padding = '0.5rem 0.8rem';
+        msgDiv.style.borderRadius = '15px';
+        msgDiv.style.wordWrap = 'break-word';
+        msgDiv.style.lineHeight = '1.4';
+        msgDiv.style.alignSelf = sender === 'user' ? 'flex-end' : 'flex-start';
+        msgDiv.style.backgroundColor = sender === 'user' ? '#0ea5ff' : '#e2e8f0';
+        msgDiv.style.color = sender === 'user' ? '#fff' : '#334155';
+        chatBody.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    // Nhấp nháy + scale nút chat
+    let blinkInterval = null;
+    function startBlink() {
+        if (blinkInterval) return;
+        blinkInterval = setInterval(() => {
+            chatButton.style.transform = chatButton.style.transform === 'scale(1.2)' ? 'scale(1)' : 'scale(1.2)';
+            chatButton.style.background = chatButton.style.background === 'linear-gradient(135deg, #0ea5ff, #3b82f6)' ? 
+                'linear-gradient(135deg, #2563eb, #0ea5ff)' : 'linear-gradient(135deg, #0ea5ff, #3b82f6)';
+        }, 600);
+    }
+
+    function shakeBell() {
+        chatBell.animate([
+            { transform: 'rotate(0deg)' },
+            { transform: 'rotate(-20deg)' },
+            { transform: 'rotate(20deg)' },
+            { transform: 'rotate(-15deg)' },
+            { transform: 'rotate(15deg)' },
+            { transform: 'rotate(0deg)' }
+        ], { duration: 600, iterations: 1 });
+    }
+
+    function notifyNewMessage() {
+        startBlink();
+        shakeBell();
+    }
+
+    function stopNotification() {
+        if (blinkInterval) {
+            clearInterval(blinkInterval);
+            blinkInterval = null;
+            chatButton.style.transform = 'scale(1)';
+            chatButton.style.background = 'linear-gradient(135deg, #0ea5ff, #3b82f6)';
+        }
+    }
+
+    // Fetch tin nhắn mới
+    function fetchNewMessages() {
+        fetch('handle_chat.php?action=fetch&since=' + lastMessageId)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.messages.length) {
+                data.messages.forEach(msg => {
+                    if (!msg.id || msg.id > lastMessageId) {
+                        addMessage(msg.message, msg.sender);
+                        if (msg.id) lastMessageId = Math.max(lastMessageId, msg.id);
+
+                        if (!chatOpen && msg.sender === 'admin') {
+                            notifyNewMessage();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    setInterval(fetchNewMessages, 2000);
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        chatInput.value = '';
+
+        const formData = new FormData();
+        formData.append('action', 'send');
+        formData.append('message', text);
+
+        fetch('handle_chat.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.reply) {
+                setTimeout(() => addMessage(data.reply, 'admin'), 500);
+            }
+        });
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
