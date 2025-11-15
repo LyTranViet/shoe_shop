@@ -511,6 +511,9 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
                 </button>
                 <!-- PayPal Button Container is now inside the flex container -->
                 <div id="paypal-button-container"></div>
+                <input type="hidden" name="coupon_code" id="hidden_product_coupon" value="">
+                <input type="hidden" name="validated_shipping_coupon_code" id="hidden_shipping_coupon" value="">
+                <input type="hidden" name="original_shipping_fee" id="hidden_original_shipping_fee" value="">
             </div>
         </form>
     </section>
@@ -1759,10 +1762,7 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
 
         onApprove: function(data, actions) {
             return actions.order.capture().then(function(details) {
-                // Lấy form data
                 const formData = new FormData();
-
-                // Thêm dữ liệu form
                 formData.append('address', document.getElementById('address').value.trim());
                 formData.append('phone', document.getElementById('phone').value.trim());
                 formData.append('shipping_fee', document.getElementById('shipping-fee-input').value);
@@ -1771,22 +1771,45 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
                 formData.append('payment_method', 'PAYPAL');
                 formData.append('paypal_order_id', details.id);
 
-                // Gửi request xử lý đơn hàng
-                fetch('process_paypal.php', {
+                // === GỬI COUPON ===
+                formData.append('coupon_code', document.getElementById('hidden_product_coupon')
+                    ?.value || '');
+                formData.append('validated_shipping_coupon_code', document.getElementById(
+                    'hidden_shipping_coupon')?.value || '');
+                formData.append('original_shipping_fee', document.getElementById(
+                    'hidden_original_shipping_fee')?.value || '0');
+
+                return fetch('process_paypal.php', {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        // === KIỂM TRA HTTP STATUS TRƯỚC KHI PARSE JSON ===
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(
+                                    `Server error: ${response.status} - ${text.substring(0, 200)}`
+                                );
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(result => {
                         if (result.success) {
+                            // XÓA localStorage TRƯỚC KHI CHUYỂN TRANG
+                            localStorage.removeItem('product_coupon_code');
+                            localStorage.removeItem('product_coupon_data');
+                            localStorage.removeItem('shipping_coupon_code');
+                            localStorage.removeItem('shipping_coupon_data');
+
                             window.location.href = 'checkout.php?order_success=' + result.order_id;
                         } else {
-                            throw new Error(result.message || 'Có lỗi xảy ra');
+                            throw new Error(result.message || 'Thanh toán thất bại');
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        alert('Lỗi: ' + error.message);
+                        console.error('PayPal Process Error:', error);
+                        alert('Lỗi thanh toán: ' + error.message);
                     });
             });
         },
@@ -1824,6 +1847,30 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
             validated.value = code;
             // Gọi calculateShippingFee() nếu có
             if (typeof calculateShippingFee === 'function') calculateShippingFee();
+        }
+    });
+</script>
+<script>
+    // === TỰ ĐỘNG ĐIỀN COUPON CHO PAYPAL (product + shipping) ===
+    document.addEventListener('DOMContentLoaded', () => {
+        // Product coupon
+        const productCode = localStorage.getItem('product_coupon_code') || '';
+        if (productCode && document.getElementById('hidden_product_coupon')) {
+            document.getElementById('hidden_product_coupon').value = productCode;
+        }
+
+        // Shipping coupon
+        const shippingCode = localStorage.getItem('shipping_coupon_code') || '';
+        if (shippingCode && document.getElementById('hidden_shipping_coupon')) {
+            document.getElementById('hidden_shipping_coupon').value = shippingCode;
+        }
+
+        // Original shipping fee
+        const origFeeElement = document.querySelector('#original-shipping-fee') || document.querySelector(
+            '#shipping-fee-input');
+        if (origFeeElement && document.getElementById('hidden_original_shipping_fee')) {
+            const fee = origFeeElement.value || origFeeElement.textContent.replace(/[^\d]/g, '');
+            document.getElementById('hidden_original_shipping_fee').value = fee;
         }
     });
 </script>

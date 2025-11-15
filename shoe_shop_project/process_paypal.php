@@ -1,9 +1,8 @@
 <?php
-header('Content-Type: application/json'); // Thêm header này để đảm bảo JSON response
+header('Content-Type: application/json');
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
 
-// Log để debug
 error_log('PayPal Process - Start');
 
 if (!is_logged_in()) {
@@ -13,7 +12,7 @@ if (!is_logged_in()) {
 $db = get_db();
 $userId = current_user_id();
 
-// --- ADD: ensure paypal_order_id column exists to avoid SQL errors ---
+// --- Đảm bảo cột paypal_order_id tồn tại ---
 try {
     $colStmt = $db->prepare("
         SELECT COUNT(*) 
@@ -24,17 +23,14 @@ try {
     ");
     $colStmt->execute();
     if ((int)$colStmt->fetchColumn() === 0) {
-        // safe: add column (nullable)
         $db->exec("ALTER TABLE `orders` ADD COLUMN `paypal_order_id` VARCHAR(255) NULL");
         error_log('process_paypal.php: Added orders.paypal_order_id column');
     }
 } catch (Exception $ex) {
-    // nếu ALTER thất bại thì log nhưng không dừng toàn bộ xử lý - lỗi sẽ được trả về JSON sau
     error_log('process_paypal.php: Could not ensure paypal_order_id column: ' . $ex->getMessage());
 }
-// --- end add ---
 
-// --- Bổ sung: helper get_cart_items_and_total (bản sao từ checkout.php) ---
+// --- Helper lấy giỏ hàng ---
 function get_cart_items_and_total($db)
 {
     if (is_logged_in()) {
@@ -50,7 +46,6 @@ function get_cart_items_and_total($db)
         foreach ($items as $it) $total += ((float)$it['price']) * ((int)$it['quantity']);
         return [$items, $total, $cartId];
     }
-    // guests fallback (shouldn't happen if checkout requires login)
     $items = [];
     $total = 0;
     foreach ($_SESSION['cart'] ?? [] as $k => $it) {
@@ -63,36 +58,76 @@ function get_cart_items_and_total($db)
     }
     return [$items, $total, null];
 }
-// --- end helper ---
 
 try {
     $db->beginTransaction();
 
-    // Debug POST data
-    error_log('POST data: ' . print_r($_POST, true));
-
-    // Lấy thông tin shipping từ form
+    // === LẤY DỮ LIỆU TỪ FORM ===
     $address = trim($_POST['address'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
-    $shipping_fee = isset($_POST['shipping_fee']) ? (float)$_POST['shipping_fee'] : 0.0;
+    $shipping_fee = (float)($_POST['shipping_fee'] ?? 0);
     $shipping_carrier = $_POST['carrier'] ?? ($_POST['shipping_carrier'] ?? 'GHN');
     $paypal_order_id = $_POST['paypal_order_id'] ?? '';
 
-    // Lấy giỏ hàng
+    // === LẤY GIỎ HÀNG ===
     list($items, $subtotal, $cartId) = get_cart_items_and_total($db);
     if (empty($items)) {
         throw new Exception('Giỏ hàng trống');
     }
 
-    // Tính tổng tiền
-    $total_amount = $subtotal + $shipping_fee;
+    // === TÍNH GIẢM GIÁ SẢN PHẨM ===
+    $couponCode = trim($_POST['coupon_code'] ?? '');
+    $discount = 0;
+    $couponId = null;
 
-    // Tạo đơn hàng
+    if ($couponCode) {
+        $st = $db->prepare('SELECT * FROM coupons WHERE code = ? LIMIT 1');
+        $st->execute([$couponCode]);
+        $coupon = $st->fetch(PDO::FETCH_ASSOC);
+        if ($coupon) {
+            $now = date('Y-m-d H:i:s');
+            if (($coupon['valid_from'] && $now < $coupon['valid_from']) || ($coupon['valid_to'] && $now > $coupon['valid_to'])) {
+                $coupon = null;
+            } else {
+                $discount = round($subtotal * $coupon['discount_percent'] / 100, 2);
+                $couponId = $coupon['id'];
+            }
+        }
+    }
+
+    // === TÍNH GIẢM PHÍ SHIP ===
+    $shipping_coupon_code = trim($_POST['validated_shipping_coupon_code'] ?? '');
+    $original_shipping_fee = (float)($_POST['original_shipping_fee'] ?? $shipping_fee);
+    $shipping_discount = 0;
+    $final_shipping_fee = $shipping_fee;
+
+    if ($shipping_coupon_code) {
+        $st = $db->prepare('SELECT * FROM shipping_coupons WHERE UPPER(code) = UPPER(?) AND active = 1 AND (expire_date IS NULL OR expire_date >= CURDATE()) LIMIT 1');
+        $st->execute([$shipping_coupon_code]);
+        $sc = $st->fetch(PDO::FETCH_ASSOC);
+        if ($sc) {
+            $val = (float)$sc['VALUE'];
+            if (strtolower($sc['TYPE']) === 'percent') {
+                $shipping_discount = round($original_shipping_fee * $val / 100, 2);
+            } else {
+                $shipping_discount = $val;
+            }
+            $shipping_discount = min($shipping_discount, $original_shipping_fee);
+            $final_shipping_fee = $original_shipping_fee - $shipping_discount;
+        }
+    }
+
+    // === TỔNG CUỐI CÙNG (ĐÚNG NHƯ PAYPAL HIỆN) ===
+    $total_amount = $subtotal + $final_shipping_fee - $discount;
+
+    // === TẠO ĐƠN HÀNG VỚI ĐẦY ĐỦ GIẢM GIÁ ===
     $ins = $db->prepare('INSERT INTO orders (
         user_id, total_amount, shipping_address, phone,
-        status_id, payment_method, shipping_fee,
-        shipping_carrier, paypal_order_id, paid_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,NOW())');
+        status_id, payment_method, shipping_fee, shipping_carrier,
+        paypal_order_id, paid_at,
+        discount_amount, coupon_id, coupon_code,
+        shipping_discount_amount, shipping_coupon_code
+    ) VALUES (?,?,?,?,?,?,?,?,?,NOW(),?,?,?,?,?)');
 
     $ins->execute([
         $userId,
@@ -101,14 +136,19 @@ try {
         $phone,
         1,
         'PAYPAL',
-        $shipping_fee,
+        $final_shipping_fee,
         $shipping_carrier,
-        $paypal_order_id
+        $paypal_order_id,
+        $discount,
+        $couponId,
+        $couponCode,
+        $shipping_discount,
+        $shipping_coupon_code
     ]);
 
     $orderId = $db->lastInsertId();
 
-    // Thêm chi tiết đơn hàng
+    // === THÊM CHI TIẾT ĐƠN HÀNG ===
     $itemStmt = $db->prepare('INSERT INTO order_items (order_id, product_id, size, quantity, price) VALUES (?,?,?,?,?)');
     foreach ($items as $item) {
         $itemStmt->execute([
@@ -120,18 +160,18 @@ try {
         ]);
     }
 
-    // Xóa giỏ hàng
+    // === XÓA GIỎ HÀNG ===
     if ($cartId) {
         $db->prepare('DELETE FROM cart_items WHERE cart_id = ?')->execute([$cartId]);
     }
     unset($_SESSION['cart']);
 
-    $_SESSION['order_success'] = $orderId;
-    $_SESSION['success'] = 'Đặt hàng thành công!';
+    // === XÓA MÃ GIẢM GIÁ SAU KHI ĐẶT HÀNG ===
 
+
+    $_SESSION['order_success'] = $orderId;
     $db->commit();
 
-    // Response JSON
     echo json_encode([
         'success' => true,
         'order_id' => $orderId,
@@ -142,13 +182,6 @@ try {
     error_log('PayPal Error: ' . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Lỗi xử lý đơn hàng: ' . $e->getMessage()
+        'message' => 'Lỗi xử electors: ' . $e->getMessage()
     ]);
-    // SAU KHI THANH TOÁN THÀNH CÔNG
-echo "<script>
-    localStorage.removeItem('product_coupon_code');
-    localStorage.removeItem('product_coupon_data');
-    localStorage.removeItem('shipping_coupon_code');
-    localStorage.removeItem('shipping_coupon_data');
-</script>";
 }
