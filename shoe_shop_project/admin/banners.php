@@ -187,6 +187,32 @@ function delete_banner_image(?string $image_url): void {
             </tbody>
         </table>
     </div>
+    <?php
+    // Placeholder for pagination if you add it later
+    /*
+    <?php if ($totalPages > 1): ?>
+        <div class="pagination">
+            <?php if ($currentPage > 1): ?>
+                <a href="index.php?page=banners&p=1">« Đầu</a>
+                <a href="index.php?page=banners&p=<?= $currentPage - 1 ?>">‹ Trước</a>
+            <?php endif; ?>
+            <?php
+            $window = 5; $half = floor($window / 2);
+            $start = max(1, $currentPage - $half);
+            $end = min($totalPages, $currentPage + $half);
+            if ($start === 1) $end = min($window, $totalPages);
+            if ($end === $totalPages) $start = max(1, $totalPages - $window + 1);
+            for ($i = $start; $i <= $end; $i++): ?>
+                <a href="index.php?page=banners&p=<?= $i ?>" class="<?= $i == $currentPage ? 'current' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+            <?php if ($currentPage < $totalPages): ?>
+                <a href="index.php?page=banners&p=<?= $currentPage + 1 ?>">Tiếp ›</a>
+                <a href="index.php?page=banners&p=<?= $totalPages ?>">Cuối »</a>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+    */
+    ?>
 </div>
 <?php endif; ?>
 

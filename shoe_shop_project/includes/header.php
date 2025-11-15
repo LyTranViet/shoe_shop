@@ -335,15 +335,16 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             min-width: 40px;
             height: 40px;
             padding: 0 10px;
-            background: var(--text-dark);
-            color: var(--bg-white);
+            background: var(--bg-white);
+            color: var(--text-dark);
+            border: 1px solid var(--text-dark);
             text-decoration: none;
             font-weight: 600;
             border-radius: 8px;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
-        .pagination a:hover { background: var(--accent); }
-        .pagination a.current { background: var(--danger); color: var(--bg-white); font-weight: 700; }
+        .pagination a:hover { background: var(--primary-light); border-color: var(--primary); }
+        .pagination a.current { background: var(--primary); color: var(--bg-white); font-weight: 700; border-color: var(--primary); }
     </style>
 
     

@@ -142,14 +142,28 @@ if ($action === 'view' && $id > 0) {
 			$query_params = !empty($search_query) ? '&q=' . urlencode($search_query) : '';
 			?>
 			<?php if ($currentPage > 1): ?>
+				<a href="index.php?page=orders&p=1<?= $query_params; ?>">« Đầu</a>
 				<a href="index.php?page=orders&p=<?= $currentPage - 1 . $query_params; ?>">‹ Trước</a>
 			<?php endif; ?>
 			<?php
-			for ($i = 1; $i <= $totalPages; $i++): ?>
+			$window = 5;
+			$half = floor($window / 2);
+			$start = $currentPage - $half;
+			$end = $currentPage + $half;
+			if ($start < 1) {
+				$start = 1;
+				$end = min($window, $totalPages);
+			}
+			if ($end > $totalPages) {
+				$end = $totalPages;
+				$start = max(1, $end - $window + 1);
+			}
+			for ($i = $start; $i <= $end; $i++): ?>
 				<a href="index.php?page=orders&p=<?= $i . $query_params; ?>" class="<?= ($i == $currentPage) ? 'current' : ''; ?>"><?= $i; ?></a>
 			<?php endfor; ?>
 			<?php if ($currentPage < $totalPages): ?>
 				<a href="index.php?page=orders&p=<?= $currentPage + 1 . $query_params; ?>">Tiếp ›</a>
+				<a href="index.php?page=orders&p=<?= $totalPages . $query_params; ?>">Cuối »</a>
 			<?php endif; ?>
 		</nav>
 	<?php endif; ?>
