@@ -302,8 +302,8 @@ $is_superadmin = is_superadmin();
 $is_admin = is_admin();
 $is_staff = is_staff();
 
-$superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet'];
-$admin_pages      = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet'];
+$superadmin_pages = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet','chat'];
+$admin_pages      = ['dashboard', 'orders', 'products', 'coupons', 'categories', 'brands', 'customers', 'users', 'suppliers', 'stock_in', 'stock_out', 'inventory', 'banners', 'contacts', 'send_single_mailjet','chat'];
 $staff_pages      = ['orders', 'customers', 'products'];
 
 if ($is_superadmin) {
@@ -389,6 +389,9 @@ if (!in_array($page, $allowed_pages, true)) {
                     <a href="index.php?page=contacts" class="<?= ($page === 'contacts') ? 'active' : '' ?>">
                         <i class="fi fi-rr-inbox"></i> Liên hệ khách hàng
                     </a>
+                    <a href="index.php?page=chat" class="<?= ($page === 'chat') ? 'active' : '' ?>">
+                        <i class="fi fi-rr-comment-alt"></i> Hỗ trợ Chat
+                    </a>
                      <a href="index.php?page=send_single_mailjet" class="<?= ($page === 'send_single_mailjet') ? 'active' : '' ?>">
                         <i class="fi fi-rr-inbox"></i> Gửi Mmail Khuyến Mãi
                     </a>
@@ -426,6 +429,9 @@ if (!in_array($page, $allowed_pages, true)) {
 
     <section class="admin-main">
         <?php
+        // Define a constant to indicate that this is a valid entry point for admin pages.
+        // This prevents direct access to included page files.
+        define('IS_ADMIN_PAGE', true);
         $page_file = __DIR__ . '/' . $page . '.php';
         if (file_exists($page_file)) {
             include $page_file;

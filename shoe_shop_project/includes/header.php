@@ -332,19 +332,20 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             <div class="nav-actions">
                 <a href="<?php echo BASE_URL; ?>category.php">🏷️ Danh mục</a>
                 <a href="<?php echo BASE_URL; ?>about.php">ℹ️ Giới thiệu</a>
-                  <a href="<?php echo BASE_URL; ?>contact.php">📞 Liên hệ</a>
+                <a href="<?php echo BASE_URL; ?>contact.php">📞 Liên hệ</a>
                 <a href="<?php echo BASE_URL; ?>cart.php">🛒 Giỏ hàng <span class="badge"><?php echo cart_count(); ?></span></a>
-                <?php if ($isLoggedIn): ?>
+                <?php if ($isLoggedIn): ?>  
                 <div class="user-menu">
                     <button class="user-btn"><?php echo htmlspecialchars($displayName); ?> ⬇️</button>
                     <div class="dropdown-menu">
                         <a href="<?php echo BASE_URL; ?>profile.php">👤 Hồ sơ</a>
                         <a href="<?php echo BASE_URL; ?>order_history.php">📦 Đơn hàng</a>
                         <a href="<?php echo BASE_URL; ?>wishlist.php">❤️ Yêu thích</a>
-                        <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'superadmin' || $_SESSION['user_role'] === 'staff'): ?>
-<a href="<?php echo BASE_URL; ?>admin/index.php" style="color:#0d6efd;font-weight:600;">
+                        <a href="<?php echo BASE_URL; ?>offchat.php">Liên Hệ Hỗ Trợ</a>
+                        <?php if ($_SESSION['user_role'] === 'SupperAdmin' || $_SESSION['user_role'] === 'SupperAdmin' || $_SESSION['user_role'] === 'staff'): ?>
+<a href="<?php echo $adminUrl; ?>" style="color:#0d6efd;font-weight:600;">
     ⚙️ Quản trị
-</a>                            </a>
+</a>                         </a>
                         <?php endif; ?>
                         <a href="<?php echo BASE_URL; ?>logout.php" style="color:#dc3545;font-weight:600;">🚪 Đăng xuất</a>
                     </div>
