@@ -39,6 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $u = $st->fetch();
 
         if ($u && password_verify($pwd, $u['password'])) {
+            // KIỂM TRA VÀ KÍCH HOẠT TÀI KHOẢN NẾU CHƯA ACTIVE
+            if ((int)$u['is_active'] === 0) {
+                $db->prepare("UPDATE users SET is_active = 1 WHERE id = ?")->execute([$u['id']]);
+                // Xóa token kích hoạt cũ nếu có
+                $db->prepare("DELETE FROM password_resets WHERE email = ?")->execute([$u['email']]);
+            }
+
             $_SESSION['user_id'] = $u['id'];
 
             // Merge wishlist từ session vào DB

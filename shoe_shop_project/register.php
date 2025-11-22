@@ -1,6 +1,11 @@
 <?php
 // ob_start() và session_start() được xử lý trong init.php và header.php
 require_once __DIR__ . '/includes/init.php'; // Bao gồm init.php trước để định nghĩa BASE_URL
+require_once __DIR__ . '/vendor/autoload.php'; // Nạp PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $db = get_db();
 
 // Helper: generate a simple math captcha and store in session
@@ -14,6 +19,52 @@ function generate_register_captcha()
     $_SESSION['register_captcha_q'] = "$a $op $b";
     $_SESSION['register_captcha'] = (string)$answer;
     return $_SESSION['register_captcha_q'];
+}
+
+/**
+ * Hàm gửi email kích hoạt
+ */
+function send_activation_email($email, $token) {
+    $mail = new PHPMailer(true);
+
+    // Tạo URL tuyệt đối để đảm bảo hoạt động trong email
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    $host = $_SERVER['HTTP_HOST'];
+    $activation_link = $protocol . $host . BASE_URL . "activate.php?token=$token";
+
+    try {
+        // Cấu hình SMTP - **BẠN CẦN THAY THÔNG TIN CỦA MÌNH VÀO ĐÂY**
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com'; // VD: smtp.gmail.com
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'lyviettran01@gmail.com'; // Email của bạn
+        $mail->Password   = 'akfh swgt kosz tpgc'; // Mật khẩu ứng dụng
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+        $mail->CharSet    = 'UTF-8';
+
+        // Người gửi và người nhận
+        $mail->setFrom('lyviettran01@gmail.com', 'Púp Bờ Si Store');
+        $mail->addAddress($email);
+
+        // Nội dung
+        $mail->isHTML(true);
+        $mail->Subject = "Kích hoạt tài khoản của bạn tại Púp Bờ Si Store";
+        $mail->Body    = "
+            <div style='font-family:Arial,sans-serif;font-size:16px;line-height:1.6;'>
+                <h2>Chào mừng bạn đến với Púp Bờ Si Store!</h2>
+                <p>Cảm ơn bạn đã đăng ký. Vui lòng nhấn vào nút bên dưới để kích hoạt tài khoản của bạn:</p>
+                <p style='text-align:center;margin:25px 0;'>
+                    <a href='$activation_link' style='background-color:#0d6efd;color:white;padding:12px 25px;text-decoration:none;border-radius:5px;font-weight:bold;'>Kích hoạt tài khoản</a>
+                </p>
+                <p>Trân trọng,<br>Đội ngũ Púp Bờ Si Store</p>
+            </div>";
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Mailer Error: {$mail->ErrorInfo}");
+        return false;
+    }
 }
 
 // Regenerate captcha on explicit request
@@ -47,11 +98,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         unset($_SESSION['register_captcha'], $_SESSION['register_captcha_q']);
 
         $pwd_hash = password_hash($password, PASSWORD_DEFAULT);
+        $activation_token = bin2hex(random_bytes(32));
+        $expires = date('Y-m-d H:i:s', time() + 86400); // Hết hạn sau 24 giờ
+
         try {
             $db->beginTransaction();
-            $st = $db->prepare('INSERT INTO users (email, name, password) VALUES (?, ?, ?)');
+            // Thêm is_active = 0 khi tạo user
+            $st = $db->prepare('INSERT INTO users (email, name, password, is_active) VALUES (?, ?, ?, 0)');
             $st->execute([$email, $name, $pwd_hash]);
             $userId = $db->lastInsertId();
+
+            // Lưu token kích hoạt vào bảng password_resets
+            $token_stmt = $db->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
+            $token_stmt->execute([$email, $activation_token, $expires]);
+
+            // Gán vai trò 'Customer'
             $r = $db->prepare('SELECT id FROM roles WHERE name = ?');
             $r->execute(['Customer']);
             $role = $r->fetch();
@@ -65,34 +126,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ur = $db->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?,?)');
             $ur->execute([$userId, $roleId]);
             $db->commit();
-            $_SESSION['user_id'] = $userId;
 
-            // Hợp nhất giỏ hàng từ session vào DB sau khi đăng ký
-            if (!empty($_SESSION['cart'])) {
-                $cartId = null;
-                // Tạo giỏ hàng mới cho người dùng
-                $ins_cart = $db->prepare('INSERT INTO carts (user_id) VALUES (?)');
-                $ins_cart->execute([$userId]);
-                $cartId = $db->lastInsertId();
-
-                foreach ($_SESSION['cart'] as $sessionKey => $item) {
-                    $pid = (int)$item['product_id'];
-                    $qty = (int)$item['quantity'];
-                    $size = $item['size'] ?? null;
-                    add_or_update_cart_item($db, $cartId, $pid, $qty, $size);
-                }
-                unset($_SESSION['cart']);
+            // Gửi email kích hoạt
+            if (send_activation_email($email, $activation_token)) {
+                flash_set('success', 'Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.');
+            } else {
+                flash_set('error', 'Đăng ký thành công nhưng không thể gửi email kích hoạt. Vui lòng liên hệ hỗ trợ.');
             }
-
-            if (isset($_SESSION['return_to'])) {
-                $return_url = $_SESSION['return_to'];
-                unset($_SESSION['return_to']);
-                header('Location: ' . $return_url);
-                exit;
-            }
-
-            flash_set('success', 'Chào mừng! Tài khoản của bạn đã được tạo thành công.');
-            header('Location: index.php');
+            
+            // Chuyển hướng về trang đăng nhập để họ thấy thông báo
+            header('Location: login.php');
             exit;
         } catch (Exception $e) {
             if ($db->inTransaction()) { $db->rollBack(); }
