@@ -1353,7 +1353,11 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
         justify-content: center;
         color: #555;
         transition: all 0.3s ease;
+<<<<<<< Updated upstream
         flex-shrink: 0;
+=======
+
+>>>>>>> Stashed changes
     }
 
     .btn-share-mini:hover {
@@ -1392,4 +1396,50 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
         }
     }
 </script>
+<<<<<<< Updated upstream
+=======
+<!-- BACK HỆ THỐNG HOÀN HẢO CHO FACEBOOK & ZALO – 2025 FINAL VERSION -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ua = navigator.userAgent || "";
+        const ref = document.referrer || "";
+
+        // Chỉ chạy khi đến từ Facebook hoặc Zalo in-app browser
+        if (!/(FBAN|FBAV|Zalo|Messenger)/i.test(ua) &&
+            !ref.includes('facebook.com') &&
+            !ref.includes('zalo.me') &&
+            !ref.includes('l.facebook.com') &&
+            !ref.includes('lm.facebook.com')) {
+            return;
+        }
+
+        // Nếu không phải từ MXH → bỏ qua
+
+        // Cách siêu đơn giản nhưng cực kỳ hiệu quả:
+        // Khi khách bấm Back lần đầu → tự động nhảy về nguồn gốc
+        // Lần thứ 2 mới thoát hẳn
+        let backPressed = false;
+
+        window.onpopstate = function() {
+            if (!backPressed) {
+                backPressed = true;
+                if (ref) {
+                    location.replace(ref); // về đúng bài post
+                }
+            }
+        };
+
+        // Đẩy 1 bước lịch sử để lần Back đầu có hiệu lực
+        history.pushState({}, "");
+
+        // Fix cho trường hợp khách bấm Forward lại trang shop
+        window.addEventListener("pageshow", function(e) {
+            if (e.persisted) {
+                backPressed = false;
+                history.pushState({}, "");
+            }
+        });
+    });
+</script>
+>>>>>>> Stashed changes
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
