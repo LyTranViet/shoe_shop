@@ -50,15 +50,103 @@ if ($isLoggedIn) {
 
 $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 ?>
-<!DOCTYPE html>
-<html lang="vi">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Púp Bờ Si - Premium Shoes Store</title>
-    <meta name="description" content="Khám phá giày cao cấp tại Púp Bờ Si - xu hướng mới nhất cho nam, nữ và trẻ em.">
 
+    <?php
+    global $prod, $mainImage, $images; // Quan trọng: lấy biến từ product.php
+
+    $og_url = "https://shoeshop.dpdns.org" . $_SERVER['REQUEST_URI'];
+    $og_title = "Púp Bờ Si - Premium Shoes Store";
+    $og_description = "Khám phá giày thể thao chính hãng Nike, Adidas, Converse, Puma... Giá tốt ✓ Giao nhanh ✓ Đổi trả dễ dàng";
+    $og_image = "https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/assets/images/share.jpg";
+
+    if (basename($_SERVER['PHP_SELF']) === 'product.php' && isset($prod) && $prod) {
+        $og_title = htmlspecialchars($prod['name']) . " - Chỉ từ " . number_format($prod['price']) . "đ";
+        $desc = $prod['short_description'] ?? $prod['description'] ?? '';
+        $og_description = "✓ Chính hãng 100% ✓ " . mb_substr(strip_tags($desc), 0, 150) . "... Xem ngay tại Púp Bờ Si!";
+
+        $main_img = $mainImage ?? ($images[0]['url'] ?? 'assets/images/share.jpg');
+        if (strpos($main_img, 'http') !== 0) {
+            $main_img = "https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/" . ltrim($main_img, '/');
+        }
+        $og_image = $main_img;
+    }
+    ?>
+
+    <title><?php echo htmlspecialchars($og_title); ?></title>
+    <meta name="description" content="<?php echo htmlspecialchars($og_description); ?>">
+
+    <!-- Open Graph -->
+    <meta property="og:type"
+        content="<?php echo (basename($_SERVER['PHP_SELF']) === 'product.php') ? 'product' : 'website'; ?>">
+    <meta property="og:title" content="<?php echo htmlspecialchars($og_title); ?>" />
+    <meta property="og:description" content="<?php echo htmlspecialchars($og_description); ?>" />
+    <meta property="og:image" content="<?php echo $og_image; ?>" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="<?php echo htmlspecialchars($og_title); ?>" />
+    <meta property="og:url" content="<?php echo $og_url; ?>" />
+    <meta property="og:site_name" content="Púp Bờ Si" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="fb:app_id" content="966242223397117" /> <!-- ID giả phổ biến, nhiều shop dùng -->
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo htmlspecialchars($og_title); ?>">
+    <meta name="twitter:description" content="<?php echo htmlspecialchars($og_description); ?>">
+    <meta name="twitter:image" content="<?php echo $og_image; ?>">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="<?php echo $og_url; ?>" />
+    <meta name="robots" content="index, follow">
+
+    <!-- BACK VỀ NGUỒN GỐC SIÊU MƯỢT CHO FACEBOOK, ZALO, MESSENGER, TELEGRAM, v.v. -->
+    <!-- BACK HỆ THỐNG HOÀN HẢO CHO FACEBOOK & ZALO – 2025 FINAL VERSION -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ua = navigator.userAgent || "";
+            const ref = document.referrer || "";
+
+            // Chỉ chạy khi đến từ Facebook hoặc Zalo in-app browser
+            if (!/(FBAN|FBAV|Zalo|Messenger)/i.test(ua) &&
+                !ref.includes('facebook.com') &&
+                !ref.includes('zalo.me') &&
+                !ref.includes('l.facebook.com') &&
+                !ref.includes('lm.facebook.com')) {
+                return;
+            }
+
+            // Nếu không phải từ MXH → bỏ qua
+
+            // Cách siêu đơn giản nhưng cực kỳ hiệu quả:
+            // Khi khách bấm Back lần đầu → tự động nhảy về nguồn gốc
+            // Lần thứ 2 mới thoát hẳn
+            let backPressed = false;
+
+            window.onpopstate = function() {
+                if (!backPressed) {
+                    backPressed = true;
+                    if (ref) {
+                        location.replace(ref); // về đúng bài post
+                    }
+                }
+            };
+
+            // Đẩy 1 bước lịch sử để lần Back đầu có hiệu lực
+            history.pushState({}, "");
+
+            // Fix cho trường hợp khách bấm Forward lại trang shop
+            window.addEventListener("pageshow", function(e) {
+                if (e.persisted) {
+                    backPressed = false;
+                    history.pushState({}, "");
+                }
+            });
+        });
+    </script>
     <!-- External CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
