@@ -1353,11 +1353,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
         justify-content: center;
         color: #555;
         transition: all 0.3s ease;
-<<<<<<< Updated upstream
-        flex-shrink: 0;
-=======
 
->>>>>>> Stashed changes
     }
 
     .btn-share-mini:hover {
@@ -1396,8 +1392,8 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
         }
     }
 </script>
-<<<<<<< Updated upstream
-=======
+
+
 <!-- BACK HỆ THỐNG HOÀN HẢO CHO FACEBOOK & ZALO – 2025 FINAL VERSION -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -1441,5 +1437,4 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
         });
     });
 </script>
->>>>>>> Stashed changes
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

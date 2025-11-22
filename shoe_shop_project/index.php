@@ -4,13 +4,15 @@ require_once __DIR__ . '/includes/header.php';
 $banners = [];
 try {
     $banners = $db->query("SELECT * FROM banners WHERE is_active = 1 ORDER BY id DESC LIMIT 3")->fetchAll();
-} catch (PDOException $e) { /* ignore if table missing */ }
+} catch (PDOException $e) { /* ignore if table missing */
+}
 
 // New products (latest by id)
 $newProducts = [];
 try {
     $newProducts = $db->query('SELECT p.*, (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock FROM products p ORDER BY (total_stock > 0) DESC, id DESC LIMIT 7')->fetchAll();
-} catch (PDOException $e) { /* ignore */ }
+} catch (PDOException $e) { /* ignore */
+}
 
 // Best sellers (by quantity in order_items) - fallback to popular by price if not available
 $bestSellers = [];
@@ -28,14 +30,16 @@ try {
 } catch (PDOException $e) {
     try {
         $bestSellers = $db->query('SELECT * FROM products ORDER BY price DESC LIMIT 7')->fetchAll();
-    } catch (PDOException $e) { /* ignore */ }
+    } catch (PDOException $e) { /* ignore */
+    }
 }
 
 // Categories
 $categories = [];
 try {
     $categories = $db->query('SELECT * FROM categories LIMIT 6')->fetchAll();
-} catch (PDOException $e) { /* ignore */ }
+} catch (PDOException $e) { /* ignore */
+}
 
 // Fetch products for each category
 $productsByCategory = [];
@@ -78,10 +82,16 @@ if (!empty($categories)) {
 $imagesByProduct = [];
 try {
     $ids = [];
-    foreach ($newProducts as $p) { $ids[] = $p['id']; }
-    foreach ($bestSellers as $p) { $ids[] = $p['id']; }
+    foreach ($newProducts as $p) {
+        $ids[] = $p['id'];
+    }
+    foreach ($bestSellers as $p) {
+        $ids[] = $p['id'];
+    }
     if (isset($allCatProducts)) {
-        foreach ($allCatProducts as $p) { $ids[] = $p['id']; }
+        foreach ($allCatProducts as $p) {
+            $ids[] = $p['id'];
+        }
     }
     $ids = array_values(array_unique($ids));
     if (!empty($ids)) {
@@ -95,7 +105,8 @@ try {
             }
         }
     }
-} catch (PDOException $e) { /* ignore if table missing */ }
+} catch (PDOException $e) { /* ignore if table missing */
+}
 
 // Load sizes for all displayed products
 $sizesByProduct = [];
@@ -120,17 +131,19 @@ try {
 
 <style>
     .hero-banner {
-    position: relative;
-    height: 400px;
-    background: linear-gradient(45deg, var(--text-dark), var(--accent));
-    overflow: hidden;
-    border-radius: 0; /* Xóa bo góc */
-    margin-bottom: 3rem;
-    /* Kỹ thuật CSS để tràn viền */
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
+        position: relative;
+        height: 400px;
+        background: linear-gradient(45deg, var(--text-dark), var(--accent));
+        overflow: hidden;
+        border-radius: 0;
+        /* Xóa bo góc */
+        margin-bottom: 3rem;
+        /* Kỹ thuật CSS để tràn viền */
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
     }
+
     .banner-content {
         position: absolute;
         top: 50%;
@@ -142,17 +155,20 @@ try {
         width: 90%;
         max-width: 800px;
     }
+
     .banner-title {
         font-size: 3rem;
         font-weight: 800;
         margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
+
     .banner-subtitle {
         font-size: 1.25rem;
         margin-bottom: 2rem;
         opacity: 0.9;
     }
+
     .banner-cta {
         display: inline-block;
         padding: 1rem 2rem;
@@ -163,93 +179,115 @@ try {
         font-weight: 600;
         transition: transform 0.3s, background 0.3s;
     }
+
     .banner-cta:hover {
         background: var(--primary-dark);
         transform: translateY(-2px);
     }
+
     .features-section {
         padding: 4rem 0;
         background: var(--bg-light);
     }
+
     .features-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 2rem; 
+        gap: 2rem;
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 1rem;
     }
+
     .feature-card {
         text-align: center;
         padding: 2rem;
         background: var(--bg-white);
         border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         transition: transform 0.3s;
     }
+
     .feature-card:hover {
         transform: translateY(-5px);
     }
+
     .feature-icon {
         font-size: 2.5rem;
         margin-bottom: 1rem;
         color: var(--primary);
     }
+
     .feature-title {
         font-size: 1.2rem;
         color: var(--text-dark);
         margin-bottom: 0.5rem;
         font-weight: 600;
     }
+
     .feature-desc {
         color: var(--text-body);
         font-size: 0.95rem;
         line-height: 1.5;
     }
+
     .section-title {
         text-align: center;
         margin-bottom: 3rem;
     }
+
     .section-title h2 {
         font-size: 2.5rem;
         color: var(--text-dark);
         margin-bottom: 1rem;
     }
+
     .section-title p {
         color: var(--text-muted);
         font-size: 1.1rem;
         max-width: 600px;
         margin: 0 auto;
     }
+
     .banner-slider {
         /* Xóa CSS tràn viền cũ, vì giờ section đã nằm ngoài container */
         width: 100%;
         margin-top: 0;
     }
+
     .slides {
-        display: flex; /* Giữ nguyên */
+        display: flex;
+        /* Giữ nguyên */
         /* Xóa bo góc và đổ bóng để ảnh tràn viền */
         border-radius: 0;
         box-shadow: none;
-        position: relative; /* For absolute positioning of slides */
-        height: 400px; /* Set a fixed height */
+        position: relative;
+        /* For absolute positioning of slides */
+        height: 400px;
+        /* Set a fixed height */
     }
+
     .slide {
         position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         opacity: 0;
         transition: opacity 0.8s ease-in-out;
     }
+
     .slide img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
+
     .slider-nav {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255,255,255,0.9);
+        background: rgba(255, 255, 255, 0.9);
         border: none;
         width: 40px;
         height: 40px;
@@ -262,16 +300,25 @@ try {
         z-index: 2;
         transition: background 0.3s, transform 0.2s;
     }
-    .slider-nav.prev { left: 20px; }
-    .slider-nav.next { right: 20px; }
+
+    .slider-nav.prev {
+        left: 20px;
+    }
+
+    .slider-nav.next {
+        right: 20px;
+    }
+
     .slider-nav:hover {
         background: white;
         transform: translateY(-50%) scale(1.1);
     }
+
     .slide.active {
         opacity: 1;
         z-index: 1;
     }
+
     .slider-dots {
         position: absolute;
         bottom: 20px;
@@ -281,6 +328,7 @@ try {
         gap: 10px;
         z-index: 2;
     }
+
     .slider-dots .dot {
         width: 12px;
         height: 12px;
@@ -289,24 +337,30 @@ try {
         cursor: pointer;
         transition: background 0.3s, transform 0.2s;
     }
+
     .slider-dots .dot:hover {
         transform: scale(1.2);
     }
+
     .slider-dots .dot.active {
         background: white;
     }
+
     @media (max-width: 992px) {
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
+
     @media (max-width: 576px) {
         .hero-banner {
             height: 400px;
         }
+
         .banner-title {
             font-size: 2rem;
         }
+
         .features-grid {
             grid-template-columns: 1fr;
         }
@@ -318,9 +372,11 @@ try {
         <div class="slides">
             <?php foreach ($banners as $b): ?>
                 <div class="slide">
-                <?php if (!empty($b['link'])): ?><a href="<?php echo htmlspecialchars($b['link']); ?>"><?php endif; ?>
-                    <img src="<?php echo htmlspecialchars($b['image_url'] ?? 'assets/images/banner/banner2.jpg'); ?>" alt="<?php echo htmlspecialchars($b['title'] ?? 'Banner'); ?>" style="width:100%; height:100%; object-fit:cover;">
-                <?php if (!empty($b['link'])): ?></a><?php endif; ?>
+                    <?php if (!empty($b['link'])): ?><a href="<?php echo htmlspecialchars($b['link']); ?>"><?php endif; ?>
+                        <img src="<?php echo htmlspecialchars($b['image_url'] ?? 'assets/images/banner/banner2.jpg'); ?>"
+                            alt="<?php echo htmlspecialchars($b['title'] ?? 'Banner'); ?>"
+                            style="width:100%; height:100%; object-fit:cover;">
+                        <?php if (!empty($b['link'])): ?></a><?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -331,19 +387,20 @@ try {
 <?php endif; ?>
 
 <section class="hero-banner">
-        <div class="banner-content">
-            <h1 class="banner-title">Step into Style</h1>
-            <p class="banner-subtitle">Discover our latest collection of trendy and comfortable footwear for every occasion</p>
-            <a href="<?php echo BASE_URL; ?>category.php?sort=newest" class="banner-cta">Shop Now</a>
-        </div>
+    <div class="banner-content">
+        <h1 class="banner-title">Step into Style</h1>
+        <p class="banner-subtitle">Discover our latest collection of trendy and comfortable footwear for every occasion
+        </p>
+        <a href="<?php echo BASE_URL; ?>category.php?sort=newest" class="banner-cta">Shop Now</a>
+    </div>
 </section>
 
 <section class="features-section">
-        <div class="section-title">
-            <h2>Why Choose Us</h2>
-            <p>Experience the best in footwear shopping with our premium services and guarantees</p>
-        </div>
-        <div class="features-grid">
+    <div class="section-title">
+        <h2>Why Choose Us</h2>
+        <p>Experience the best in footwear shopping with our premium services and guarantees</p>
+    </div>
+    <div class="features-grid">
         <div class="feature-card">
             <div class="feature-icon">🚚</div>
             <h3 class="feature-title">Free Shipping</h3>
@@ -372,14 +429,16 @@ try {
             padding: 4rem 0;
             background: var(--bg-white);
         }
+
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 2rem;
-            padding: 0 1rem; 
+            padding: 0 1rem;
             max-width: 1200px;
             margin: 0 auto;
         }
+
         .product-card {
             background: var(--bg-white);
             border-radius: 12px;
@@ -388,14 +447,17 @@ try {
             border: 1px solid var(--border);
             transition: transform 0.3s;
         }
+
         .product-card:hover {
             transform: translateY(-5px);
         }
+
         .product-image {
             position: relative;
             padding-top: 100%;
             overflow: hidden;
         }
+
         .product-image img {
             position: absolute;
             top: 0;
@@ -405,12 +467,15 @@ try {
             object-fit: cover;
             transition: transform 0.3s;
         }
+
         .product-card:hover .product-image img {
             transform: scale(1.05);
         }
+
         .product-info {
             padding: 1.5rem;
         }
+
         .product-name {
             font-size: 1.1rem;
             font-weight: 600;
@@ -418,56 +483,68 @@ try {
             margin-bottom: 0.5rem;
             text-decoration: none;
         }
+
         .product-name:hover {
             color: var(--primary);
         }
+
         .product-price {
             color: var(--text-dark);
             font-size: 1.2rem;
             font-weight: 700;
             margin-bottom: 1rem;
         }
+
         .product-actions {
-            display: flex; 
-            justify-content: center; 
-            gap: 8px; 
-            margin-top: 10px; 
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
         }
+
         .product-actions .btn {
-            font-size: 0.98em; 
-            padding: 8px 14px; 
-            border-radius: 7px; 
+            font-size: 0.98em;
+            padding: 8px 14px;
+            border-radius: 7px;
         }
+
         .product-actions .ajax-add-cart .btn {
             background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
             color: #fff;
         }
+
         .product-actions .ajax-wishlist .btn {
-            background: var(--bg-gray); 
-            color: var(--primary); 
-            border: 1px solid var(--primary-light); 
+            background: var(--bg-gray);
+            color: var(--primary);
+            border: 1px solid var(--primary-light);
         }
+
         .product-actions .ajax-wishlist .btn:hover {
-            background: var(--primary); 
-            color: #fff; 
+            background: var(--primary);
+            color: #fff;
         }
+
         .section-header {
             text-align: center;
             margin-bottom: 3rem;
         }
+
         .section-header h2 {
             font-size: 2rem;
             color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
+
         .section-header p {
             color: var(--text-muted);
             font-size: 1.1rem;
         }
+
         .view-more {
             text-align: center;
             margin-top: 2rem;
         }
+
         .view-more-link {
             display: inline-block;
             padding: 0.75rem 2rem;
@@ -478,26 +555,38 @@ try {
             font-weight: 500;
             transition: all 0.2s;
         }
+
         .view-more-link:hover {
             background: var(--border);
             transform: translateX(5px);
         }
+
         /* Styles for size selection, copied from category.php */
         .product-sizes {
-            display: none; /* Ẩn mặc định */
+            display: none;
+            /* Ẩn mặc định */
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
             margin-top: 12px;
-            padding-top: 12px; 
+            padding-top: 12px;
             border-top: 1px solid var(--bg-gray);
         }
-        .product-sizes.active { display: flex; } /* Hiện khi có class active */
-        .product-sizes .btn-size {
-            font-size: 0.85em; padding: 6px 10px; background: var(--border);
+
+        .product-sizes.active {
+            display: flex;
         }
+
+        /* Hiện khi có class active */
+        .product-sizes .btn-size {
+            font-size: 0.85em;
+            padding: 6px 10px;
+            background: var(--border);
+        }
+
         .product-sizes .btn-size:hover {
-            background: var(--primary); color: #fff;
+            background: var(--primary);
+            color: #fff;
         }
     </style>
     <style>
@@ -505,7 +594,8 @@ try {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(220, 53, 69, 0.95); /* var(--danger) with opacity */
+            background: rgba(220, 53, 69, 0.95);
+            /* var(--danger) with opacity */
             color: white;
             padding: 4px 8px;
             font-size: 0.8em;
@@ -626,7 +716,8 @@ try {
         /* Cho phép Swiper tự chia đều width */
         .product-carousel-wrapper .swiper-slide {
             width: auto !important;
-            flex-shrink: 0 !important; /* Tương đương flex: 0 0 auto */
+            flex-shrink: 0 !important;
+            /* Tương đương flex: 0 0 auto */
         }
 
         .product-carousel-wrapper .product {
@@ -651,18 +742,58 @@ try {
                 justify-content: space-between;
                 position: relative;
             }
-            .product:hover { box-shadow: 0 8px 28px rgba(14, 165, 255, 0.13); transform: translateY(-6px) scale(1.03); }
-            .product .thumb { margin-bottom: 14px; }
-            .product .thumb img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(186, 230, 253, 0.2); }
+
+            .product:hover {
+                box-shadow: 0 8px 28px rgba(14, 165, 255, 0.13);
+                transform: translateY(-6px) scale(1.03);
+            }
+
+            .product .thumb {
+                margin-bottom: 14px;
+            }
+
+            .product .thumb img {
+                max-width: 100%;
+                height: 180px;
+                object-fit: cover;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(186, 230, 253, 0.2);
+            }
+
             .product .product-main {
                 display: flex;
                 flex-direction: column;
-                flex-grow: 1; /* Cho phép phần này co giãn */
+                flex-grow: 1;
+                /* Cho phép phần này co giãn */
             }
-            .product h3, .product h4 { font-size: 1.13em; margin: 8px 0 6px 0; font-weight: 700; color: var(--accent); flex-grow: 1; /* Cho phép tên sản phẩm co giãn để đẩy các phần tử khác xuống */ }
-            .product p.price { font-size: 1.08em; color: var(--primary); margin: 0 0 8px 0; font-weight: 700; }
-            .product-actions .btn-wishlist { background: var(--bg-gray); color: var(--primary); border: 1px solid var(--primary-light); }
-            .product-actions .btn-wishlist:hover { background: var(--primary); color: #fff; }
+
+            .product h3,
+            .product h4 {
+                font-size: 1.13em;
+                margin: 8px 0 6px 0;
+                font-weight: 700;
+                color: var(--accent);
+                flex-grow: 1;
+                /* Cho phép tên sản phẩm co giãn để đẩy các phần tử khác xuống */
+            }
+
+            .product p.price {
+                font-size: 1.08em;
+                color: var(--primary);
+                margin: 0 0 8px 0;
+                font-weight: 700;
+            }
+
+            .product-actions .btn-wishlist {
+                background: var(--bg-gray);
+                color: var(--primary);
+                border: 1px solid var(--primary-light);
+            }
+
+            .product-actions .btn-wishlist:hover {
+                background: var(--primary);
+                color: #fff;
+            }
         </style>
 
         <div class="section-header">
@@ -672,110 +803,7 @@ try {
         <div class="product-carousel-wrapper">
             <div class="swiper product-carousel">
                 <div class="swiper-wrapper">
-                <?php foreach ($newProducts as $p): ?>
-                <div class="swiper-slide product">
-                    <div class="product-main">
-                        <div class="thumb">
-                            <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
-                                <div class="out-of-stock-badge">Hết hàng</div>
-                            <?php endif; ?>
-                            <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
-                            <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
-                        </div>
-                        <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
-                        <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
-                        <div class="product-actions">
-                            <?php if (isset($p['total_stock']) && $p['total_stock'] > 0 && !empty($sizesByProduct[$p['id']])): ?>
-                                <button class="btn btn-choose-size" data-product-id="<?php echo $p['id']; ?>">Thêm vào giỏ hàng</button>
-                            <?php else: ?>
-                                <button class="btn" disabled>Thêm vào giỏ hàng</button>
-                            <?php endif; ?>
-                            <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
-                                <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
-                                <button class="btn btn-wishlist" type="submit">❤</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="product-sizes" id="sizes-for-<?php echo $p['id']; ?>">
-                        <?php if (!empty($sizesByProduct[$p['id']])): ?>
-                            <?php foreach ($sizesByProduct[$p['id']] as $size): ?>
-                                <button class="btn btn-size" data-product-id="<?php echo $p['id']; ?>" data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-                </div>
-            </div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-button-next"></div>
-        </div>
-            <div class="section-footer">
-                <a href="<?php echo BASE_URL; ?>category.php?sort=newest" class="section-view-more">View more →</a>
-            </div>
-    </section>
-<?php endif; ?>
-
-<?php if (!empty($bestSellers)): ?><section class="product-section">
-    <div class="section-header"><h2>Best Sellers</h2></div>
-    <div class="product-carousel-wrapper">
-        <div class="swiper product-carousel">
-            <div class="swiper-wrapper">
-            <?php foreach ($bestSellers as $p): ?>
-            <div class="swiper-slide product">
-                <div class="product-main">
-                    <div class="thumb">
-                        <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
-                            <div class="out-of-stock-badge">Hết hàng</div>
-                        <?php endif; ?>
-                        <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
-                        <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
-                    </div>
-                    <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h3>
-                    <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
-                    <div class="product-actions">
-                        <?php if (isset($p['total_stock']) && $p['total_stock'] > 0 && !empty($sizesByProduct[$p['id']])): ?>
-                            <button class="btn btn-choose-size" data-product-id="<?php echo $p['id']; ?>">Thêm vào giỏ hàng</button>
-                        <?php else: ?>
-                            <button class="btn" disabled>Thêm vào giỏ hàng</button>
-                        <?php endif; ?>
-                        <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
-                            <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
-                            <button class="btn btn-wishlist" type="submit">❤</button>
-                        </form>
-                    </div>
-                    </div>
-                    <div class="product-sizes" id="sizes-for-<?php echo $p['id']; ?>">
-                        <?php if (!empty($sizesByProduct[$p['id']])): ?>
-                            <?php foreach ($sizesByProduct[$p['id']] as $size): ?>
-                                <button class="btn btn-size" data-product-id="<?php echo $p['id']; ?>" data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-            </div>
-        </div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
-    </div>
-        <div class="section-footer">
-            <a href="<?php echo BASE_URL; ?>category.php?sort=bestsellers" class="section-view-more">View more →</a>
-        </div>
-</section>
-<?php endif; ?>
-
-<?php if (!empty($categories)): ?>
-    <div class="section-header"><h2>Categories</h2></div>
-    <?php foreach ($categories as $c): ?>
-        <section class="product-section">
-            <div class="section-header">
-                <h3><?php echo htmlspecialchars($c['name']); ?></h3>
-            </div>
-            <div class="product-carousel-wrapper">
-                <div class="swiper product-carousel">
-                    <div class="swiper-wrapper">
-                        <?php if (!empty($productsByCategory[$c['id']])): foreach ($productsByCategory[$c['id']] as $p): ?>
+                    <?php foreach ($newProducts as $p): ?>
                         <div class="swiper-slide product">
                             <div class="product-main">
                                 <div class="thumb">
@@ -783,13 +811,18 @@ try {
                                         <div class="out-of-stock-badge">Hết hàng</div>
                                     <?php endif; ?>
                                     <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
-                                    <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                                    <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img
+                                            src="<?php echo htmlspecialchars($img); ?>"
+                                            alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                                 </div>
-                                <h4><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
+                                <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"
+                                        style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a>
+                                </h3>
                                 <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                                 <div class="product-actions">
                                     <?php if (isset($p['total_stock']) && $p['total_stock'] > 0 && !empty($sizesByProduct[$p['id']])): ?>
-                                        <button class="btn btn-choose-size" data-product-id="<?php echo $p['id']; ?>">Thêm vào giỏ hàng</button>
+                                        <button class="btn btn-choose-size" data-product-id="<?php echo $p['id']; ?>">Thêm vào giỏ
+                                            hàng</button>
                                     <?php else: ?>
                                         <button class="btn" disabled>Thêm vào giỏ hàng</button>
                                     <?php endif; ?>
@@ -801,18 +834,141 @@ try {
                             </div>
                             <div class="product-sizes" id="sizes-for-<?php echo $p['id']; ?>">
                                 <?php if (!empty($sizesByProduct[$p['id']])): ?>
-                                    <?php foreach ($sizesByProduct[$p['id']] as $size): ?><button class="btn btn-size" data-product-id="<?php echo $p['id']; ?>" data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button><?php endforeach; ?>
+                                    <?php foreach ($sizesByProduct[$p['id']] as $size): ?>
+                                        <button class="btn btn-size" data-product-id="<?php echo $p['id']; ?>"
+                                            data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button>
+                                    <?php endforeach; ?>
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <?php endforeach; endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+        <div class="section-footer">
+            <a href="<?php echo BASE_URL; ?>category.php?sort=newest" class="section-view-more">View more →</a>
+        </div>
+    </section>
+<?php endif; ?>
+
+<?php if (!empty($bestSellers)): ?><section class="product-section">
+        <div class="section-header">
+            <h2>Best Sellers</h2>
+        </div>
+        <div class="product-carousel-wrapper">
+            <div class="swiper product-carousel">
+                <div class="swiper-wrapper">
+                    <?php foreach ($bestSellers as $p): ?>
+                        <div class="swiper-slide product">
+                            <div class="product-main">
+                                <div class="thumb">
+                                    <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
+                                        <div class="out-of-stock-badge">Hết hàng</div>
+                                    <?php endif; ?>
+                                    <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
+                                    <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img
+                                            src="<?php echo htmlspecialchars($img); ?>"
+                                            alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                                </div>
+                                <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"
+                                        style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a>
+                                </h3>
+                                <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
+                                <div class="product-actions">
+                                    <?php if (isset($p['total_stock']) && $p['total_stock'] > 0 && !empty($sizesByProduct[$p['id']])): ?>
+                                        <button class="btn btn-choose-size" data-product-id="<?php echo $p['id']; ?>">Thêm vào giỏ
+                                            hàng</button>
+                                    <?php else: ?>
+                                        <button class="btn" disabled>Thêm vào giỏ hàng</button>
+                                    <?php endif; ?>
+                                    <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
+                                        <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
+                                        <button class="btn btn-wishlist" type="submit">❤</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="product-sizes" id="sizes-for-<?php echo $p['id']; ?>">
+                                <?php if (!empty($sizesByProduct[$p['id']])): ?>
+                                    <?php foreach ($sizesByProduct[$p['id']] as $size): ?>
+                                        <button class="btn btn-size" data-product-id="<?php echo $p['id']; ?>"
+                                            data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+        <div class="section-footer">
+            <a href="<?php echo BASE_URL; ?>category.php?sort=bestsellers" class="section-view-more">View more →</a>
+        </div>
+    </section>
+<?php endif; ?>
+
+<?php if (!empty($categories)): ?>
+    <div class="section-header">
+        <h2>Categories</h2>
+    </div>
+    <?php foreach ($categories as $c): ?>
+        <section class="product-section">
+            <div class="section-header">
+                <h3><?php echo htmlspecialchars($c['name']); ?></h3>
+            </div>
+            <div class="product-carousel-wrapper">
+                <div class="swiper product-carousel">
+                    <div class="swiper-wrapper">
+                        <?php if (!empty($productsByCategory[$c['id']])): foreach ($productsByCategory[$c['id']] as $p): ?>
+                                <div class="swiper-slide product">
+                                    <div class="product-main">
+                                        <div class="thumb">
+                                            <?php if (isset($p['total_stock']) && $p['total_stock'] <= 0): ?>
+                                                <div class="out-of-stock-badge">Hết hàng</div>
+                                            <?php endif; ?>
+                                            <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
+                                            <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img
+                                                    src="<?php echo htmlspecialchars($img); ?>"
+                                                    alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                                        </div>
+                                        <h4><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"
+                                                style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a>
+                                        </h4>
+                                        <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
+                                        <div class="product-actions">
+                                            <?php if (isset($p['total_stock']) && $p['total_stock'] > 0 && !empty($sizesByProduct[$p['id']])): ?>
+                                                <button class="btn btn-choose-size" data-product-id="<?php echo $p['id']; ?>">Thêm vào giỏ
+                                                    hàng</button>
+                                            <?php else: ?>
+                                                <button class="btn" disabled>Thêm vào giỏ hàng</button>
+                                            <?php endif; ?>
+                                            <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
+                                                <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
+                                                <button class="btn btn-wishlist" type="submit">❤</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="product-sizes" id="sizes-for-<?php echo $p['id']; ?>">
+                                        <?php if (!empty($sizesByProduct[$p['id']])): ?>
+                                            <?php foreach ($sizesByProduct[$p['id']] as $size): ?><button class="btn btn-size"
+                                                    data-product-id="<?php echo $p['id']; ?>"
+                                                    data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></button><?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                        <?php endforeach;
+                        endif; ?>
                     </div>
                 </div>
                 <div class="swiper-button-prev"></div>
                 <div class="swiper-button-next"></div>
             </div>
             <div class="section-footer">
-                <a href="<?php echo BASE_URL; ?>category.php?category_id[]=<?php echo $c['id']; ?>" class="section-view-more">View more →</a>
+                <a href="<?php echo BASE_URL; ?>category.php?category_id[]=<?php echo $c['id']; ?>"
+                    class="section-view-more">View more →</a>
             </div>
         </section>
     <?php endforeach; ?>
@@ -823,20 +979,23 @@ try {
         padding: 4rem 0;
         background: var(--bg-light);
     }
+
     .testimonials-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
-        max-width: 1200px; 
+        max-width: 1200px;
         margin: 0 auto;
         padding: 0 1rem;
     }
+
     .testimonial-card {
         background: var(--bg-white);
         padding: 2rem;
         border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
+
     .testimonial-text {
         color: var(--text-muted);
         font-size: 1.1rem;
@@ -844,11 +1003,13 @@ try {
         margin-bottom: 1.5rem;
         font-style: italic;
     }
+
     .testimonial-author {
         display: flex;
         align-items: center;
         gap: 1rem;
     }
+
     .author-avatar {
         width: 50px;
         height: 50px;
@@ -859,41 +1020,49 @@ try {
         justify-content: center;
         font-size: 1.5rem;
     }
+
     .author-info h4 {
         color: var(--text-dark);
         margin: 0;
         font-size: 1.1rem;
     }
+
     .author-info p {
         color: var(--text-muted);
         margin: 0;
         font-size: 0.9rem;
     }
+
     .newsletter-section {
         padding: 4rem 0;
         background: linear-gradient(45deg, var(--text-dark), var(--accent));
         color: white;
         text-align: center;
     }
+
     .newsletter-content {
         max-width: 600px;
         margin: 0 auto;
         padding: 0 1rem;
     }
+
     .newsletter-title {
         font-size: 2rem;
         margin-bottom: 1rem;
     }
+
     .newsletter-desc {
         opacity: 0.9;
         margin-bottom: 2rem;
     }
+
     .newsletter-form {
         display: flex;
         gap: 1rem;
         margin: 0 auto;
         max-width: 500px;
     }
+
     .newsletter-input {
         flex: 1;
         padding: 1rem;
@@ -901,6 +1070,7 @@ try {
         border-radius: 30px;
         font-size: 1rem;
     }
+
     .newsletter-button {
         padding: 1rem 2rem;
         background: var(--primary);
@@ -911,21 +1081,26 @@ try {
         font-weight: 600;
         transition: background 0.3s, transform 0.3s;
     }
+
     .newsletter-button:hover {
         background: var(--primary-dark);
     }
+
     @media (max-width: 992px) {
         .testimonials-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
+
     @media (max-width: 768px) {
         .testimonials-grid {
             grid-template-columns: 1fr;
         }
+
         .newsletter-form {
             flex-direction: column;
         }
+
         .newsletter-button {
             width: 100%;
         }
@@ -933,13 +1108,14 @@ try {
 </style>
 
 <section class="testimonials-section">
-        <div class="section-title">
-            <h2>What Our Customers Say</h2>
-            <p>Real experiences from our satisfied customers</p>
-        </div>
-        <div class="testimonials-grid">
+    <div class="section-title">
+        <h2>What Our Customers Say</h2>
+        <p>Real experiences from our satisfied customers</p>
+    </div>
+    <div class="testimonials-grid">
         <div class="testimonial-card">
-            <p class="testimonial-text">"Amazing selection of shoes! The quality is outstanding, and the delivery was super fast. Will definitely shop here again!"</p>
+            <p class="testimonial-text">"Amazing selection of shoes! The quality is outstanding, and the delivery was
+                super fast. Will definitely shop here again!"</p>
             <div class="testimonial-author">
                 <div class="author-avatar">👤</div>
                 <div class="author-info">
@@ -949,7 +1125,8 @@ try {
             </div>
         </div>
         <div class="testimonial-card">
-            <p class="testimonial-text">"The customer service is exceptional. They helped me find the perfect size, and the shoes are incredibly comfortable."</p>
+            <p class="testimonial-text">"The customer service is exceptional. They helped me find the perfect size, and
+                the shoes are incredibly comfortable."</p>
             <div class="testimonial-author">
                 <div class="author-avatar">👤</div>
                 <div class="author-info">
@@ -959,7 +1136,8 @@ try {
             </div>
         </div>
         <div class="testimonial-card">
-            <p class="testimonial-text">"Great prices and even better quality. The return process was smooth when I needed a different size. Highly recommend!"</p>
+            <p class="testimonial-text">"Great prices and even better quality. The return process was smooth when I
+                needed a different size. Highly recommend!"</p>
             <div class="testimonial-author">
                 <div class="author-avatar">👤</div>
                 <div class="author-info">
@@ -974,7 +1152,8 @@ try {
 <section class="newsletter-section">
     <div class="newsletter-content">
         <h2 class="newsletter-title">Stay in Step with Us</h2>
-        <p class="newsletter-desc">Subscribe to our newsletter for exclusive offers, new arrivals, and shoe care tips!</p>
+        <p class="newsletter-desc">Subscribe to our newsletter for exclusive offers, new arrivals, and shoe care tips!
+        </p>
         <form class="newsletter-form" action="#" method="POST">
             <input type="email" class="newsletter-input" placeholder="Enter your email address" required>
             <button type="submit" class="newsletter-button">Subscribe</button>
@@ -983,93 +1162,107 @@ try {
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const slider = document.querySelector('.banner-slider');
-    if (slider) {
-        const slides = Array.from(slider.querySelectorAll('.slide'));
-        const prevBtn = slider.querySelector('.slider-nav.prev');
-        const nextBtn = slider.querySelector('.slider-nav.next');
-        const dotsContainer = slider.querySelector('.slider-dots');
-        let currentIndex = 0;
-        let slideInterval;
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.querySelector('.banner-slider');
+        if (slider) {
+            const slides = Array.from(slider.querySelectorAll('.slide'));
+            const prevBtn = slider.querySelector('.slider-nav.prev');
+            const nextBtn = slider.querySelector('.slider-nav.next');
+            const dotsContainer = slider.querySelector('.slider-dots');
+            let currentIndex = 0;
+            let slideInterval;
 
-        if (slides.length === 0) return;
+            if (slides.length === 0) return;
 
-        function goToSlide(index) {
-            slides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
-            });
-            if (dotsContainer) {
-                Array.from(dotsContainer.children).forEach((dot, i) => {
-                    dot.classList.toggle('active', i === index);
+            function goToSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
+                if (dotsContainer) {
+                    Array.from(dotsContainer.children).forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                }
+                currentIndex = index;
+            }
+
+            function nextSlide() {
+                const nextIndex = (currentIndex + 1) % slides.length;
+                goToSlide(nextIndex);
+            }
+
+            function prevSlide() {
+                const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+                goToSlide(prevIndex);
+            }
+
+            function startSlider() {
+                stopSlider(); // Clear any existing interval
+                slideInterval = setInterval(nextSlide, 10000); // Change slide every 10 seconds
+            }
+
+            function stopSlider() {
+                clearInterval(slideInterval);
+            }
+
+            if (prevBtn && nextBtn) {
+                prevBtn.addEventListener('click', () => {
+                    prevSlide();
+                    startSlider();
+                });
+                nextBtn.addEventListener('click', () => {
+                    nextSlide();
+                    startSlider();
                 });
             }
-            currentIndex = index;
-        }
 
-        function nextSlide() {
-            const nextIndex = (currentIndex + 1) % slides.length;
-            goToSlide(nextIndex);
+            // Initial setup
+            goToSlide(0);
+            if (slides.length > 1) {
+                startSlider();
+                slider.addEventListener('mouseenter', stopSlider);
+                slider.addEventListener('mouseleave', startSlider);
+            }
         }
-
-        function prevSlide() {
-            const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
-            goToSlide(prevIndex);
-        }
-
-        function startSlider() {
-            stopSlider(); // Clear any existing interval
-            slideInterval = setInterval(nextSlide, 10000); // Change slide every 10 seconds
-        }
-
-        function stopSlider() {
-            clearInterval(slideInterval);
-        }
-
-        if (prevBtn && nextBtn) {
-            prevBtn.addEventListener('click', () => { prevSlide(); startSlider(); });
-            nextBtn.addEventListener('click', () => { nextSlide(); startSlider(); });
-        }
-
-        // Initial setup
-        goToSlide(0);
-        if (slides.length > 1) {
-            startSlider();
-            slider.addEventListener('mouseenter', stopSlider);
-            slider.addEventListener('mouseleave', startSlider);
-        }
-    }
-});
+    });
 </script>
 
 <!-- Thêm thư viện Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.product-carousel-wrapper').forEach(wrapper => {
-    const swiperEl = wrapper.querySelector('.swiper');
-    if (!swiperEl) return;
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.product-carousel-wrapper').forEach(wrapper => {
+            const swiperEl = wrapper.querySelector('.swiper');
+            if (!swiperEl) return;
 
-    new Swiper(swiperEl, {
-      slidesPerView: 5,          // chỉ hiển thị 5 sản phẩm cùng lúc
-      slidesPerGroup: 1,          // mỗi lần trượt sang 1 sản phẩm
-      spaceBetween: 20,           // khoảng cách giữa các sản phẩm
-      loop: false,                // không lặp lại
-      watchOverflow: true,
-            navigation: {
-                nextEl: wrapper.querySelector('.swiper-button-next'),
-                prevEl: wrapper.querySelector('.swiper-button-prev'),
-            },
-            breakpoints: {
-        0: { slidesPerView: 2 },
-        576: { slidesPerView: 3 },
-        992: { slidesPerView: 4 },
-        1200: { slidesPerView: 5 },
-            }
+            new Swiper(swiperEl, {
+                slidesPerView: 5, // chỉ hiển thị 5 sản phẩm cùng lúc
+                slidesPerGroup: 1, // mỗi lần trượt sang 1 sản phẩm
+                spaceBetween: 20, // khoảng cách giữa các sản phẩm
+                loop: false, // không lặp lại
+                watchOverflow: true,
+                navigation: {
+                    nextEl: wrapper.querySelector('.swiper-button-next'),
+                    prevEl: wrapper.querySelector('.swiper-button-prev'),
+                },
+                breakpoints: {
+                    0: {
+                        slidesPerView: 2
+                    },
+                    576: {
+                        slidesPerView: 3
+                    },
+                    992: {
+                        slidesPerView: 4
+                    },
+                    1200: {
+                        slidesPerView: 5
+                    },
+                }
+            });
         });
     });
-});
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -1082,26 +1275,26 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('size', size);
 
             fetch('cart.php', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json' // Báo cho server biết client muốn nhận JSON
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Chuyển hướng đến trang giỏ hàng sau khi thêm thành công
-                    window.location.href = 'cart.php';
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json' // Báo cho server biết client muốn nhận JSON
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Chuyển hướng đến trang giỏ hàng sau khi thêm thành công
+                        window.location.href = 'cart.php';
 
-                } else {
-                    alert('Có lỗi xảy ra, không thể thêm vào giỏ hàng.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Lỗi kết nối, vui lòng thử lại.');
-            });
+                    } else {
+                        alert('Có lỗi xảy ra, không thể thêm vào giỏ hàng.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Lỗi kết nối, vui lòng thử lại.');
+                });
         }
 
         // Gắn sự kiện cho các nút "Thêm vào giỏ hàng"
@@ -1147,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
+</script>
 <!-- Box chat mini bên trái -->
 <a href="<?php echo BASE_URL; ?>admin/live_chat.php" class="floating-chat-box">
     <div class="chat-icon">💬</div>
@@ -1156,72 +1349,73 @@ document.addEventListener('DOMContentLoaded', () => {
 </a>
 
 <style>
-/* Box chat mini */
-.floating-chat-box {
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-    background: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    font-weight: 600;
-    z-index: 9999;
-    transition: all 0.2s ease;
-}
+    /* Box chat mini */
+    .floating-chat-box {
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        font-weight: 600;
+        z-index: 9999;
+        transition: all 0.2s ease;
+    }
 
-.floating-chat-box:hover {
-    transform: scale(1.05);
-    background: #0056d2;
-}
+    .floating-chat-box:hover {
+        transform: scale(1.05);
+        background: #0056d2;
+    }
 
-.chat-icon {
-    font-size: 20px;
-}
+    .chat-icon {
+        font-size: 20px;
+    }
 
-.chat-text {
-    font-size: 15px;
-}
+    .chat-text {
+        font-size: 15px;
+    }
 
-.chat-notify {
-    background: red;
-    color: white;
-    font-size: 12px;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 5px;
-    padding: 2px;
-    font-weight: 700;
-    display: none;
-}
+    .chat-notify {
+        background: red;
+        color: white;
+        font-size: 12px;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 5px;
+        padding: 2px;
+        font-weight: 700;
+        display: none;
+    }
 </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-// Lấy số tin nhắn chưa đọc của admin
-setInterval(() => {
-    $.post('<?php echo BASE_URL; ?>chat_api.php', 
-    { action: 'admin_unread_count' }, 
-    function(res) {
-        if (res.success) {
-            const notify = $('#chat-notify');
-            notify.text(res.count);
+    // Lấy số tin nhắn chưa đọc của admin
+    setInterval(() => {
+        $.post('<?php echo BASE_URL; ?>chat_api.php', {
+                action: 'admin_unread_count'
+            },
+            function(res) {
+                if (res.success) {
+                    const notify = $('#chat-notify');
+                    notify.text(res.count);
 
-            if (res.count > 0) notify.show();
-            else notify.hide();
-        }
-    }, 'json');
-}, 2000);
+                    if (res.count > 0) notify.show();
+                    else notify.hide();
+                }
+            }, 'json');
+    }, 2000);
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
