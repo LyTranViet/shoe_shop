@@ -97,51 +97,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // captcha valid: remove to avoid reuse
         unset($_SESSION['register_captcha'], $_SESSION['register_captcha_q']);
 
-        $pwd_hash = password_hash($password, PASSWORD_DEFAULT);
-        $activation_token = bin2hex(random_bytes(32));
-        $expires = date('Y-m-d H:i:s', time() + 86400); // Hết hạn sau 24 giờ
+        // Kiểm tra xem email đã tồn tại chưa
+        $stmt_check = $db->prepare('SELECT id FROM users WHERE email = ?');
+        $stmt_check->execute([$email]);
 
-        try {
-            $db->beginTransaction();
-            // Thêm is_active = 0 khi tạo user
-            $st = $db->prepare('INSERT INTO users (email, name, password, is_active) VALUES (?, ?, ?, 0)');
-            $st->execute([$email, $name, $pwd_hash]);
-            $userId = $db->lastInsertId();
-
-            // Lưu token kích hoạt vào bảng password_resets
-            $token_stmt = $db->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
-            $token_stmt->execute([$email, $activation_token, $expires]);
-
-            // Gán vai trò 'Customer'
-            $r = $db->prepare('SELECT id FROM roles WHERE name = ?');
-            $r->execute(['Customer']);
-            $role = $r->fetch();
-            if (!$role) {
-                $insr = $db->prepare('INSERT INTO roles (name) VALUES (?)');
-                $insr->execute(['Customer']);
-                $roleId = $db->lastInsertId();
-            } else {
-                $roleId = $role['id'];
-            }
-            $ur = $db->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?,?)');
-            $ur->execute([$userId, $roleId]);
-            $db->commit();
-
-            // Gửi email kích hoạt
-            if (send_activation_email($email, $activation_token)) {
-                flash_set('success', 'Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.');
-            } else {
-                flash_set('error', 'Đăng ký thành công nhưng không thể gửi email kích hoạt. Vui lòng liên hệ hỗ trợ.');
-            }
-            
-            // Chuyển hướng về trang đăng nhập để họ thấy thông báo
-            header('Location: login.php');
-            exit;
-        } catch (Exception $e) {
-            if ($db->inTransaction()) { $db->rollBack(); }
-            flash_set('error','Could not register (maybe email exists)');
+        if ($stmt_check->fetch()) {
+            // Nếu email đã tồn tại, hiển thị thông báo lỗi
+            flash_set('error', 'Email này đã tồn tại, vui lòng thử lại.');
             $show_shake = true;
             $captcha_question = generate_register_captcha();
+        } else {
+            // Nếu email chưa tồn tại, tiến hành đăng ký
+            $pwd_hash = password_hash($password, PASSWORD_DEFAULT);
+            $activation_token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', time() + 86400); // Hết hạn sau 24 giờ
+
+            try {
+                $db->beginTransaction();
+                // Thêm is_active = 0 khi tạo user
+                $st = $db->prepare('INSERT INTO users (email, name, password, is_active) VALUES (?, ?, ?, 0)');
+                $st->execute([$email, $name, $pwd_hash]);
+                $userId = $db->lastInsertId();
+
+                // Lưu token kích hoạt vào bảng password_resets
+                $token_stmt = $db->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
+                $token_stmt->execute([$email, $activation_token, $expires]);
+
+                // Gán vai trò 'Customer'
+                $r = $db->prepare('SELECT id FROM roles WHERE name = ?');
+                $r->execute(['Customer']);
+                $role = $r->fetch();
+                if (!$role) {
+                    $insr = $db->prepare('INSERT INTO roles (name) VALUES (?)');
+                    $insr->execute(['Customer']);
+                    $roleId = $db->lastInsertId();
+                } else {
+                    $roleId = $role['id'];
+                }
+                $ur = $db->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?,?)');
+                $ur->execute([$userId, $roleId]);
+                $db->commit();
+
+                // Gửi email kích hoạt
+                if (send_activation_email($email, $activation_token)) {
+                    flash_set('success', 'Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.');
+                } else {
+                    flash_set('error', 'Đăng ký thành công nhưng không thể gửi email kích hoạt. Vui lòng liên hệ hỗ trợ.');
+                }
+                
+                // Chuyển hướng về trang đăng nhập để họ thấy thông báo
+                header('Location: login.php');
+                exit;
+            } catch (Exception $e) {
+                if ($db->inTransaction()) { $db->rollBack(); }
+                flash_set('error', 'Không thể đăng ký do lỗi hệ thống. Vui lòng thử lại.');
+                $show_shake = true;
+                $captcha_question = generate_register_captcha();
+            }
         }
     }
 }
