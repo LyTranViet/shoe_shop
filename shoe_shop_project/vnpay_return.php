@@ -80,6 +80,41 @@ if ($vnp_RespCode === '00') {
         $db->prepare("UPDATE orders SET status_id = 1, payment_method = 'VNPAY', paid_at = NOW() WHERE id = ?")
             ->execute([$vnp_TxnRef]);
 
+        // 2. Lấy các sản phẩm trong đơn hàng để tạo phiếu xuất
+        $itemsStmt = $db->prepare('
+            SELECT oi.product_id, oi.size, oi.quantity, oi.price, ps.id as productsize_id
+            FROM order_items oi
+            JOIN product_sizes ps ON oi.product_id = ps.product_id AND oi.size = ps.size
+            WHERE oi.order_id = ?
+        ');
+        $itemsStmt->execute([$vnp_TxnRef]);
+        $items = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3. Tự động tạo phiếu xuất kho
+        $exportCode = 'PX-ORD' . $vnp_TxnRef;
+        $exportNote = 'Tự động tạo cho đơn hàng VNPAY #' . $vnp_TxnRef;
+        $exportStmt = $db->prepare("INSERT INTO export_receipt (receipt_code, export_type, status, employee_id, total_amount, note, order_id) VALUES (?, 'Bán hàng', 'Đang xử lý', ?, ?, ?, ?)");
+        $exportStmt->execute([$exportCode, $order['user_id'], $order['total_amount'], $exportNote, $vnp_TxnRef]);
+        $export_id = $db->lastInsertId();
+
+        foreach ($items as $item) {
+            $quantity_to_export = (int)$item['quantity'];
+            $productsize_id = $item['productsize_id'];
+
+            $batchesStmt = $db->prepare("SELECT id, quantity_remaining FROM product_batch WHERE productsize_id = ? AND quantity_remaining > 0 ORDER BY import_date ASC");
+            $batchesStmt->execute([$productsize_id]);
+
+            $quantity_left_to_deduct = $quantity_to_export;
+            while ($quantity_left_to_deduct > 0 && ($batch = $batchesStmt->fetch())) {
+                $deduct_from_this_batch = min($quantity_left_to_deduct, (int)$batch['quantity_remaining']);
+
+                $db->prepare("INSERT INTO export_receipt_detail (export_id, batch_id, productsize_id, quantity, price) VALUES (?, ?, ?, ?, ?)")->execute([$export_id, $batch['id'], $productsize_id, $deduct_from_this_batch, (float)$item['price']]);
+                $db->prepare("UPDATE product_batch SET quantity_remaining = quantity_remaining - ? WHERE id = ?")->execute([$deduct_from_this_batch, $batch['id']]);
+                $db->prepare("UPDATE product_sizes SET stock = stock - ? WHERE id = ?")->execute([$deduct_from_this_batch, $productsize_id]);
+                $quantity_left_to_deduct -= $deduct_from_this_batch;
+            }
+        }
+
         // 2. Clear cart in DB
         if (!empty($order['user_id'])) {
             $cartSt = $db->prepare('SELECT id FROM carts WHERE user_id = ? LIMIT 1');

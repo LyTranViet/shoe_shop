@@ -166,6 +166,37 @@ try {
     }
     unset($_SESSION['cart']);
 
+    // === TỰ ĐỘNG TẠO PHIẾU XUẤT KHO ===
+    $exportCode = 'PX-ORD' . $orderId;
+    $exportNote = 'Tự động tạo cho đơn hàng PayPal #' . $orderId;
+    $exportStmt = $db->prepare("INSERT INTO export_receipt (receipt_code, export_type, status, employee_id, total_amount, note, order_id) VALUES (?, 'Bán hàng', 'Đang xử lý', ?, ?, ?, ?)");
+    $exportStmt->execute([$exportCode, $userId, $total_amount, $exportNote, $orderId]);
+    $export_id = $db->lastInsertId();
+
+    foreach ($items as $item) {
+        $quantity_to_export = (int)$item['quantity'];
+        $psStmt = $db->prepare("SELECT id FROM product_sizes WHERE product_id = ? AND size = ?");
+        $psStmt->execute([$item['product_id'], $item['size']]);
+        $productsize_id = $psStmt->fetchColumn();
+        if (!$productsize_id) continue;
+
+        $batchesStmt = $db->prepare("SELECT id, quantity_remaining FROM product_batch WHERE productsize_id = ? AND quantity_remaining > 0 ORDER BY import_date ASC");
+        $batchesStmt->execute([$productsize_id]);
+
+        $quantity_left_to_deduct = $quantity_to_export;
+        while ($quantity_left_to_deduct > 0 && ($batch = $batchesStmt->fetch())) {
+            $deduct_from_this_batch = min($quantity_left_to_deduct, (int)$batch['quantity_remaining']);
+
+            $db->prepare("INSERT INTO export_receipt_detail (export_id, batch_id, productsize_id, quantity, price) VALUES (?, ?, ?, ?, ?)")
+                ->execute([$export_id, $batch['id'], $productsize_id, $deduct_from_this_batch, (float)$item['price']]);
+            $db->prepare("UPDATE product_batch SET quantity_remaining = quantity_remaining - ? WHERE id = ?")
+                ->execute([$deduct_from_this_batch, $batch['id']]);
+            $db->prepare("UPDATE product_sizes SET stock = stock - ? WHERE id = ?")
+                ->execute([$deduct_from_this_batch, $productsize_id]);
+            $quantity_left_to_deduct -= $deduct_from_this_batch;
+        }
+    }
+
     // === XÓA MÃ GIẢM GIÁ SAU KHI ĐẶT HÀNG ===
 
 

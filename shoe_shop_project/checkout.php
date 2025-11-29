@@ -357,7 +357,7 @@ VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                 $deduct_from_this_batch = min($quantity_left_to_deduct, (int)$batch['quantity_remaining']);
 
                 // fixed: prepare + execute must be separate calls (or chained correctly)
-                $db->prepare("INSERT INTO export_receipt_detail (export_id, batch_id, productsize_id, quantity, price) VALUES (?, ?, ?, ?, ?)")->execute([$export_id, $batch['id'], $productsize_id, $deduct_from_this_batch, $item['price']]);
+                $db->prepare("INSERT INTO export_receipt_detail (export_id, batch_id, productsize_id, quantity, price) VALUES (?, ?, ?, ?, ?)")->execute([$export_id, $batch['id'], $productsize_id, $deduct_from_this_batch, (float)$item['price']]);
 
                 $db->prepare("UPDATE product_batch SET quantity_remaining = quantity_remaining - ? WHERE id = ?")
                     ->execute([$deduct_from_this_batch, $batch['id']]);
