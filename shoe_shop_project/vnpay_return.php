@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
 $db = get_db();
 
-$vnp_HashSecret = 'UPP5TZKX60XTIKA60DRSV6HHE847PKS5';
+$vnp_HashSecret = '3W1G21VMGLI30U99923AM5JF1A9RE7K1';
 
 // Debug: log all incoming parameters
 error_log('VNPay return params: ' . print_r($_GET, true));

@@ -19,8 +19,8 @@ if (isset($_SESSION['order_success'])) {
 
 // Thêm cấu hình VNPay chung (chèn bắt buộc để các khối VNPay dùng được)
 $vnp_config = [
-    'TmnCode'   => 'VO2O0KDK',
-    'HashSecret' => 'UPP5TZKX60XTIKA60DRSV6HHE847PKS5',
+    'TmnCode'   => '1NDITK1W',
+    'HashSecret' => '3W1G21VMGLI30U99923AM5JF1A9RE7K1',
     'BaseUrl'   => 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
     'Version'   => '2.1.0',
     'Command'   => 'pay',
