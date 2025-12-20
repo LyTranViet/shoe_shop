@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+
+Allow: /
+
+Sitemap: https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/sitemap.xml
