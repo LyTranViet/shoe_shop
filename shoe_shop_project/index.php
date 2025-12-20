@@ -1342,7 +1342,7 @@ try {
     });
 </script>
 <!-- Box chat mini bên trái -->
-<a href="<?php echo BASE_URL; ?>admin/live_chat.php" class="floating-chat-box">
+<a href="<?php echo BASE_URL; ?>live_chat.php" class="floating-chat-box">
     <div class="chat-icon">💬</div>
     <span class="chat-text">Hỗ trợ khách hàng</span>
     <span id="chat-notify" class="chat-notify">0</span>

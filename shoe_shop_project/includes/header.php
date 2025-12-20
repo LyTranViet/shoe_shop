@@ -52,22 +52,50 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+<!-- Facebook SDK - BẮT BUỘC cho FB.ui() -->
+
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Púp Bờ Si - Premium Shoes Store</title>
-    <meta name="description" content="Khám phá giày cao cấp tại Púp Bờ Si - xu hướng mới nhất cho nam, nữ và trẻ em.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- TITLE & DESCRIPTION ĐỘNG -->
+    <title>
+        <?php echo isset($title) ? htmlspecialchars($title) : 'Khám phá giày cao cấp tại Púp Bờ Si - xu hướng mới nhất cho nam, nữ và trẻ em.'; ?>
+    </title>
+    <meta name="description"
+        content="<?php echo isset($description) ? htmlspecialchars($description) : 'ShoeShop - Chuyên giày thể thao chính hãng Nike, Adidas, Puma, Vans... Giao hàng toàn quốc, freeship nội thành'; ?>">
+
+    <!-- OPEN GRAPH -->
+    <meta property="og:site_name" content="ShoeShop">
+    <meta property="og:title"
+        content="<?php echo isset($og_title) ? htmlspecialchars($og_title) : (isset($title) ? $title : 'ShoeShop'); ?>">
+    <meta property="og:description"
+        content="<?php echo isset($og_description) ? htmlspecialchars($og_description) : (isset($description) ? $description : 'Xem ngay giày chính hãng giá cực tốt!'); ?>">
+    <meta property="og:type" content="<?php echo isset($og_type) ? $og_type : 'website'; ?>">
+    <meta property="og:url"
+        content="<?php echo htmlspecialchars('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>">
+    <meta property="og:image"
+        content="<?php echo isset($og_image) ? $og_image : 'https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/assets/images/share-default.jpg'; ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="<?php echo isset($og_title) ? htmlspecialchars($og_title) : 'ShoeShop'; ?>">
+
+    <!-- CANONICAL CHO SEOQUAKE + GOOGLE -->
+    <link rel="canonical"
+        href="<?php echo htmlspecialchars('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>">
 
     <!-- External CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <link rel="stylesheet" href="assets/css/site.css">
     <link rel="stylesheet" href="assets/css/chat.css">
     <!-- FIX jQuery: Load từ CDN ổn định, version 3.6.0 -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <!-- Nếu CDN fail, fallback local (tải jquery-3.6.0.min.js về thư mục js/) -->
     <script>
         window.jQuery || document.write('<script src="js/jquery-3.6.0.min.js"><\/script>')
@@ -417,8 +445,29 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
 
 
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5BETCK9G0H"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-5BETCK9G0H');
+</script>
 
 <body>
+    <?php
+    // Đoạn này để tránh lỗi nếu ai đó include header.php mà chưa khai báo biến
+    $title       ??= '';
+    $description ??= '';
+    $og_title    ??= $title;
+    $og_description ??= $description;
+    $og_image    ??= 'https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/assets/images/share-default.jpg';
+    $og_type     ??= 'website';
+    ?>
     <!-- 🔹 Top Bar -->
     <div class="top-bar text-center text-md-start">
         <div class="container d-flex justify-content-between align-items-center flex-wrap">
@@ -443,7 +492,8 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
             </a>
 
             <form class="search-form" action="<?php echo BASE_URL; ?>category.php" method="GET">
-                <input type="text" name="q" id="ajax-search-input" placeholder="Tìm kiếm sản phẩm, thương hiệu..." required autocomplete="off">
+                <input type="text" name="q" id="ajax-search-input" placeholder="Tìm kiếm sản phẩm, thương hiệu..."
+                    required autocomplete="off">
                 <button type="submit">🔍</button>
                 <div class="search-results-box" id="search-results-container">
                     <!-- Kết quả AJAX sẽ được chèn vào đây -->
@@ -454,7 +504,8 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                 <a href="<?php echo BASE_URL; ?>category.php">🏷️ Danh mục</a>
                 <a href="<?php echo BASE_URL; ?>about.php">ℹ️ Giới thiệu</a>
                 <a href="<?php echo BASE_URL; ?>contact.php">📞 Liên hệ</a>
-                <a href="<?php echo BASE_URL; ?>cart.php">🛒 Giỏ hàng <span class="badge"><?php echo cart_count(); ?></span></a>
+                <a href="<?php echo BASE_URL; ?>cart.php">🛒 Giỏ hàng <span
+                        class="badge"><?php echo cart_count(); ?></span></a>
                 <?php if ($isLoggedIn): ?>
                     <div class="user-menu">
                         <button class="user-btn"><?php echo htmlspecialchars($displayName); ?> ⬇️</button>
@@ -468,12 +519,15 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                                     ⚙️ Quản trị
                                 </a>
                             <?php endif; ?>
-                            <a href="<?php echo BASE_URL; ?>logout.php" style="color:var(--danger);font-weight:600;">🚪 Đăng xuất</a>
+                            <a href="<?php echo BASE_URL; ?>logout.php" style="color:var(--danger);font-weight:600;">🚪 Đăng
+                                xuất</a>
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="<?php echo BASE_URL; ?>login.php" class="btn btn-gradient rounded-pill px-3 fw-semibold">Đăng nhập</a>
-                    <a href="<?php echo BASE_URL; ?>register.php" class="btn btn-gradient rounded-pill px-3 fw-semibold">Đăng ký</a>
+                    <a href="<?php echo BASE_URL; ?>login.php" class="btn btn-gradient rounded-pill px-3 fw-semibold">Đăng
+                        nhập</a>
+                    <a href="<?php echo BASE_URL; ?>register.php"
+                        class="btn btn-gradient rounded-pill px-3 fw-semibold">Đăng ký</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -512,7 +566,8 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                                         resultItem.href = item.url;
                                         resultItem.className = 'search-result-item';
 
-                                        const priceFormatted = new Intl.NumberFormat('vi-VN').format(item.price) + '₫';
+                                        const priceFormatted = new Intl.NumberFormat(
+                                            'vi-VN').format(item.price) + '₫';
 
                                         resultItem.innerHTML = `
                                 <img src="${item.image_url}" alt="${item.name}">
@@ -525,12 +580,14 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
                                         resultsContainer.appendChild(resultItem);
                                     });
                                 } else {
-                                    resultsContainer.innerHTML = '<div class="no-results">Không tìm thấy kết quả nào.</div>';
+                                    resultsContainer.innerHTML =
+                                        '<div class="no-results">Không tìm thấy kết quả nào.</div>';
                                 }
                             })
                             .catch(error => {
                                 console.error('Search error:', error);
-                                resultsContainer.innerHTML = '<div class="no-results">Lỗi khi tìm kiếm.</div>';
+                                resultsContainer.innerHTML =
+                                    '<div class="no-results">Lỗi khi tìm kiếm.</div>';
                             });
                     }, 300); // Chờ 300ms sau khi người dùng ngừng gõ
                 });

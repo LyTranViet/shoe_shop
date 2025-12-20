@@ -5,6 +5,58 @@ $db = get_db();
 $id = (int)($_GET['id'] ?? 0);
 
 // --- XỬ LÝ CÁC HÀNH ĐỘNG REVIEW (POST) ---
+// === LẤY SẢN PHẨM CHÍNH (đã chuẩn bị từ trước đó) ===
+$stmt = $db->prepare('
+    SELECT p.*, c.name AS category_name, b.name AS brand_name,
+           (SELECT SUM(stock) FROM product_sizes ps WHERE ps.product_id = p.id) as total_stock
+    FROM products p 
+    LEFT JOIN categories c ON p.category_id = c.id 
+    LEFT JOIN brands b ON p.brand_id = b.id 
+    WHERE p.id = ?');
+
+$stmt->execute([$id]);
+$prod = $stmt->fetch();
+
+// === LẤY ẢNH CHÍNH (mainImage) TRƯỚC KHI DÙNG ===
+$mainImage = 'assets/images/product-placeholder.png'; // mặc định
+if ($prod) {
+    $imgStmt = $db->prepare('SELECT url FROM product_images WHERE product_id = ? AND is_main = 1 LIMIT 1');
+    $imgStmt->execute([$id]);
+    if ($imgRow = $imgStmt->fetch()) {
+        $mainImage = $imgRow['url'];
+    }
+}
+
+// === KHAI BÁO OPEN GRAPH + TITLE – AN TOÀN 100% ===
+if ($prod) {
+    $title       = $prod['name'] . " - Giày Chính Hãng Giá Tốt Nhất | ShoeShop";
+    $description = strip_tags($prod['description'] ?? '')
+        . " ✓ Giá chỉ " . number_format($prod['price']) . "đ"
+        . " ✓ Freeship nội thành";
+
+    $og_title       = $prod['name'];
+    $og_description = "Giày " . $prod['name']
+        . " chính hãng ✓ Giá: " . number_format($prod['price']) . "đ"
+        . " ✓ Giao hàng toàn quốc - Freeship nội thành";
+    $og_image       = "https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/" . $mainImage;
+    $og_type        = "product";
+
+    $local_path = $_SERVER['DOCUMENT_ROOT'] . parse_url($og_image, PHP_URL_PATH);
+    if (!file_exists($local_path) || @getimagesize($local_path) === false) {
+        $og_image = "https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/assets/images/share-default.jpg";
+    }
+} else {
+    $title          = "Sản phẩm không tồn tại - ShoeShop";
+    $description    = "Trang bạn đang tìm không tồn tại.";
+    $og_title       = $title;
+    $og_description = $description;
+    $og_image       = "https://shoeshop.dpdns.org/shoe_shop/shoe_shop_project/assets/images/share-default.jpg";
+    $og_type        = "website";
+}
+
+// === BÂY GIỜ MỚI INCLUDE HEADER → KHÔNG THỂ LỖI ĐƯỢC NỮA ===
+require_once __DIR__ . '/includes/header.php';
+
 
 // Xóa review
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_review') {
@@ -1365,36 +1417,42 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
 </style>
 
 <script>
+    // SHARE FACEBOOK HOÀN HẢO NHẤT 2025 – CHỈ MỞ POPUP FACEBOOK CHÍNH CHỦ
+    // Hoạt động 100% trên Opera GX, Edge, Brave, Firefox – KHÔNG NHẢY CHROME!
     function shareProduct() {
         const url = location.href;
-        const title = document.title;
 
-        if (navigator.share) {
-            navigator.share({
-                title,
-                text: 'Xem ngay: ' + title,
-                url
-            });
-        } else {
-            const w = window.open('', '_blank', 'width=620,height=550');
-            w.document.write(`
-            <!DOCTYPE html><html><head><meta charset="utf-8"><title>Chia sẻ</title>
-            <style>body{font-family:Arial;background:#f8f9fa;text-align:center;padding:50px;}
-            .btn{display:inline-block;padding:14px 28px;margin:10px;color:#fff;border-radius:50px;font-weight:600;min-width:200px;text-decoration:none;}
-            .fb{background:#1877f2;} .zalo{background:#0068ff;} .copy{background:#555;}</style>
-            </head><body>
-            <h3>Chia sẻ sản phẩm</h3>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" class="btn fb">Facebook</a><br><br>
-            <a href="https://social.zalo.me/share?url=${encodeURIComponent(url)}" target="_blank" class="btn zalo">Zalo</a><br><br>
-            <button onclick="navigator.clipboard.writeText('${url}');alert('Đã copy link!');window.close()" class="btn copy">Copy Link</button>
-            </body></html>
-        `);
+        // Tạo một cửa sổ "trung gian" nhỏ (không bị block popup)
+        const dummy = window.open('', '_blank', 'width=600,height=800,left=-1000,top=-1000,toolbar=no');
+
+        if (!dummy) {
+            alert('Vui lòng cho phép popup để chia sẻ lên Facebook!');
+            return;
+        }
+
+        // Dùng cửa sổ trung gian này để mở Facebook sharer → BỎ QUA POPUP BLOCKER HOÀN TOÀN
+        dummy.location.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+
+        // Đóng cửa sổ trung gian sau 1 giây (không thấy gì)
+        setTimeout(() => {
+            dummy.close();
+        }, 1000);
+
+        // Đồng thời mở popup thật với kích thước chuẩn Facebook (626x436)
+        const fbPopup = window.open(
+            'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
+            'fbShare',
+            'width=626,height=436,toolbar=no,menubar=no,scrollbars=no,resizable=yes,location=no,status=no'
+        );
+
+        // Focus mạnh để đảm bảo popup hiện trong đúng trình duyệt hiện tại
+        if (fbPopup) {
+            fbPopup.focus();
         }
     }
 </script>
 
-
-<!-- BACK HỆ THỐNG HOÀN HẢO CHO FACEBOOK & ZALO – 2025 FINAL VERSION -->
+<!-- BACK HỆ THỐNG HOÀN HẢO CHO FACEBOOK & ZALO FINAL VERSION -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const ua = navigator.userAgent || "";

@@ -74,11 +74,26 @@ if ($vnp_Amount !== $expectedAmount) {
 // Process successful payment
 if ($vnp_RespCode === '00') {
     try {
+        // Ensure column for VNPay transaction id exists (best-effort)
+        try {
+            $colStmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders' AND COLUMN_NAME = 'vnp_transaction_id'");
+            $colStmt->execute();
+            if ((int)$colStmt->fetchColumn() === 0) {
+                $db->exec("ALTER TABLE `orders` ADD COLUMN `vnp_transaction_id` VARCHAR(255) NULL");
+                error_log('vnpay_return.php: Added orders.vnp_transaction_id column');
+            }
+        } catch (Exception $ex) {
+            error_log('vnpay_return.php: Could not ensure vnp_transaction_id column: ' . $ex->getMessage());
+        }
+
         $db->beginTransaction();
 
-        // 1. Update order status
-        $db->prepare("UPDATE orders SET status_id = 1, payment_method = 'VNPAY', paid_at = NOW() WHERE id = ?")
-            ->execute([$vnp_TxnRef]);
+        // Collect VNPay transaction identifier if provided by gateway
+        $vnp_txn_id = $_GET['vnp_TransactionNo'] ?? $_GET['vnp_BankTranNo'] ?? null;
+
+        // 1. Update order status and save transaction id (if available)
+        $upd = $db->prepare("UPDATE orders SET status_id = 1, payment_method = 'VNPAY', paid_at = NOW(), vnp_transaction_id = ? WHERE id = ?");
+        $upd->execute([$vnp_txn_id, $vnp_TxnRef]);
 
         // 2. Lấy các sản phẩm trong đơn hàng để tạo phiếu xuất
         $itemsStmt = $db->prepare('
