@@ -2,6 +2,7 @@
 // Wishlist page: supports add/remove via POST and renders wishlist as grid
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/helper.php';
 
 // helper for JSON
 function json_res($arr) { header('Content-Type: application/json'); echo json_encode($arr); exit; }
@@ -201,9 +202,9 @@ if (!empty($ids)) {
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <button type="submit" class="btn-remove-circle" title="Xóa">&times;</button>
                         </form>
-                        <a href="product.php?id=<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
+                        <a href="product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"><img src="<?php echo htmlspecialchars($img); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                     </div>
-                    <h4><a href="product.php?id=<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
+                    <h4><a href="product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a></h4>
                     <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
                     <div class="product-actions">
                         <?php if (isset($p['total_stock']) && $p['total_stock'] > 0 && !empty($sizesByProduct[$p['id']])): ?>

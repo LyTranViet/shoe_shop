@@ -1,6 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/helper.php';
 
 // Kiểm tra AJAX
 function is_ajax() {
@@ -241,7 +242,7 @@ if (!empty($items)) {
             <div class="cart-item-product">
                 <img src="<?php echo htmlspecialchars($img); ?>" alt="" class="cart-item-image">
                 <div class="cart-item-info">
-                    <a href="product.php?id=<?php echo $it['product_id']; ?>" class="cart-item-name"><?php echo htmlspecialchars($it['name']); ?></a>
+                    <a href="product.php/<?php echo createSlug($it['name']); ?>-<?php echo $it['product_id']; ?>" class="cart-item-name"><?php echo htmlspecialchars($it['name']); ?></a>
                     <?php if (!empty($it['size'])): ?><p class="cart-item-meta">Size: <?php echo htmlspecialchars($it['size']); ?></p><?php endif; ?>
                     <p class="cart-item-meta cart-item-price-mobile">Giá: <?php echo number_format($item_price, 0); ?>đ</p>
                 </div>

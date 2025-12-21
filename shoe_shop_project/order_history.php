@@ -1,6 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/helper.php';
 
 // require login
 if (!is_logged_in()) {
@@ -80,7 +81,7 @@ require_once __DIR__ . '/includes/header.php';
                     alt="<?php echo htmlspecialchars($item['product_name']); ?>" class="order-item-image">
                 <div class="order-item-details">
                     <a
-                        href="product.php?id=<?php echo $item['product_id']; ?>"><?php echo htmlspecialchars($item['product_name']); ?></a>
+                        href="product.php/<?php echo createSlug($item['product_name']); ?>-<?php echo $item['product_id']; ?>"><?php echo htmlspecialchars($item['product_name']); ?></a>
                     <span>Qty: <?php echo $item['quantity']; ?></span>
                 </div>
                 <div class="order-item-price"><?php echo number_format($item['price'] * $item['quantity'], 0); ?>₫</div>

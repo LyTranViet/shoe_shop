@@ -1,6 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/helper.php';
 
 if (!is_logged_in()) {
     flash_set('info', 'Vui lòng đăng nhập để xem chi tiết đơn hàng.');
@@ -184,7 +185,7 @@ require_once __DIR__ . '/includes/header.php';
                             <img src="<?php echo $image; ?>" alt="" class="item-image me-3"
                                 style="width:70px;height:70px;object-fit:cover;border-radius:6px;">
                             <div class="flex-grow-1">
-                                <a href="product.php?id=<?php echo $item['product_id']; ?>"
+                                <a href="product.php/<?php echo createSlug($item['product_name']); ?>-<?php echo $item['product_id']; ?>"
                                     class="text-decoration-none text-dark fw-semibold">
                                     <?php echo htmlspecialchars($item['product_name']); ?>
                                 </a>

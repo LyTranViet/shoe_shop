@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/helper.php';
 // Load banners (if table exists)
 $banners = [];
 try {
@@ -811,11 +812,11 @@ try {
                                         <div class="out-of-stock-badge">Hết hàng</div>
                                     <?php endif; ?>
                                     <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
-                                    <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img
+                                    <a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"><img
                                             src="<?php echo htmlspecialchars($img); ?>"
                                             alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                                 </div>
-                                <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"
+                                <h3><a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"
                                         style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a>
                                 </h3>
                                 <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
@@ -868,11 +869,11 @@ try {
                                         <div class="out-of-stock-badge">Hết hàng</div>
                                     <?php endif; ?>
                                     <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
-                                    <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img
+                                    <a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"><img
                                             src="<?php echo htmlspecialchars($img); ?>"
                                             alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                                 </div>
-                                <h3><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"
+                                <h3><a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"
                                         style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a>
                                 </h3>
                                 <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>
@@ -930,11 +931,11 @@ try {
                                                 <div class="out-of-stock-badge">Hết hàng</div>
                                             <?php endif; ?>
                                             <?php $img = $imagesByProduct[$p['id']] ?? BASE_URL . 'assets/images/product-placeholder.png'; ?>
-                                            <a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"><img
+                                            <a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"><img
                                                     src="<?php echo htmlspecialchars($img); ?>"
                                                     alt="<?php echo htmlspecialchars($p['name']); ?>"></a>
                                         </div>
-                                        <h4><a href="<?php echo BASE_URL; ?>product.php?id=<?php echo $p['id']; ?>"
+                                        <h4><a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>"
                                                 style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($p['name']); ?></a>
                                         </h4>
                                         <p class="price"><?php echo number_format($p['price'], 0); ?>₫</p>

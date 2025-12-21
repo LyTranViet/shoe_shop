@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/helper.php';
 
 header('Content-Type: application/json');
 
@@ -24,7 +25,7 @@ if (strlen($q) > 1) { // Chỉ tìm kiếm khi có hơn 1 ký tự
 
         // Thêm URL sản phẩm và ảnh mặc định
         foreach ($results as &$row) {
-            $row['url'] = 'product.php?id=' . $row['id'];
+            $row['url'] = 'product.php/' . createSlug($row['name']) . '-' . $row['id'];
             $row['image_url'] = $row['image_url'] ?? 'assets/images/product-placeholder.png';
         }
 

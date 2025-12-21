@@ -91,20 +91,20 @@ $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH), '/');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-    <link rel="stylesheet" href="assets/css/site.css">
-    <link rel="stylesheet" href="assets/css/chat.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/site.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/chat.css">
     <!-- FIX jQuery: Load từ CDN ổn định, version 3.6.0 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <!-- Nếu CDN fail, fallback local (tải jquery-3.6.0.min.js về thư mục js/) -->
     <script>
-        window.jQuery || document.write('<script src="js/jquery-3.6.0.min.js"><\/script>')
+        window.jQuery || document.write('<script src="<?php echo BASE_URL; ?>js/jquery-3.6.0.min.js"><\/script>')
     </script>
     <script>
         window.siteBasePath = '<?php echo $basePath; ?>';
     </script>
-    <script src="assets/js/chat.js" defer></script>
-    <script src="assets/js/site.js" defer></script>
+    <script src="<?php echo BASE_URL; ?>assets/js/chat.js" defer></script>
+    <script src="<?php echo BASE_URL; ?>assets/js/site.js" defer></script>
 
     <style>
         :root {

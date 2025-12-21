@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/includes/functions.php';
 $db = get_db();
+require_once __DIR__ . '/includes/helper.php';
 $id = (int)($_GET['id'] ?? 0);
 
 // --- XỬ LÝ CÁC HÀNH ĐỘNG REVIEW (POST) ---
@@ -16,6 +17,15 @@ $stmt = $db->prepare('
 
 $stmt->execute([$id]);
 $prod = $stmt->fetch();
+
+// === SEO REDIRECT ===
+if ($prod && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $currentSlug = createSlug($prod['name']);
+    if (strpos($_SERVER['REQUEST_URI'], $currentSlug) === false) {
+        header("Location: product.php/$currentSlug-$id", true, 301);
+        exit;
+    }
+}
 
 // === LẤY ẢNH CHÍNH (mainImage) TRƯỚC KHI DÙNG ===
 $mainImage = 'assets/images/product-placeholder.png'; // mặc định
@@ -318,7 +328,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
             const code = input.value.trim();
             if (!code) return;
 
-            const url = isShipping ? 'validate_shipping_coupon.php' : 'validate_coupon.php';
+            const url = isShipping ? '<?php echo BASE_URL; ?>validate_shipping_coupon.php' : '<?php echo BASE_URL; ?>validate_coupon.php';
             const formData = new FormData();
             formData.append('code', code);
 
@@ -537,7 +547,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
             formData.append('quantity', 1);
             formData.append('size', size);
 
-            fetch('cart.php', {
+            fetch('<?php echo BASE_URL; ?>cart.php', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -547,7 +557,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = 'cart.php';
+                        window.location.href = '<?php echo BASE_URL; ?>cart.php';
                     } else {
                         alert('Có lỗi xảy ra, không thể thêm vào giỏ hàng.');
                     }
@@ -605,7 +615,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
 <div class="product-page-container">
     <div class="product-detail">
         <div class="gallery">
-            <div class="main-image"><img src="<?php echo htmlspecialchars($mainImage); ?>"
+            <div class="main-image"><img src="<?php echo (strpos($mainImage, 'http') === 0 ? '' : BASE_URL) . htmlspecialchars($mainImage); ?>"
                     alt="<?php echo htmlspecialchars($prod['name']); ?>"></div>
             <?php if (!empty($images)): ?>
                 <?php if ($is_out_of_stock): ?>
@@ -619,8 +629,8 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                             $isVideo = preg_match('/\.(mp4|webm|ogg)$/i', $url);
                         ?>
                             <div class="thumb" data-type="<?php echo $isVideo ? 'video' : 'image'; ?>"
-                                data-src="<?php echo htmlspecialchars($url); ?>">
-                                <img src="<?php echo htmlspecialchars($url); ?>"
+                                data-src="<?php echo (strpos($url, 'http') === 0 ? '' : BASE_URL) . htmlspecialchars($url); ?>">
+                                <img src="<?php echo (strpos($url, 'http') === 0 ? '' : BASE_URL) . htmlspecialchars($url); ?>"
                                     alt="<?php echo htmlspecialchars($prod['name']); ?>">
                                 <?php if ($isVideo): ?><span class="play">Play</span><?php endif; ?>
                             </div>
@@ -651,10 +661,10 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
             </div>
             <p class="meta">
                 Brand: <a
-                    href="category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a>
+                    href="<?php echo BASE_URL; ?>category.php?brand_id[]=<?php echo $prod['brand_id']; ?>"><?php echo htmlspecialchars($prod['brand_name'] ?? ''); ?></a>
                 |
                 Category: <a
-                    href="category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a>
+                    href="<?php echo BASE_URL; ?>category.php?category_id[]=<?php echo $prod['category_id']; ?>"><?php echo htmlspecialchars($prod['category_name'] ?? ''); ?></a>
                 |
                 <span class="stock-display">Tồn kho: <span id="size-stock-display">--</span></span>
             </p>
@@ -675,7 +685,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                     Sản phẩm này hiện đã hết hàng.
                 </div>
             <?php else: ?>
-                <form class="ajax-add-cart product-actions-form" method="post" action="cart.php">
+                <form class="ajax-add-cart product-actions-form" method="post" action="<?php echo BASE_URL; ?>cart.php">
                     <input type="hidden" name="product_id" value="<?php echo $prod['id']; ?>">
                     <div class="form-group size-selector">
                         <label>Size</label>
@@ -741,7 +751,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                 </form>
             <?php endif; ?>
 
-            <form class="ajax-wishlist" method="post" action="wishlist.php">
+            <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
                 <input type="hidden" name="product_id" value="<?php echo $prod['id']; ?>">
                 <button class="btn secondary"
                     type="submit"><?php echo $inWishlist ? '♥ In wishlist' : '♡ Add to wishlist'; ?></button>
@@ -811,7 +821,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                         <?php if ($can_edit): ?>
                             <div class="review-actions">
                                 <button type="button" class="btn-edit-review" title="Sửa"><i class="fi fi-rr-pencil"></i></button>
-                                <form method="post" action="product.php?id=<?php echo $id; ?>"
+                                <form method="post" action="<?php echo BASE_URL; ?>product.php?id=<?php echo $id; ?>"
                                     onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?');" style="display:inline;">
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?php echo $rev['id']; ?>">
@@ -824,7 +834,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
 
                     <!-- Edit Mode (hidden by default) -->
                     <?php if ($can_edit): ?>
-                        <form class="review-edit-form" method="post" action="product.php?id=<?php echo $id; ?>">
+                        <form class="review-edit-form" method="post" action="<?php echo BASE_URL; ?>product.php?id=<?php echo $id; ?>">
                             <input type="hidden" name="action" value="edit_review">
                             <input type="hidden" name="review_id" value="<?php echo $rev['id']; ?>">
                             <div class="form-group">
@@ -863,7 +873,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                 ?>
                     <p style="color:var(--success);"><?php echo htmlspecialchars($success_message); ?></p>
                 <?php endif; ?>
-                <form method="post" action="product.php?id=<?php echo $id; ?>">
+                <form method="post" action="<?php echo BASE_URL; ?>product.php?id=<?php echo $id; ?>">
                     <input type="hidden" name="action" value="add_review">
                     <div class="form-group">
                         <label>Rating</label>
@@ -884,7 +894,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                 </form>
             </div>
         <?php else: ?>
-            <p><a href="login.php" style="color: var(--primary);">Đăng nhập</a> để viết đánh giá.</p>
+            <p><a href="<?php echo BASE_URL; ?>login.php" style="color: var(--primary);">Đăng nhập</a> để viết đánh giá.</p>
         <?php endif; ?>
     </div>
 
@@ -1047,11 +1057,11 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                                             <div class="out-of-stock-badge">Hết hàng</div>
                                         <?php endif; ?>
                                         <?php $simg = $imagesBy[$s['id']] ?? 'assets/images/product-placeholder.png'; ?>
-                                        <a href="product.php?id=<?php echo $s['id']; ?>"><img
-                                                src="<?php echo htmlspecialchars($simg); ?>"
+                                        <a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($s['name']); ?>-<?php echo $s['id']; ?>"><img
+                                                src="<?php echo (strpos($simg, 'http') === 0 ? '' : BASE_URL) . htmlspecialchars($simg); ?>"
                                                 alt="<?php echo htmlspecialchars($s['name']); ?>"></a>
                                     </div>
-                                    <h3><a href="product.php?id=<?php echo $s['id']; ?>"
+                                    <h3><a href="<?php echo BASE_URL; ?>product.php/<?php echo createSlug($s['name']); ?>-<?php echo $s['id']; ?>"
                                             style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($s['name']); ?></a>
                                     </h3>
                                     <p class="price"><?php echo number_format($s['price'], 0); ?>₫</p>
@@ -1062,7 +1072,7 @@ $is_out_of_stock = (!isset($prod['total_stock']) || $prod['total_stock'] <= 0);
                                         <?php else: ?>
                                             <button class="btn" disabled>Thêm vào giỏ hàng</button>
                                         <?php endif; ?>
-                                        <form class="ajax-wishlist" method="post" action="wishlist.php">
+                                        <form class="ajax-wishlist" method="post" action="<?php echo BASE_URL; ?>wishlist.php">
                                             <input type="hidden" name="product_id" value="<?php echo $s['id']; ?>">
                                             <button class="btn btn-wishlist" type="submit">❤</button>
                                         </form>

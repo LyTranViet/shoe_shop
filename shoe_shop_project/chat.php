@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/helper.php';
 header('Content-Type: application/json; charset=utf-8');
 $input = trim($_POST['q'] ?? '');
 if ($input === '') {
@@ -175,7 +176,7 @@ foreach ($rows as $r) {
         'sizes' => $r['sizes'] ? explode(',', $r['sizes']) : [],
         'category' => $r['category'] ?? null,
         'brand' => $r['brand'] ?? null,
-        'url' => 'product.php?id=' . $r['id']
+        'url' => 'product.php/' . createSlug($r['name']) . '-' . $r['id']
     ];
 }
 

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/helper.php';
 
 $q = trim($_GET['q'] ?? '');
 $results = [];
@@ -21,7 +22,7 @@ if ($q !== '') {
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;">
             <?php foreach ($results as $p): ?>
                 <div style="background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:1rem;text-align:center;">
-                    <a href="product.php?id=<?php echo $p['id']; ?>">
+                    <a href="product.php/<?php echo createSlug($p['name']); ?>-<?php echo $p['id']; ?>">
                         <img src="<?php echo htmlspecialchars($p['image'] ?? 'assets/images/product-placeholder.png'); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" style="width:100%;max-width:160px;height:160px;object-fit:cover;border-radius:8px;">
                         <h3 style="margin:0.5rem 0 0.25rem;font-size:1.1rem;color:var(--dark);"><?php echo htmlspecialchars($p['name']); ?></h3>
                     </a>
