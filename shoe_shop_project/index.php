@@ -1408,35 +1408,38 @@ try {
 
 /* Box Facebook */
 <style>
+/* Box Facebook */
 .floating-fb-box {
     position: fixed;
     left: 20px;
-    bottom: 80px; /* nằm trên nút chat */
-    background: #1877f2;
-    color: white;
+    bottom: 110px; /* TÁCH XA RÕ với nút chat */
+    background: #ffffff;
+    color: #1877f2;
     padding: 10px 16px 10px 10px;
-    border-radius: 40px;
-    top: 100;px;
+    border-radius: 14px; /* vuông nhẹ → chuyên nghiệp */
+    display: flex;
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     font-weight: 600;
     z-index: 9999;
     transition: all 0.25s ease;
+    border-left: 4px solid #1877f2; /* điểm nhấn */
 }
 
 .floating-fb-box:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: #0f5dc9;
+    transform: translateY(-4px);
+    background: #f0f5ff;
 }
 
-/* Icon Facebook tròn */
+/* Icon Facebook */
 .fb-icon {
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.25);
-    border-radius: 50%;
+    background: #1877f2;
+    color: white;
+    border-radius: 8px; /* KHÔNG tròn → khác chat */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1445,9 +1448,10 @@ try {
 
 /* Text Facebook */
 .fb-text {
-    font-size: 15px;
+    font-size: 14px;
     white-space: nowrap;
 }
+
 </style>
 
 
