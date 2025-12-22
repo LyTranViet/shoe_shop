@@ -1772,6 +1772,16 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
 
         onApprove: function(data, actions) {
             return actions.order.capture().then(function(details) {
+                // === LẤY TRANSACTION ID TỪ CAPTURE ===
+                let transactionId = '';
+                if (details.purchase_units && details.purchase_units[0] &&
+                    details.purchase_units[0].payments &&
+                    details.purchase_units[0].payments.captures &&
+                    details.purchase_units[0].payments.captures.length > 0) {
+                    transactionId = details.purchase_units[0].payments.captures[0].id;
+                }
+
+                // === GỬI TOÀN BỘ DETAILS ===
                 const formData = new FormData();
                 formData.append('address', document.getElementById('address').value.trim());
                 formData.append('phone', document.getElementById('phone').value.trim());
@@ -1780,6 +1790,8 @@ if (isset($_GET['order_success']) && $_GET['order_success'] !== '') {
                     .value);
                 formData.append('payment_method', 'PAYPAL');
                 formData.append('paypal_order_id', details.id);
+                formData.append('paypal_transaction_id', transactionId);
+                formData.append('paypal_details', JSON.stringify(details));
 
                 // === GỬI COUPON ===
                 formData.append('coupon_code', document.getElementById('hidden_product_coupon')

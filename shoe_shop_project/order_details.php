@@ -56,60 +56,60 @@ require_once __DIR__ . '/includes/header.php';
     <title>Đơn hàng #<?php echo $orderId; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @media print {
-            body {
-                margin: 0;
-                padding: 10mm;
-                font-size: 12pt;
-            }
-
-            .no-print,
-            .action-buttons {
-                display: none !important;
-            }
-
-            .container {
-                box-shadow: none;
-                border: none;
-                max-width: 100%;
-            }
-
-            .panel {
-                border: none;
-                padding: 10px 0;
-            }
-
-            .summary-row {
-                font-size: 11pt;
-            }
-
-            .item-image {
-                width: 60px;
-                height: 60px;
-            }
-
-            .order-item {
-                padding: 8px 0;
-            }
+    @media print {
+        body {
+            margin: 0;
+            padding: 10mm;
+            font-size: 12pt;
         }
 
-        .print-btn {
-            background: #0d6efd;
-            color: white;
+        .no-print,
+        .action-buttons {
+            display: none !important;
+        }
+
+        .container {
+            box-shadow: none;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
+            max-width: 100%;
         }
 
-        .print-btn:hover {
-            background: #0b5ed7;
+        .panel {
+            border: none;
+            padding: 10px 0;
         }
 
-        .print-btn i {
-            margin-right: 6px;
+        .summary-row {
+            font-size: 11pt;
         }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+        }
+
+        .order-item {
+            padding: 8px 0;
+        }
+    }
+
+    .print-btn {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .print-btn:hover {
+        background: #0b5ed7;
+    }
+
+    .print-btn i {
+        margin-right: 6px;
+    }
     </style>
 </head>
 
@@ -143,14 +143,24 @@ require_once __DIR__ . '/includes/header.php';
                         <?php
                         $pm = strtoupper($order['payment_method'] ?? '');
                         $tx = '';
-                        if ($pm === 'PAYPAL' && !empty($order['paypal_order_id'])) {
+                        if ($pm === 'PAYPAL' && !empty($order['paypal_transaction_id'])) {
+                            // Ưu tiên hiển thị paypal_transaction_id (Capture ID)
+                            $tx = $order['paypal_transaction_id'];
+                        } elseif ($pm === 'PAYPAL' && !empty($order['paypal_order_id'])) {
+                            // Fallback: hiển thị Order ID nếu không có Transaction ID
                             $tx = $order['paypal_order_id'];
                         } elseif ($pm === 'VNPAY' && !empty($order['vnp_transaction_id'])) {
                             $tx = $order['vnp_transaction_id'];
                         }
                         ?>
                         <?php if (!empty($tx)): ?>
-                            <div class="small text-muted">Mã GD: <?php echo htmlspecialchars($tx); ?></div>
+                        <div class="small text-muted">
+                            <?php if ($pm === 'PAYPAL'): ?>
+                            Mã GD: <?php echo htmlspecialchars($tx); ?>
+                            <?php else: ?>
+                            Mã GD: <?php echo htmlspecialchars($tx); ?>
+                            <?php endif; ?>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -181,23 +191,23 @@ require_once __DIR__ . '/includes/header.php';
                         $itemTotal = $item['price'] * $item['quantity'];
                         $image = !empty($item['product_image']) ? htmlspecialchars($item['product_image']) : 'assets/images/product-placeholder.png';
                     ?>
-                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                            <img src="<?php echo $image; ?>" alt="" class="item-image me-3"
-                                style="width:70px;height:70px;object-fit:cover;border-radius:6px;">
-                            <div class="flex-grow-1">
-                                <a href="product.php/<?php echo createSlug($item['product_name']); ?>-<?php echo $item['product_id']; ?>"
-                                    class="text-decoration-none text-dark fw-semibold">
-                                    <?php echo htmlspecialchars($item['product_name']); ?>
-                                </a>
-                                <div class="text-muted small">
-                                    SL: <strong><?php echo $item['quantity']; ?></strong>
-                                    <?php if (!empty($item['size'])): ?>
-                                        • Size: <strong><?php echo htmlspecialchars($item['size']); ?></strong>
-                                    <?php endif; ?>
-                                </div>
+                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                        <img src="<?php echo $image; ?>" alt="" class="item-image me-3"
+                            style="width:70px;height:70px;object-fit:cover;border-radius:6px;">
+                        <div class="flex-grow-1">
+                            <a href="product.php/<?php echo createSlug($item['product_name']); ?>-<?php echo $item['product_id']; ?>"
+                                class="text-decoration-none text-dark fw-semibold">
+                                <?php echo htmlspecialchars($item['product_name']); ?>
+                            </a>
+                            <div class="text-muted small">
+                                SL: <strong><?php echo $item['quantity']; ?></strong>
+                                <?php if (!empty($item['size'])): ?>
+                                • Size: <strong><?php echo htmlspecialchars($item['size']); ?></strong>
+                                <?php endif; ?>
                             </div>
-                            <div class="text-end fw-bold"><?php echo number_format($itemTotal, 0); ?>₫</div>
                         </div>
+                        <div class="text-end fw-bold"><?php echo number_format($itemTotal, 0); ?>₫</div>
+                    </div>
                     <?php endforeach; ?>
                 </div>
 
@@ -209,37 +219,37 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <?php if ($discountAmount > 0): ?>
-                        <div class="d-flex justify-content-between mb-2 text-danger">
-                            <span>Mã KM: <strong><?php echo htmlspecialchars($couponCode); ?></strong></span>
-                            <span><?php echo number_format($discountAmount, 0); ?>₫</span>
-                        </div>
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+                        <span>Mã KM: <strong><?php echo htmlspecialchars($couponCode); ?></strong></span>
+                        <span><?php echo number_format($discountAmount, 0); ?>₫</span>
+                    </div>
                     <?php endif; ?>
 
                     <?php if ($shippingDiscountAmount > 0): ?>
-                        <div class="d-flex justify-content-between mb-2 text-success">
-                            <span>Mã vận chuyển:
-                                <strong><?php echo htmlspecialchars($shippingCouponCode); ?></strong></span>
-                            <span>- <?php echo number_format($shippingDiscountAmount, 0); ?>%</span>
-                        </div>
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span>Mã vận chuyển:
+                            <strong><?php echo htmlspecialchars($shippingCouponCode); ?></strong></span>
+                        <span>- <?php echo number_format($shippingDiscountAmount, 0); ?>%</span>
+                    </div>
                     <?php endif; ?>
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Phí vận chuyển
                             <?php if (!empty($order['shipping_carrier'])): ?>
-                                <small
-                                    class="text-muted">(<?php echo strtoupper(htmlspecialchars($order['shipping_carrier'])); ?>)</small>
+                            <small
+                                class="text-muted">(<?php echo strtoupper(htmlspecialchars($order['shipping_carrier'])); ?>)</small>
                             <?php endif; ?>
                         </span>
                         <span>
                             <?php if ($finalShippingFee > 0): ?>
-                                <?php if ($finalShippingFee < $originalShippingFee): ?>
-                                    <del class="text-muted small"><?php echo number_format($originalShippingFee, 0); ?>₫</del>
-                                    <strong><?php echo number_format($finalShippingFee, 0); ?>₫</strong>
-                                <?php else: ?>
-                                    <strong><?php echo number_format($finalShippingFee, 0); ?>₫</strong>
-                                <?php endif; ?>
+                            <?php if ($finalShippingFee < $originalShippingFee): ?>
+                            <del class="text-muted small"><?php echo number_format($originalShippingFee, 0); ?>₫</del>
+                            <strong><?php echo number_format($finalShippingFee, 0); ?>₫</strong>
                             <?php else: ?>
-                                Miễn phí
+                            <strong><?php echo number_format($finalShippingFee, 0); ?>₫</strong>
+                            <?php endif; ?>
+                            <?php else: ?>
+                            Miễn phí
                             <?php endif; ?>
                         </span>
                     </div>
@@ -260,9 +270,9 @@ require_once __DIR__ . '/includes/header.php';
 
     <!-- SCRIPT IN ĐƠN HÀNG -->
     <script>
-        function printOrder() {
-            const printWindow = window.open('', '_blank');
-            const printContent = `
+    function printOrder() {
+        const printWindow = window.open('', '_blank');
+        const printContent = `
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -351,107 +361,107 @@ require_once __DIR__ . '/includes/header.php';
 </body>
 </html>
     `;
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => printWindow.print(), 500);
-        }
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => printWindow.print(), 500);
+    }
     </script>
 
     <style>
-        .container {
-            max-width: 800px;
-        }
+    .container {
+        max-width: 800px;
+    }
 
-        .card {
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
+    .card {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
 
-        .card-header {
-            border-radius: 12px 12px 0 0 !important;
-            background-color: var(--bg-light) !important;
-            border-bottom: 1px solid var(--border);
-        }
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        background-color: var(--bg-light) !important;
+        border-bottom: 1px solid var(--border);
+    }
 
-        .card-header h4 {
-            color: var(--text-dark);
-            font-weight: 600;
-        }
+    .card-header h4 {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
 
-        .badge {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        /* Status colors from order_history.php */
-        .badge.bg-success {
-            background-color: rgba(40, 167, 69, 0.15) !important;
-            color: var(--success) !important;
-        }
+    /* Status colors from order_history.php */
+    .badge.bg-success {
+        background-color: rgba(40, 167, 69, 0.15) !important;
+        color: var(--success) !important;
+    }
 
-        .badge.bg-warning {
-            background-color: rgba(255, 193, 7, 0.15) !important;
-            color: #b58500 !important;
-        }
+    .badge.bg-warning {
+        background-color: rgba(255, 193, 7, 0.15) !important;
+        color: #b58500 !important;
+    }
 
-        .badge.bg-info {
-            background-color: rgba(23, 162, 184, 0.15) !important;
-            color: var(--info) !important;
-        }
+    .badge.bg-info {
+        background-color: rgba(23, 162, 184, 0.15) !important;
+        color: var(--info) !important;
+    }
 
-        .badge.bg-danger {
-            background-color: rgba(220, 53, 69, 0.1) !important;
-            color: var(--danger) !important;
-        }
+    .badge.bg-danger {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+        color: var(--danger) !important;
+    }
 
-        .order-items-list .d-flex {
-            gap: 15px;
-        }
+    .order-items-list .d-flex {
+        gap: 15px;
+    }
 
-        .item-image {
-            width: 65px;
-            height: 65px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
+    .item-image {
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
 
-        .flex-grow-1 a {
-            text-decoration: none;
-            color: var(--text-dark);
-        }
+    .flex-grow-1 a {
+        text-decoration: none;
+        color: var(--text-dark);
+    }
 
-        .flex-grow-1 a:hover {
-            color: var(--primary);
-        }
+    .flex-grow-1 a:hover {
+        color: var(--primary);
+    }
 
-        .mt-4.p-3.bg-light {
-            background-color: var(--bg-light) !important;
-        }
+    .mt-4.p-3.bg-light {
+        background-color: var(--bg-light) !important;
+    }
 
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-        }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+    }
 
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 12px;
-            margin-top: 8px;
-            border-top: 1px solid var(--border);
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 12px;
+        margin-top: 8px;
+        border-top: 1px solid var(--border);
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
 
-        .total-row .text-primary {
-            color: var(--primary) !important;
-        }
+    .total-row .text-primary {
+        color: var(--primary) !important;
+    }
     </style>
 
     <?php require_once __DIR__ . '/includes/footer.php'; ?>

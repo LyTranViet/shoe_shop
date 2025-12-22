@@ -30,6 +30,42 @@ try {
     error_log('process_paypal.php: Could not ensure paypal_order_id column: ' . $ex->getMessage());
 }
 
+// --- Đảm bảo cột paypal_transaction_id tồn tại ---
+try {
+    $colStmt2 = $db->prepare("
+        SELECT COUNT(*) 
+        FROM information_schema.COLUMNS 
+        WHERE TABLE_SCHEMA = DATABASE() 
+          AND TABLE_NAME = 'orders' 
+          AND COLUMN_NAME = 'paypal_transaction_id'
+    ");
+    $colStmt2->execute();
+    if ((int)$colStmt2->fetchColumn() === 0) {
+        $db->exec("ALTER TABLE `orders` ADD COLUMN `paypal_transaction_id` VARCHAR(255) NULL");
+        error_log('process_paypal.php: Added orders.paypal_transaction_id column');
+    }
+} catch (Exception $ex) {
+    error_log('process_paypal.php: Could not ensure paypal_transaction_id column: ' . $ex->getMessage());
+}
+
+// --- Đảm bảo cột paypal_details tồn tại ---
+try {
+    $colStmt3 = $db->prepare("
+        SELECT COUNT(*) 
+        FROM information_schema.COLUMNS 
+        WHERE TABLE_SCHEMA = DATABASE() 
+          AND TABLE_NAME = 'orders' 
+          AND COLUMN_NAME = 'paypal_details'
+    ");
+    $colStmt3->execute();
+    if ((int)$colStmt3->fetchColumn() === 0) {
+        $db->exec("ALTER TABLE `orders` ADD COLUMN `paypal_details` TEXT NULL");
+        error_log('process_paypal.php: Added orders.paypal_details column');
+    }
+} catch (Exception $ex) {
+    error_log('process_paypal.php: Could not ensure paypal_details column: ' . $ex->getMessage());
+}
+
 // --- Helper lấy giỏ hàng ---
 function get_cart_items_and_total($db)
 {
@@ -68,6 +104,38 @@ try {
     $shipping_fee = (float)($_POST['shipping_fee'] ?? 0);
     $shipping_carrier = $_POST['carrier'] ?? ($_POST['shipping_carrier'] ?? 'GHN');
     $paypal_order_id = $_POST['paypal_order_id'] ?? '';
+    $paypal_transaction_id = $_POST['paypal_transaction_id'] ?? '';
+    $paypal_details = $_POST['paypal_details'] ?? '';
+
+    // Log raw details for debugging
+    if (!empty($paypal_details)) {
+        error_log('PayPal details (client): ' . $paypal_details);
+    }
+
+    // === ƯU TIÊN: Nếu client đã gửi transaction_id thì dùng ===
+    if (empty($paypal_transaction_id) || $paypal_transaction_id === 'undefined') {
+        // Nếu không có, thử lấy từ paypal_details JSON
+        if (!empty($paypal_details)) {
+            try {
+                $decoded = json_decode($paypal_details, true);
+                if (is_array($decoded) && isset($decoded['purchase_units'])) {
+                    $purchases = $decoded['purchase_units'];
+                    if (!empty($purchases) && isset($purchases[0]['payments']['captures'])) {
+                        $captures = $purchases[0]['payments']['captures'];
+                        if (!empty($captures) && isset($captures[0]['id'])) {
+                            $paypal_transaction_id = $captures[0]['id'];
+                            error_log('Extracted paypal_transaction_id from details: ' . $paypal_transaction_id);
+                        }
+                    }
+                }
+            } catch (Exception $ex) {
+                error_log('Failed to extract transaction_id from details: ' . $ex->getMessage());
+            }
+        }
+    }
+
+    // Log final IDs
+    error_log('PayPal IDs before saving: Order ID=' . $paypal_order_id . ', Transaction ID=' . $paypal_transaction_id);
 
     // === LẤY GIỎ HÀNG ===
     list($items, $subtotal, $cartId) = get_cart_items_and_total($db);
@@ -124,26 +192,31 @@ try {
     $ins = $db->prepare('INSERT INTO orders (
         user_id, total_amount, shipping_address, phone,
         status_id, payment_method, shipping_fee, shipping_carrier,
-        paypal_order_id, paid_at,
+            paypal_order_id, paypal_transaction_id, paypal_details, paid_at,
         discount_amount, coupon_id, coupon_code,
         shipping_discount_amount, shipping_coupon_code
-    ) VALUES (?,?,?,?,?,?,?,?,?,NOW(),?,?,?,?,?)');
+    ) VALUES (:user_id, :total_amount, :shipping_address, :phone, :status_id, :payment_method, :shipping_fee, :shipping_carrier, :paypal_order_id, :paypal_transaction_id, :paypal_details, NOW(), :discount_amount, :coupon_id, :coupon_code, :shipping_discount_amount, :shipping_coupon_code)');
+
+    // Log what will be saved for debugging
+    error_log(sprintf('process_paypal.php: saving paypal_order_id=%s paypal_transaction_id=%s', $paypal_order_id, $paypal_transaction_id));
 
     $ins->execute([
-        $userId,
-        $total_amount,
-        $address,
-        $phone,
-        1,
-        'PAYPAL',
-        $final_shipping_fee,
-        $shipping_carrier,
-        $paypal_order_id,
-        $discount,
-        $couponId,
-        $couponCode,
-        $shipping_discount,
-        $shipping_coupon_code
+        ':user_id' => $userId,
+        ':total_amount' => $total_amount,
+        ':shipping_address' => $address,
+        ':phone' => $phone,
+        ':status_id' => 1,
+        ':payment_method' => 'PAYPAL',
+        ':shipping_fee' => $final_shipping_fee,
+        ':shipping_carrier' => $shipping_carrier,
+        ':paypal_order_id' => $paypal_order_id,
+        ':paypal_transaction_id' => $paypal_transaction_id,
+        ':paypal_details' => $paypal_details,
+        ':discount_amount' => $discount,
+        ':coupon_id' => $couponId,
+        ':coupon_code' => $couponCode,
+        ':shipping_discount_amount' => $shipping_discount,
+        ':shipping_coupon_code' => $shipping_coupon_code
     ]);
 
     $orderId = $db->lastInsertId();
