@@ -1398,6 +1398,58 @@ try {
         display: none;
     }
 </style>
+<!-- Nút Facebook -->
+<a href="https://www.facebook.com/profile.php?id=61585648075037" 
+   target="_blank" 
+   class="floating-fb-box">
+    <div class="fb-icon">📘</div>
+    <span class="fb-text">Facebook</span>
+</a>
+
+/* Box Facebook */
+<style>
+.floating-fb-box {
+    position: fixed;
+    left: 20px;
+    bottom: 80px; /* nằm trên nút chat */
+    background: #1877f2;
+    color: white;
+    padding: 10px 16px 10px 10px;
+    border-radius: 40px;
+    top: 100;px;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    font-weight: 600;
+    z-index: 9999;
+    transition: all 0.25s ease;
+}
+
+.floating-fb-box:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: #0f5dc9;
+}
+
+/* Icon Facebook tròn */
+.fb-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+/* Text Facebook */
+.fb-text {
+    font-size: 15px;
+    white-space: nowrap;
+}
+</style>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
